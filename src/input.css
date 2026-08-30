@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Glassmorphism Components & Utilities (65px blur standard) */
+.glass-box {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(65px);
+  -webkit-backdrop-filter: blur(65px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.12);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(65px);
+  -webkit-backdrop-filter: blur(65px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-navbar {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(65px);
+  -webkit-backdrop-filter: blur(65px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.05);
+}
+
+.glass-modal {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(65px);
+  -webkit-backdrop-filter: blur(65px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 20px 40px 0 rgba(0, 0, 0, 0.25);
+}
+
+.glass-popup {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(65px);
+  -webkit-backdrop-filter: blur(65px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.18);
+}
+
+.modal.modal-open {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.modal.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+

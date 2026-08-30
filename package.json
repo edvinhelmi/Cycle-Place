@@ -1,0 +1,29 @@
+{
+  "name": "trento_bike_parking",
+  "version": "1.0.0",
+  "description": "Trento Bike Parking - Mappa interattiva delle rastrelliere e parcheggi protetti di Trento",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "build:css": "tailwindcss -i ./src/input.css -o ./public/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./public/tailwind.css --watch"
+  },
+
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "google-auth-library": "^9.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "proj4": "^2.9.2"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "^10.5.4",
+    "daisyui": "^4.12.24",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^3.4.19"
+  }
+}

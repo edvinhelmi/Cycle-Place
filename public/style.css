@@ -1,0 +1,418 @@
+/* =====================================================
+   Trento Bike Parking — style.css
+   Complementare a Tailwind CSS + DaisyUI
+   ===================================================== */
+
+/* =====================
+   Leaflet Map Container & Layers
+   ===================== */
+#map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Rimuove lo sfondo bianco e padding squadrato nativo di Leaflet per esporre la card Glassmorphism */
+.leaflet-popup-content-wrapper {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-radius: 1rem !important;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    line-height: inherit !important;
+}
+
+.leaflet-popup-tip-container {
+    display: none !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+    top: 8px !important;
+    right: 8px !important;
+    color: #64748b !important;
+    padding: 0 !important;
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12) !important;
+    z-index: 30 !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+    color: #0f172a !important;
+    background: #ffffff !important;
+}
+
+/* =====================
+   Leaflet Zoom Controls (Glassmorphism & Desktop Position)
+   ===================== */
+.leaflet-control-zoom {
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 1rem !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    margin-top: 1.25rem !important;
+    margin-left: 1.25rem !important;
+}
+
+.leaflet-control-zoom a {
+    background: transparent !important;
+    color: #1e293b !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7) !important;
+    width: 34px !important;
+    height: 34px !important;
+    line-height: 34px !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    transition: all 0.2s ease !important;
+}
+
+.leaflet-control-zoom a:last-child {
+    border-bottom: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background: #ffffff !important;
+    color: #0284c7 !important;
+}
+
+/* =====================
+   Search Panel (Desktop Position & Join Wrapper)
+   ===================== */
+.search-panel {
+
+    position: absolute;
+    top: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 480px;
+    max-width: calc(100vw - 2rem);
+    z-index: 1000;
+}
+
+.search-feedback {
+    position: absolute;
+    top: 4.5rem;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: fit-content;
+    background: rgba(15, 23, 42, 0.90);
+    backdrop-filter: blur(16px);
+    color: white;
+    padding: 0.4rem 1.1rem;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    z-index: 1050;
+    pointer-events: none;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+
+.search-feedback.error {
+    background: rgba(220, 38, 38, 0.95);
+}
+
+/* =====================
+   Filter Panel (Desktop: in alto a destra nell'angolo sotto navbar)
+   ===================== */
+.filter-panel {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    left: auto;
+    z-index: 1000;
+    min-width: 240px;
+}
+
+.btn-filter-toggle {
+    display: none;
+}
+
+.legend-dot-inline {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+
+    border: 1.5px solid rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+/* =====================
+   GPS Button (Desktop Position)
+   ===================== */
+.btn-geo {
+    position: absolute;
+    bottom: 2rem;
+    left: 1.25rem;
+    z-index: 500;
+    padding: 0.65rem 1.15rem;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn-geo:hover {
+    transform: translateY(-2px);
+}
+
+.btn-geo.locating {
+    opacity: 0.75;
+    cursor: wait;
+    pointer-events: none;
+}
+
+.btn-geo.locating .geo-icon {
+    display: inline-block;
+    animation: geo-spin 1s infinite linear;
+}
+
+@keyframes geo-spin {
+    0%   { transform: rotate(0deg) scale(1); }
+    50%  { transform: rotate(180deg) scale(1.25); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* =====================
+   Legenda (Nascosta su Desktop, visibile solo su Mobile)
+   ===================== */
+.btn-legend-toggle {
+    display: none;
+}
+
+.map-legend {
+    display: none; /* Eliminata su Desktop */
+}
+
+.legend-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+/* =====================
+   Stats Dashboard (Bottom Center)
+   ===================== */
+.stats-dashboard {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    pointer-events: auto;
+}
+
+/* =====================
+   IoT Pulse Animations
+   ===================== */
+.iot-pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: #10b981;
+    animation: iotPulseGreen 1.8s infinite;
+}
+
+.popup-iot-card.theme-warn .iot-pulse-dot {
+    background-color: #f59e0b;
+    animation: iotPulseOrange 1.8s infinite;
+}
+
+.popup-iot-card.theme-full .iot-pulse-dot {
+    background-color: #ef4444;
+    animation: iotPulseRed 1.8s infinite;
+}
+
+@keyframes iotPulseGreen {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+    70%  { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes iotPulseOrange {
+    0%   { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6); }
+    70%  { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+@keyframes iotPulseRed {
+    0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+    70%  { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* =====================================================
+   Mobile Responsive Rules (<= 768px)
+   ===================================================== */
+@media (max-width: 768px) {
+    .user-controls {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(65px);
+        -webkit-backdrop-filter: blur(65px);
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1.25rem 1.5rem;
+        gap: 0.75rem;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        border-top: 1px solid rgba(226, 232, 240, 0.8);
+        z-index: 2500;
+    }
+
+    .user-controls.active {
+        display: flex;
+        animation: navbarSlideDown 0.22s ease-out;
+    }
+
+    .user-controls .btn,
+    .user-controls .lang-selector-wrapper {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .user-controls .user-greeting {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Search & Filter bar integration on mobile */
+    .search-panel {
+        width: calc(100vw - 1.25rem);
+        top: 0.65rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        height: 2.5rem;
+    }
+
+    /* Controlli di Zoom Leaflet nascosti su Mobile */
+    .leaflet-control-zoom {
+        display: none !important;
+    }
+
+
+    .btn-filter-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        height: 100% !important;
+        min-height: 0 !important;
+    }
+
+
+
+    .filter-panel {
+        position: absolute;
+        top: 3.8rem;
+        left: 0.65rem;
+        right: 0.65rem;
+        width: auto;
+        min-width: unset;
+        display: none;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+        z-index: 1100;
+    }
+
+    .filter-panel.open-mobile {
+        display: block;
+        animation: filterDropdownSlide 0.2s ease-out;
+    }
+
+
+    /* Pulsante GPS Geolocation Mobile (in basso a sinistra, distanziato SOPRA le statistiche) */
+    .btn-geo {
+        position: absolute;
+        bottom: 5.8rem;
+        left: 0.75rem;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: 50%;
+        justify-content: center;
+        z-index: 600;
+    }
+
+    .btn-geo .geo-text {
+        display: none;
+    }
+
+    .btn-geo .geo-icon {
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    /* Pulsante Toggle Legenda Mobile (in basso a destra, distanziato SOPRA le statistiche) */
+    .btn-legend-toggle {
+        display: flex;
+        position: absolute;
+        bottom: 5.8rem;
+        right: 0.75rem;
+        z-index: 600;
+    }
+
+    /* Legenda Mobile Popover */
+    .map-legend {
+        display: none;
+        position: absolute;
+        top: auto;
+        bottom: 9.0rem;
+        right: 0.75rem;
+        left: auto;
+        z-index: 650;
+    }
+
+    .map-legend.open-mobile {
+        display: block;
+        animation: legendPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Stats Dashboard Centrata Mobile con Altezze Omogenee */
+    .stats-dashboard {
+        bottom: 0.5rem;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        gap: 0.4rem;
+        flex-direction: row;
+        width: auto;
+        max-width: calc(100vw - 1rem);
+    }
+}
+
+@keyframes navbarSlideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes filterDropdownSlide {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes legendPop {
+    from { opacity: 0; transform: translateY(8px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+

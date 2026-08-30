@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="trento">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trento Bike Parking</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <!-- FontAwesome Free (Locale & CDN Fallback) -->
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Flag Icons (SVG Bandiere) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
+    <!-- Tailwind CSS + DaisyUI (Locale) -->
+    <link rel="stylesheet" href="tailwind.css">
+    <!-- App Custom CSS (Leaflet & Animation Overrides) -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-base-200 text-slate-800 antialiased overflow-hidden select-none">
+    <!-- Navbar con Glassmorphism & DaisyUI Component (RNF1, RNF6) -->
+    <header class="navbar glass-navbar px-4 sm:px-6 py-2.5 z-[2000] sticky top-0 flex justify-between items-center">
+        <div class="logo font-bold text-xl text-primary flex items-center gap-2.5 tracking-tight">
+            <i class="fa-solid fa-bicycle text-2xl text-primary"></i>
+            <span>Trento Bike Parking</span>
+        </div>
+
+        <!-- Hamburger Button per Mobile (RNF1, RNF6) -->
+        <button id="btn-hamburger" class="hamburger-btn btn btn-square btn-ghost btn-sm text-slate-700 md:hidden" aria-label="Menu" aria-expanded="false">
+            <span class="hamburger-icon text-lg"><i class="fa-solid fa-bars"></i></span>
+        </button>
+
+        <!-- Contenitore controlli utente -->
+        <div class="user-controls flex items-center gap-2.5" id="user-controls">
+            <span id="user-greeting" class="user-greeting hidden badge badge-lg bg-primary/10 text-primary border-primary/20 py-3.5 px-3.5 gap-2 font-semibold">
+                <i class="fa-solid fa-circle-user"></i> <span id="user-name-text"></span>
+            </span>
+            <button id="btn-login-modal" class="btn btn-primary btn-sm rounded-xl font-semibold shadow-sm text-white" data-i18n="nav.login">Login</button>
+            <button id="btn-register-modal" class="btn btn-secondary btn-sm rounded-xl font-semibold shadow-sm text-white" data-i18n="nav.register">Registrati</button>
+            <a id="btn-dashboard" class="btn btn-info btn-sm rounded-xl font-semibold shadow-sm text-white hidden" href="/dashboard.html" data-i18n="nav.dashboard">
+                <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+            </a>
+            <button id="btn-logout" class="btn btn-outline btn-error btn-sm rounded-xl font-semibold hidden" data-i18n="nav.logout">
+                <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+            </button>
+            <!-- Selettore lingua con flag-icons SVG -->
+            <div class="lang-selector-wrapper flex items-center gap-2 bg-base-100/90 border border-base-300 rounded-xl px-2.5 py-1 shadow-xs">
+                <span id="lang-flag-icon" class="fi fi-it text-base rounded-xs shadow-xs"></span>
+                <select id="lang-select" class="lang-select select select-ghost select-xs font-bold text-slate-700 focus:outline-none p-0 h-auto min-h-0" aria-label="Seleziona lingua">
+                    <option value="it">IT</option>
+                    <option value="en">EN</option>
+                    <option value="de">DE</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content relative w-full h-[calc(100vh-62px)] overflow-hidden">
+        <div id="map-error-banner" class="hidden map-error-banner alert alert-error absolute top-4 left-1/2 -translate-x-1/2 z-[1500] w-11/12 max-w-lg shadow-xl text-white text-xs font-bold"></div>
+
+        <!-- Barra di Ricerca Spaziale (RF3) come componente Join DaisyUI -->
+        <div class="search-panel join glass-box rounded-full shadow-2xl p-0 z-[1000] h-10 sm:h-11" id="search-panel">
+            <label class="input input-ghost join-item rounded-s-full flex items-center gap-2 bg-base-100/80 pl-4 pr-3 border-none flex-1 focus-within:bg-base-100 h-full min-h-0 py-0">
+                <span class="label p-0 text-slate-500 text-sm"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" id="search-input" class="grow bg-transparent text-slate-800 text-xs sm:text-sm font-semibold placeholder:text-slate-400 focus:outline-none" placeholder="Cerca via o parcheggio..." data-i18n-placeholder="search.placeholder" autocomplete="off">
+                <button id="btn-clear-search" class="search-clear-btn hidden btn btn-ghost btn-xs btn-circle text-slate-400 hover:text-slate-700 p-0 min-h-0 h-6 w-6" title="Cancella" aria-label="Cancella ricerca">&times;</button>
+            </label>
+            <!-- Pulsante Toggle Filtri per Mobile (join-item, visibile solo su mobile) -->
+            <button id="btn-filter-toggle" class="btn btn-ghost join-item border-l border-r border-base-300/60 bg-base-100/60 px-3.5 relative h-full min-h-0 rounded-none md:hidden flex items-center justify-center py-0" title="Filtri" aria-label="Filtri">
+                <span class="filter-toggle-icon text-slate-700"><i class="fa-solid fa-sliders"></i></span>
+                <span id="filter-badge" class="filter-badge badge badge-xs badge-accent absolute -top-1 -right-1 hidden"></span>
+            </button>
+            <button id="btn-search" class="btn btn-primary join-item rounded-r-full sm:rounded-e-full px-5 font-extrabold shadow-md text-white border-none h-full min-h-0 py-0 flex items-center justify-center" data-i18n="search.button">Cerca</button>
+        </div>
+
+
+        <!-- Pannello Filtri (Desktop: fisso in alto a destra sotto navbar; Mobile: dropdown sotto la barra) -->
+        <div class="filter-panel card glass-box shadow-2xl p-4 rounded-2xl" id="filter-panel">
+            <div class="filter-header card-title text-sm font-bold text-slate-800 pb-2 border-b border-base-200/80 mb-2 flex items-center gap-2">
+                <strong data-i18n="filter.title"><i class="fa-solid fa-filter text-primary"></i> Filtri & Legenda</strong>
+            </div>
+            <label class="filter-item label cursor-pointer justify-start gap-3 py-1.5 hover:bg-base-200/50 rounded-lg px-1 transition-colors">
+                <input type="checkbox" id="filter-tradizionali" class="checkbox checkbox-sm checkbox-primary rounded-md" checked>
+                <span class="label-text font-semibold text-slate-700 text-xs sm:text-sm" data-i18n="filter.tradizionali">Rastrelliere Tradizionali</span>
+            </label>
+            <label class="filter-item label cursor-pointer justify-start gap-3 py-1.5 hover:bg-base-200/50 rounded-lg px-1 transition-colors">
+                <input type="checkbox" id="filter-bloccatelaio" class="checkbox checkbox-sm checkbox-accent rounded-md" checked>
+                <span class="label-text font-semibold text-slate-700 text-xs sm:text-sm" data-i18n="filter.bloccatelaio">Rastrelliere Bloccatelaio</span>
+            </label>
+            <label class="filter-item label cursor-pointer justify-start gap-3 py-1.5 hover:bg-base-200/50 rounded-lg px-1 transition-colors">
+                <input type="checkbox" id="filter-parcheggi" class="checkbox checkbox-sm checkbox-secondary rounded-md" checked>
+                <span class="label-text font-semibold text-slate-700 text-xs sm:text-sm" data-i18n="filter.parcheggi">Parcheggi Protetti</span>
+            </label>
+            <label class="filter-item label cursor-pointer justify-start gap-3 py-1.5 hover:bg-base-200/50 rounded-lg px-1 transition-colors border-t border-base-200/80 mt-1 pt-2">
+                <input type="checkbox" id="filter-piene" class="checkbox checkbox-sm checkbox-error rounded-md">
+                <span class="label-text font-semibold text-slate-700 text-xs sm:text-sm" data-i18n="filter.nascondiPiene">Nascondi rastrelliere piene</span>
+            </label>
+        </div>
+
+        <div id="search-feedback" class="search-feedback hidden"></div>
+
+        <!-- Pulsante Geolocalizzazione GPS (Pillola su Desktop, Circolare su Mobile) -->
+        <button id="btn-geolocation" class="btn-geo btn glass-box rounded-full shadow-xl text-primary hover:text-primary-focus border border-white/60 px-4 py-2 flex items-center gap-2 font-bold text-xs sm:text-sm" title="La mia posizione" data-i18n-title="geo.title" aria-label="La mia posizione">
+            <span class="geo-icon text-base sm:text-lg"><i class="fa-solid fa-location-crosshairs"></i></span>
+            <span class="geo-text" data-i18n="geo.button">La mia posizione</span>
+        </button>
+
+        <!-- Pulsante Toggle Legenda per Mobile (RNF1, RNF6) -->
+        <button id="btn-legend-toggle" class="btn-legend-toggle btn btn-sm rounded-full glass-box shadow-xl border border-white/60 text-slate-800 font-bold gap-2 px-3.5" aria-label="Legenda">
+            <i class="fa-solid fa-circle-info text-primary"></i> <span data-i18n="legend.button">Legenda</span>
+        </button>
+
+        <!-- Legenda (Mobile Popover) -->
+        <div class="map-legend card glass-box shadow-2xl p-3.5 rounded-2xl text-xs space-y-1.5" id="map-legend">
+            <strong class="card-title text-xs font-bold text-slate-800 border-b border-base-200/80 pb-1.5 mb-1.5 flex items-center gap-1.5" data-i18n="legend.title">
+                <i class="fa-solid fa-list-ul text-primary"></i> Legenda
+            </strong>
+            <div class="legend-item flex items-center gap-2 text-slate-700 font-medium">
+                <span class="legend-dot" style="background:#2980b9"></span>
+                <span data-i18n="legend.tradizionale">Rastrelliera tradizionale</span>
+            </div>
+            <div class="legend-item flex items-center gap-2 text-slate-700 font-medium">
+                <span class="legend-dot" style="background:#e67e22"></span>
+                <span data-i18n="legend.bloccatelaio">Rastrelliera bloccatelaio</span>
+            </div>
+            <div class="legend-item flex items-center gap-2 text-slate-700 font-medium">
+                <span class="legend-dot" style="background:#c0392b"></span>
+                <span data-i18n="legend.piena">Bloccatelaio piena (0 posti)</span>
+            </div>
+            <div class="legend-item flex items-center gap-2 text-slate-700 font-medium">
+                <span class="legend-dot" style="background:#27ae60"></span>
+                <span data-i18n="legend.parcheggio">Parcheggio protetto</span>
+            </div>
+        </div>
+
+        <!-- Cruscotto Statistiche (Alta Leggibilità & Testi Completi) -->
+        <div id="stats-dashboard" class="stats-dashboard flex items-center justify-center gap-2 sm:gap-4 pointer-events-none select-none z-[500]">
+            <div class="stat-box bg-white/95 backdrop-blur-[65px] rounded-2xl py-2 px-3 sm:py-2.5 sm:px-5 shadow-2xl border border-white/90 flex flex-col items-center justify-center min-w-[85px] sm:min-w-[125px] h-auto text-center">
+                <span class="text-primary text-base sm:text-lg mb-0.5"><i class="fa-solid fa-bicycle"></i></span>
+                <span class="text-base sm:text-2xl font-black text-slate-900 leading-none mb-1" id="stat-rastrelliere">—</span>
+                <span class="text-[10px] sm:text-xs font-extrabold text-slate-700 tracking-tight whitespace-nowrap" data-i18n="stats.racks">Rastrelliere</span>
+            </div>
+            <div class="stat-box bg-white/95 backdrop-blur-[65px] rounded-2xl py-2 px-3 sm:py-2.5 sm:px-5 shadow-2xl border border-white/90 flex flex-col items-center justify-center min-w-[85px] sm:min-w-[125px] h-auto text-center">
+                <span class="text-secondary text-base sm:text-lg mb-0.5"><i class="fa-solid fa-square-parking"></i></span>
+                <span class="text-base sm:text-2xl font-black text-slate-900 leading-none mb-1" id="stat-parcheggi">—</span>
+                <span class="text-[10px] sm:text-xs font-extrabold text-slate-700 tracking-tight whitespace-nowrap" data-i18n="stats.protected">Parcheggi</span>
+            </div>
+            <div class="stat-box bg-white/95 backdrop-blur-[65px] rounded-2xl py-2 px-3 sm:py-2.5 sm:px-5 shadow-2xl border border-white/90 flex flex-col items-center justify-center min-w-[85px] sm:min-w-[125px] h-auto text-center">
+                <span class="text-accent text-base sm:text-lg mb-0.5"><i class="fa-solid fa-hashtag"></i></span>
+                <span class="text-base sm:text-2xl font-black text-slate-900 leading-none mb-1" id="stat-stalli">—</span>
+                <span class="text-[10px] sm:text-xs font-extrabold text-slate-700 tracking-tight whitespace-nowrap" data-i18n="stats.slots">Stalli totali</span>
+            </div>
+        </div>
+
+
+
+
+        <div id="map" class="w-full h-full"></div>
+    </main>
+
+    <!-- Modale Registrazione -->
+    <div id="register-modal" class="modal hidden fixed inset-0 z-[3000] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
+        <div class="modal-content glass-modal rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl">
+            <button class="close btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-slate-500 hover:text-slate-800" data-modal="register-modal" aria-label="Chiudi">&times;</button>
+            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2" data-i18n="modal.register.title">
+                <i class="fa-solid fa-user-plus text-primary"></i> <span>Registrazione</span>
+            </h2>
+            <form id="register-form" novalidate class="space-y-3">
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.name">Nome</span></label>
+                    <input type="text" id="reg-name" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="given-name" required>
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.surname">Cognome</span></label>
+                    <input type="text" id="reg-surname" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="family-name" required>
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs">Email</span></label>
+                    <input type="email" id="reg-email" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="email" required>
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.password">Password</span></label>
+                    <input type="password" id="reg-password" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="new-password" required>
+                </div>
+                <div id="reg-error" class="error-msg text-xs text-error font-semibold mt-1" role="alert" aria-live="polite"></div>
+                <div id="reg-success" class="success-msg text-xs text-success font-semibold mt-1" role="status" aria-live="polite"></div>
+                <button type="submit" class="btn btn-primary btn-block rounded-xl font-bold shadow-md mt-4 text-white" data-i18n="nav.register">Registrati</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modale Login -->
+    <div id="login-modal" class="modal hidden fixed inset-0 z-[3000] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
+        <div class="modal-content glass-modal rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl">
+            <button class="close btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-slate-500 hover:text-slate-800" data-modal="login-modal" aria-label="Chiudi">&times;</button>
+            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2" data-i18n="modal.login.title">
+                <i class="fa-solid fa-right-to-bracket text-primary"></i> <span>Login</span>
+            </h2>
+            <form id="login-form" novalidate class="space-y-3">
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs">Email</span></label>
+                    <input type="email" id="login-email" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="email" required>
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.password">Password</span></label>
+                    <input type="password" id="login-password" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="current-password" required>
+                </div>
+                <div id="login-error" class="error-msg text-xs text-error font-semibold mt-1" role="alert" aria-live="polite"></div>
+                <button type="submit" class="btn btn-primary btn-block rounded-xl font-bold shadow-md mt-4 text-white" data-i18n="nav.login">Accedi</button>
+            </form>
+            <div class="divider my-4 text-xs font-bold uppercase tracking-wider text-slate-400" data-i18n="modal.or">oppure</div>
+            <div id="google-btn-container" class="flex justify-center min-h-[44px]"></div>
+            <div id="google-error" class="error-msg text-xs text-error font-semibold mt-2 text-center" role="alert" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- Modale Segnalazione -->
+    <div id="segnalazione-modal" class="modal hidden fixed inset-0 z-[3000] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
+        <div class="modal-content glass-modal rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl">
+            <button class="close btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-slate-500 hover:text-slate-800" data-modal="segnalazione-modal" aria-label="Chiudi">&times;</button>
+            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2" data-i18n="modal.segnala.title">
+                <i class="fa-solid fa-triangle-exclamation text-error"></i> <span>Segnala un problema</span>
+            </h2>
+            <input type="hidden" id="seg-rastrelliera-id">
+            <input type="hidden" id="seg-lat">
+            <input type="hidden" id="seg-lng">
+            <div class="form-control mb-3">
+                <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.tipoProblem">Tipo di problema</span></label>
+                <select id="seg-tipo" class="select select-bordered select-sm sm:select-md bg-base-100/90 rounded-xl focus:select-primary text-slate-800 font-medium">
+                    <option value="bici_abbandonata"   data-i18n="seg.bikeLeft">Bici abbandonata</option>
+                    <option value="danno_strutturale"  data-i18n="seg.damage">Danno strutturale</option>
+                    <option value="rastrelliera_piena" data-i18n="seg.full">Rastrelliera piena</option>
+                    <option value="vandalismo"         data-i18n="seg.vandalism">Vandalismo</option>
+                    <option value="altro"              data-i18n="seg.other">Altro</option>
+                </select>
+            </div>
+            <div class="form-control mb-3">
+                <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.notes">Note aggiuntive</span></label>
+                <textarea id="seg-note" rows="3" class="textarea textarea-bordered bg-base-100/90 rounded-xl focus:textarea-primary text-slate-800 font-medium text-xs sm:text-sm" placeholder="Descrivi brevemente il problema..."></textarea>
+            </div>
+            <div id="seg-error"   class="error-msg text-xs text-error font-semibold"   role="alert"></div>
+            <div id="seg-success" class="success-msg text-xs text-success font-semibold" role="status"></div>
+            <button id="seg-submit" class="btn btn-error btn-block rounded-xl font-bold shadow-md mt-4 text-white" data-i18n="form.sendReport">Invia segnalazione</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="script.js"></script>
+</body>
+</html>

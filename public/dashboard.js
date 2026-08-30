@@ -1,0 +1,382 @@
+/**
+ * dashboard.js — Area Personale Trento Bike Parking
+ * Coerente con la pagina principale (Task 1, Task 4, RNF1, RNF6)
+ */
+
+const TOKEN_KEY = 'tbp_jwt';
+const LANG_KEY  = 'tbp_lang';
+
+// =======================================================
+// i18n — Dizionario multilingua completo (IT / EN / DE)
+// =======================================================
+const TRANSLATIONS = {
+    it: {
+        'nav.backToMap':      'Torna alla Mappa',
+        'nav.logout':         'Logout',
+        'dash.profile':       'Profilo',
+        'dash.name':          'Nome',
+        'dash.surname':       'Cognome',
+        'dash.provider':      'Accesso via',
+        'dash.favourites':    'Rastrelliere Preferite',
+        'dash.noFavourites':  'Nessuna rastrelliera salvata ancora.',
+        'dash.reports':       'Le Mie Segnalazioni',
+        'dash.noReports':     'Nessuna segnalazione inviata.',
+        'dash.remove':        'Rimuovi',
+        'dash.stalli':        'stalli',
+        'dash.zone':          'Zona',
+        'dash.savedOn':       'Salvata il',
+        'dash.rack':          'Rastrelliera',
+        'dash.localAccount':  'Account locale',
+        'dash.googleAccount': 'Google SSO',
+        'tipo.bici_abbandonata':   'Bici abbandonata',
+        'tipo.danno_strutturale':  'Danno strutturale',
+        'tipo.rastrelliera_piena': 'Rastrelliera piena',
+        'tipo.vandalismo':         'Vandalismo',
+        'tipo.altro':              'Altro',
+    },
+    en: {
+        'nav.backToMap':      'Back to Map',
+        'nav.logout':         'Logout',
+        'dash.profile':       'Profile',
+        'dash.name':          'First Name',
+        'dash.surname':       'Last Name',
+        'dash.provider':      'Signed in via',
+        'dash.favourites':    'Favourite Racks',
+        'dash.noFavourites':  'No saved racks yet.',
+        'dash.reports':       'My Reports',
+        'dash.noReports':     'No reports submitted yet.',
+        'dash.remove':        'Remove',
+        'dash.stalli':        'slots',
+        'dash.zone':          'Zone',
+        'dash.savedOn':       'Saved on',
+        'dash.rack':          'Rack',
+        'dash.localAccount':  'Local Account',
+        'dash.googleAccount': 'Google SSO',
+        'tipo.bici_abbandonata':   'Abandoned bike',
+        'tipo.danno_strutturale':  'Structural damage',
+        'tipo.rastrelliera_piena': 'Rack is full',
+        'tipo.vandalismo':         'Vandalism',
+        'tipo.altro':              'Other',
+    },
+    de: {
+        'nav.backToMap':      'Zurück zur Karte',
+        'nav.logout':         'Abmelden',
+        'dash.profile':       'Profil',
+        'dash.name':          'Vorname',
+        'dash.surname':       'Nachname',
+        'dash.provider':      'Angemeldet über',
+        'dash.favourites':    'Gespeicherte Fahrradständer',
+        'dash.noFavourites':  'Noch keine gespeicherten Ständer.',
+        'dash.reports':       'Meine Meldungen',
+        'dash.noReports':     'Noch keine Meldungen gesendet.',
+        'dash.remove':        'Entfernen',
+        'dash.stalli':        'Plätze',
+        'dash.zone':          'Zone',
+        'dash.savedOn':       'Gespeichert am',
+        'dash.rack':          'Fahrradständer',
+        'dash.localAccount':  'Lokales Konto',
+        'dash.googleAccount': 'Google SSO',
+        'tipo.bici_abbandonata':   'Verlassenes Fahrrad',
+        'tipo.danno_strutturale':  'Strukturschaden',
+        'tipo.rastrelliera_piena': 'Ständer ist voll',
+        'tipo.vandalismo':         'Vandalismus',
+        'tipo.altro':              'Sonstiges',
+    }
+};
+
+let currentLang = localStorage.getItem(LANG_KEY) || 'it';
+
+function tr(key) {
+    return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || key;
+}
+
+function applyTranslations() {
+    document.documentElement.lang = currentLang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const val = tr(key);
+        // Se l'elemento ha un elemento figlio span o testo, preserviamo eventuali icone
+        const textSpan = el.querySelector('span');
+        if (textSpan) {
+            textSpan.textContent = val;
+        } else {
+            el.textContent = val;
+        }
+    });
+    const langSelect = document.getElementById('lang-select');
+    if (langSelect) langSelect.value = currentLang;
+
+    // Sincronizza bandiera SVG
+    const flagIcon = document.getElementById('lang-flag-icon');
+    if (flagIcon) {
+        flagIcon.className = currentLang === 'en' ? 'fi fi-gb' : (currentLang === 'de' ? 'fi fi-de' : 'fi fi-it');
+    }
+}
+
+// =======================================================
+// JWT Helpers
+// =======================================================
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function removeToken() { localStorage.removeItem(TOKEN_KEY); }
+
+function decodeToken(token) {
+    try { return JSON.parse(atob(token.split('.')[1])); }
+    catch { return null; }
+}
+
+function isTokenValid(token) {
+    if (!token) return false;
+    const d = decodeToken(token);
+    return d && d.exp && d.exp * 1000 > Date.now();
+}
+
+function authHeaders() {
+    return { 'Authorization': 'Bearer ' + getToken(), 'Content-Type': 'application/json' };
+}
+
+function formatDate(iso) {
+    if (!iso) return '—';
+    const loc = currentLang === 'de' ? 'de-DE' : (currentLang === 'en' ? 'en-US' : 'it-IT');
+    return new Date(iso).toLocaleString(loc, {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+
+// Cache dati per ri-render al cambio lingua
+let cachedPreferiti = [];
+let cachedSegnalazioni = [];
+
+// =======================================================
+// Inizializzazione Dashboard
+// =======================================================
+async function init() {
+    applyTranslations();
+
+    const token = getToken();
+    if (!isTokenValid(token)) {
+        window.location.href = '/';
+        return;
+    }
+
+    const user = decodeToken(token);
+
+    // Navbar & Saluto utente
+    const userNameSpan = document.getElementById('dash-user-name');
+    if (userNameSpan) userNameSpan.textContent = user.name || 'Utente';
+
+    // Dati Anagrafici Profilo
+    const pName     = document.getElementById('p-name');
+    const pSurname  = document.getElementById('p-surname');
+    const pEmail    = document.getElementById('p-email');
+    const pProvider = document.getElementById('p-provider');
+
+    if (pName)     pName.textContent     = user.name    || '—';
+    if (pSurname)  pSurname.textContent  = user.surname || '—';
+    if (pEmail)    pEmail.textContent    = user.email   || '—';
+    if (pProvider) {
+        pProvider.innerHTML = user.provider === 'google' 
+            ? '<i class="fa-brands fa-google text-primary"></i> <span>' + tr('dash.googleAccount') + '</span>'
+            : '<i class="fa-solid fa-house-user"></i> <span>' + tr('dash.localAccount') + '</span>';
+    }
+
+    // Setup Mobile Hamburger Menu (RNF1, RNF6)
+    setupMobileMenu();
+
+    // Listener Selettore Lingua
+    const langSelect = document.getElementById('lang-select');
+    if (langSelect) {
+        langSelect.value = currentLang;
+        langSelect.addEventListener('change', () => {
+            currentLang = langSelect.value;
+            localStorage.setItem(LANG_KEY, currentLang);
+            applyTranslations();
+            if (pProvider) {
+                pProvider.innerHTML = user.provider === 'google' 
+                    ? '<i class="fa-brands fa-google text-primary"></i> <span>' + tr('dash.googleAccount') + '</span>'
+                    : '<i class="fa-solid fa-house-user"></i> <span>' + tr('dash.localAccount') + '</span>';
+            }
+            renderPreferiti(cachedPreferiti);
+            renderSegnalazioni(cachedSegnalazioni);
+        });
+    }
+
+    // Carica Preferiti e Segnalazioni
+    await Promise.all([loadPreferiti(), loadSegnalazioni()]);
+
+    // Logout
+    const btnLogout = document.getElementById('dash-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            removeToken();
+            window.location.href = '/';
+        });
+    }
+}
+
+// =======================================================
+// Mobile Hamburger Menu
+// =======================================================
+function setupMobileMenu() {
+    const btnHamburger = document.getElementById('btn-hamburger');
+    const userControls = document.getElementById('user-controls');
+
+    function toggleMenu() {
+        if (!userControls || !btnHamburger) return;
+        const isActive = userControls.classList.toggle('active');
+        btnHamburger.setAttribute('aria-expanded', String(isActive));
+        const iconSpan = btnHamburger.querySelector('.hamburger-icon');
+        if (iconSpan) {
+            iconSpan.innerHTML = isActive ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
+        }
+    }
+
+    function closeMenu() {
+        if (!userControls || !btnHamburger) return;
+        userControls.classList.remove('active');
+        btnHamburger.setAttribute('aria-expanded', 'false');
+        const iconSpan = btnHamburger.querySelector('.hamburger-icon');
+        if (iconSpan) iconSpan.innerHTML = '<i class="fa-solid fa-bars"></i>';
+    }
+
+    if (btnHamburger) {
+        btnHamburger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMenu();
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (userControls && userControls.classList.contains('active')) {
+            if (!userControls.contains(e.target) && !btnHamburger.contains(e.target)) {
+                closeMenu();
+            }
+        }
+    });
+}
+
+// =======================================================
+// Gestione Preferiti
+// =======================================================
+async function loadPreferiti() {
+    try {
+        const res = await fetch('/api/v1/user/preferiti', { headers: authHeaders() });
+        const data = await res.json();
+        cachedPreferiti = (res.ok && data.preferiti) ? data.preferiti : [];
+        renderPreferiti(cachedPreferiti);
+    } catch (err) {
+        console.error('Errore caricamento preferiti:', err);
+    }
+}
+
+function renderPreferiti(items) {
+    const list = document.getElementById('preferiti-list');
+    if (!list) return;
+
+    if (!items || items.length === 0) {
+        list.innerHTML = `<p class="empty-msg alert bg-base-100/70 border border-base-300 text-slate-500 font-medium text-sm rounded-2xl">${tr('dash.noFavourites')}</p>`;
+        return;
+    }
+
+    list.innerHTML = items.map(f => `
+        <div class="list-item card bg-base-100/90 border border-base-300 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-shadow flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5" id="fav-${f.id}">
+            <div class="list-item-info space-y-1">
+                <div class="font-bold text-slate-800 text-sm sm:text-base flex flex-wrap items-center gap-2">
+                    <span><i class="fa-solid fa-bicycle text-primary"></i> ${tr('dash.rack')} #${f.id}</span>
+                    ${f.tipologia ? `<span class="text-slate-500 font-normal">— ${f.tipologia}</span>` : ''}
+                    ${f.stalli ? `<span class="badge badge-sm badge-ghost font-bold text-slate-600">(${f.stalli} ${tr('dash.stalli')})</span>` : ''}
+                    ${f.tipologia === 'Rastr_bloccatelaio' ? '<span class="badge badge-sm badge-accent text-white font-bold">bloccatelaio</span>' : ''}
+                </div>
+                <div class="text-xs text-slate-500 flex flex-wrap items-center gap-2">
+                    <span><i class="fa-solid fa-location-dot text-slate-400"></i> ${tr('dash.zone')}: <strong>${f.zona || '—'}</strong></span>
+                    <span class="text-slate-300">•</span>
+                    <span><i class="fa-regular fa-calendar text-slate-400"></i> ${tr('dash.savedOn')} ${formatDate(f.savedAt)}</span>
+                </div>
+            </div>
+            <div class="list-item-actions w-full sm:w-auto">
+                <button class="btn btn-sm btn-outline btn-error rounded-xl w-full sm:w-auto font-semibold gap-1.5" onclick="rimuoviPreferito(${f.id})">
+                    <i class="fa-solid fa-trash-can"></i> <span>${tr('dash.remove')}</span>
+                </button>
+            </div>
+        </div>`).join('');
+}
+
+async function rimuoviPreferito(id) {
+    try {
+        const res = await fetch(`/api/v1/user/preferiti/${id}`, {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+        if (res.ok) {
+            cachedPreferiti = cachedPreferiti.filter(f => f.id !== id);
+            renderPreferiti(cachedPreferiti);
+        }
+    } catch (err) {
+        console.error('Errore rimozione preferito:', err);
+    }
+}
+
+// =======================================================
+// Gestione Segnalazioni
+// =======================================================
+async function loadSegnalazioni() {
+    try {
+        const res = await fetch('/api/v1/segnalazioni/user', { headers: authHeaders() });
+        const data = await res.json();
+        cachedSegnalazioni = (res.ok && data.segnalazioni) ? data.segnalazioni : [];
+        renderSegnalazioni(cachedSegnalazioni);
+    } catch (err) {
+        console.error('Errore caricamento segnalazioni:', err);
+    }
+}
+
+function getTipoIcon(tipo) {
+    switch (tipo) {
+        case 'bici_abbandonata':  return '<i class="fa-solid fa-bicycle text-primary"></i>';
+        case 'danno_strutturale': return '<i class="fa-solid fa-wrench text-warning"></i>';
+        case 'rastrelliera_piena':return '<i class="fa-solid fa-ban text-error"></i>';
+        case 'vandalismo':        return '<i class="fa-solid fa-triangle-exclamation text-error"></i>';
+        default:                  return '<i class="fa-solid fa-pen-to-square text-info"></i>';
+    }
+}
+
+function renderSegnalazioni(items) {
+    const list = document.getElementById('segnalazioni-list');
+    if (!list) return;
+
+    if (!items || items.length === 0) {
+        list.innerHTML = `<p class="empty-msg alert bg-base-100/70 border border-base-300 text-slate-500 font-medium text-sm rounded-2xl">${tr('dash.noReports')}</p>`;
+        return;
+    }
+
+    list.innerHTML = [...items].reverse().map(s => {
+        const tipoText = tr(`tipo.${s.tipo}`) || s.tipo;
+        const icon = getTipoIcon(s.tipo);
+        const badgeClass = s.stato === 'risolta' ? 'badge-success text-white' : (s.stato === 'in_lavorazione' ? 'badge-warning text-white' : 'badge-info text-white');
+        return `
+        <div class="list-item card bg-base-100/90 border border-base-300 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-shadow flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5">
+            <div class="list-item-info space-y-1">
+                <div class="font-bold text-slate-800 text-sm sm:text-base flex flex-wrap items-center gap-2">
+                    <span>${icon} ${tipoText}</span>
+                    <span class="text-slate-500 font-normal">— ${tr('dash.rack')} #${s.rastrellieraId}</span>
+                </div>
+                <div class="text-xs text-slate-500 flex flex-wrap items-center gap-2">
+                    <span><i class="fa-regular fa-calendar text-slate-400"></i> ${formatDate(s.timestamp)}</span>
+                    ${s.note ? `<span class="text-slate-300">•</span> <span class="italic text-slate-600">"${s.note}"</span>` : ''}
+                </div>
+            </div>
+            <div class="list-item-actions w-full sm:w-auto flex justify-start sm:justify-end">
+                <span class="badge ${badgeClass} font-bold text-xs uppercase tracking-wider py-2.5 px-3 rounded-lg">${s.stato || 'inviata'}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+
+
+// Esponi per onclick inline
+window.rimuoviPreferito = rimuoviPreferito;
+
+// Avvio
+document.addEventListener('DOMContentLoaded', init);
+
