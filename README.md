@@ -36,6 +36,7 @@ Scegli le istruzioni corrispondenti al tuo sistema operativo:
 4. **Apri l'app:**
    Apri il tuo browser preferito e vai all'indirizzo: **`http://localhost:3000`**
 
+*(Nota: il progetto è configurato in modalità Plug&Play. Non è necessario configurare chiavi API o file .env per testare il login tramite Google in locale).*
 
 ---
 
@@ -60,3 +61,15 @@ Scegli le istruzioni corrispondenti al tuo sistema operativo:
 
 4. **Apri l'app:**
    Apri il tuo browser preferito e vai all'indirizzo: **`http://localhost:3000`**
+
+*(Nota: il progetto è configurato in modalità Plug&Play. Non è necessario configurare chiavi API o file .env per testare il login tramite Google in locale).*
+
+---
+
+### 💡 Note per gli Sviluppatori (CSS & Tailwind)
+L'interfaccia utente è stilizzata tramite Tailwind CSS e i componenti DaisyUI. Il file CSS finale (`public/css/tailwind.css`) è già generato e incluso nel repository.
+Tuttavia, se decidi di **modificare il codice HTML o aggiungere nuove classi CSS**, ricordati di ricompilare il file Tailwind eseguendo il seguente comando nel terminale:
+
+```bash
+npm run build:css
+```

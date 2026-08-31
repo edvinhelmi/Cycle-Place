@@ -46,5 +46,29 @@
     "lng": 11.12635171381315,
     "timestamp": "2026-08-30T21:36:40.140Z",
     "stato": "inviata"
+  },
+  {
+    "id": "seg_1788164610070",
+    "userId": "117827982692808573140",
+    "userEmail": "edvinhelmi@gmail.com",
+    "rastrellieraId": 419,
+    "tipo": "rastrelliera_piena",
+    "note": "sempre piena!",
+    "lat": 46.07481180107354,
+    "lng": 11.144269337007824,
+    "timestamp": "2026-08-31T08:23:30.070Z",
+    "stato": "inviata"
+  },
+  {
+    "id": "seg_1788174171646",
+    "userId": "117827982692808573140",
+    "userEmail": "edvinhelmi@gmail.com",
+    "rastrellieraId": 420,
+    "tipo": "rastrelliera_piena",
+    "note": "hawduhadhadoh",
+    "lat": 46.07321320916661,
+    "lng": 11.149899287432948,
+    "timestamp": "2026-08-31T11:02:51.646Z",
+    "stato": "inviata"
   }
 ]

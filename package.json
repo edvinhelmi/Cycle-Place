@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "build:css": "tailwindcss -i ./src/input.css -o ./public/tailwind.css --minify",
-    "watch:css": "tailwindcss -i ./src/input.css -o ./public/tailwind.css --watch"
+    "build:css": "tailwindcss -i ./src/input.css -o ./public/css/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./public/css/tailwind.css --watch"
   },
 
   "dependencies": {
