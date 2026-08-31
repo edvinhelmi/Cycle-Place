@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.SUPER_SECRET || 'dev-fallback-secret-CHANGE-IN-PRODUCTION';
+const JWT_SECRET = process.env.SUPER_SECRET || 'segreto_universitario_trento_bike_parking';
 
 /**
  * Middleware che verifica il token JWT nell'header Authorization.
