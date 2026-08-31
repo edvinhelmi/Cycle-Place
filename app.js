@@ -13,8 +13,8 @@ const tokenChecker = require('./middleware/tokenChecker');
 // --- Configurazione ---
 const app  = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET      = process.env.SUPER_SECRET || 'dev-fallback-secret-CHANGE-IN-PRODUCTION';
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const JWT_SECRET       = process.env.SUPER_SECRET || 'segreto_universitario_trento_bike_parking';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '455956234516-62c55ghdcsl2tffohcancm7is467jgda.apps.googleusercontent.com';
 
 app.use(cors());
 app.use(bodyParser.json());
