@@ -28,19 +28,15 @@ Scegli le istruzioni corrispondenti al tuo sistema operativo:
    npm install
    ```
 
-3. **Configura le variabili d'ambiente:**
-   Duplica il file di esempio per creare il tuo file di configurazione nascosto `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-
-4. **Avvia il Server:**
+3. **Avvia il Server:**
    ```bash
    npm start
    ```
 
-5. **Apri l'app:**
+4. **Apri l'app:**
    Apri il tuo browser preferito e vai all'indirizzo: **`http://localhost:3000`**
+
+*(Nota: il progetto è configurato in modalità Plug&Play. Non è necessario configurare chiavi API o file .env per testare il login tramite Google in locale).*
 
 ---
 
@@ -58,19 +54,15 @@ Scegli le istruzioni corrispondenti al tuo sistema operativo:
    npm install
    ```
 
-3. **Configura le variabili d'ambiente:**
-   Usa il comando `copy` per generare il file `.env` a partire dall'esempio:
-   ```cmd
-   copy .env.example .env
-   ```
-
-4. **Avvia il Server:**
+3. **Avvia il Server:**
    ```cmd
    npm start
    ```
 
-5. **Apri l'app:**
+4. **Apri l'app:**
    Apri il tuo browser preferito e vai all'indirizzo: **`http://localhost:3000`**
+
+*(Nota: il progetto è configurato in modalità Plug&Play. Non è necessario configurare chiavi API o file .env per testare il login tramite Google in locale).*
 
 ---
 
