@@ -191,8 +191,14 @@ app.post('/api/v1/register', (req, res) => {
     if (!EMAIL_REGEX.test(trimmedEmail)) {
         return res.status(400).json({ error: 'Inserisci un indirizzo email valido (es. nome@dominio.it)' });
     }
-    if (cleanPassword.length < 6) {
-        return res.status(400).json({ error: 'La password deve contenere almeno 6 caratteri' });
+    if (cleanPassword.length < 8) {
+        return res.status(400).json({ error: 'La password deve contenere almeno 8 caratteri' });
+    }
+    if (!/[A-Z]/.test(cleanPassword)) {
+        return res.status(400).json({ error: 'La password deve contenere almeno una lettera maiuscola' });
+    }
+    if (!/[^A-Za-z0-9]/.test(cleanPassword)) {
+        return res.status(400).json({ error: 'La password deve contenere almeno un carattere speciale' });
     }
 
     readJsonFile(usersFile, (err, users) => {

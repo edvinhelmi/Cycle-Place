@@ -44,39 +44,47 @@ window.alert = function(message, type = 'warning') {
     if (!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
-        container.className = 'toast toast-top toast-center sm:toast-end z-[9999] mt-14 sm:mt-0';
+        container.className = 'toast-container-custom';
         document.body.appendChild(container);
     }
     
     const toast = document.createElement('div');
     let alertClass = 'alert-warning';
     let iconClass = 'fa-triangle-exclamation';
+    let bgClass = 'bg-amber-500 text-slate-950 border-amber-400';
     
-    if (type === 'error') { alertClass = 'alert-error text-white'; iconClass = 'fa-circle-xmark'; }
-    else if (type === 'success') { alertClass = 'alert-success text-white'; iconClass = 'fa-circle-check'; }
-    else if (type === 'info') { alertClass = 'alert-info text-white'; iconClass = 'fa-circle-info'; }
-    else { alertClass = 'alert-warning text-slate-800'; iconClass = 'fa-triangle-exclamation'; }
+    if (type === 'error') {
+        alertClass = 'alert-error';
+        iconClass = 'fa-circle-xmark';
+        bgClass = 'bg-red-500 text-white border-red-400';
+    } else if (type === 'success') {
+        alertClass = 'alert-success';
+        iconClass = 'fa-circle-check';
+        bgClass = 'bg-emerald-500 text-white border-emerald-400';
+    } else if (type === 'info') {
+        alertClass = 'alert-info';
+        iconClass = 'fa-circle-info';
+        bgClass = 'bg-sky-500 text-white border-sky-400';
+    }
 
-    toast.className = `alert ${alertClass} shadow-2xl font-bold flex flex-row items-center gap-3 transition-all duration-300 opacity-0 translate-y-[-20px]`;
+    toast.className = `custom-toast alert ${alertClass} ${bgClass} font-bold flex flex-row items-center gap-3 px-4 py-3 rounded-2xl border`;
     toast.innerHTML = `
-        <i class="fa-solid ${iconClass} text-xl"></i>
-        <span>${message}</span>
+        <i class="fa-solid ${iconClass} text-xl shrink-0"></i>
+        <span class="text-xs sm:text-sm font-bold leading-tight">${message}</span>
     `;
     
     container.appendChild(toast);
     
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
-            toast.classList.add('opacity-100', 'translate-y-0');
+            toast.classList.add('show');
         });
     });
     
     setTimeout(() => {
-        toast.classList.remove('opacity-100', 'translate-y-0');
-        toast.classList.add('opacity-0', 'translate-y-[-20px]');
-        setTimeout(() => toast.remove(), 300);
-    }, 3500);
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 350);
+    }, 3800);
 };
 
 // =======================================================
@@ -96,9 +104,12 @@ async function loadUserPreferiti() {
 // Funzione globale — chiamata da onclick nel popup
 window.toggleFavorito = async function(id, tipologia, stalli, zona, lat, lng) {
     if (!isTokenValid(getToken())) {
-        alert(tr('popup.loginToFav'));
+        alert(tr('popup.loginToFav') || 'Accedi per salvare i tuoi preferiti.');
         const loginModal = document.getElementById('login-modal');
-        if (loginModal) loginModal.classList.remove('hidden');
+        if (loginModal) {
+            loginModal.classList.remove('hidden');
+            loginModal.classList.add('modal-open');
+        }
         return;
     }
     const isFav = userFavoritiIds.has(id);
@@ -426,8 +437,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            if (password.length < 6) {
-                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errPasswordLength');
+            if (password.length < 8 || !/[A-Z]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errPasswordRequirements');
                 if (passInput) { passInput.classList.add('input-error'); passInput.focus(); }
                 return;
             }
