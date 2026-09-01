@@ -31,8 +31,6 @@ evidenziazione delle criticità sul tracciato.
 e visualizzazione della media aggregata nel popup.  -> Codice: Il sistema di feedback/rating a 3 criteri è completamente assente sia nelle API che nei popup.  
 - Foto delle Aree di Sosta (RF 5.4):Requisito: Visualizzazione foto nel popup ove disponibili.  -> Codice: I popup mostrano solo attributi testuali 
 (stalli, zona, edificio, link GIS/MITT).  
-- Marker Grafico per i Preferiti sulla Mappa (US 9 Criterio 2):Requisito: Le aree salvate nei preferiti devono mostrare un'icona/marker dedicato direttamente sulla mappa.  
--> Codice: Il cambio di stato preferito aggiorna il pulsante nel popup e la dashboard, ma non altera lo stile/icona del marker sulla mappa principale.  
 
 5. Modulo Segnalazione Furti e Iniziative 
 - (RF 6 & RF 1.1)Modulo Furto Specifico (RF 6, US 10):Requisito: Form dedicato per i furti con data/ora/luogo, pre-compilazione caratteristiche bici 
