@@ -1681,6 +1681,62 @@ document.addEventListener('DOMContentLoaded', async () => {
         return instruction;
     }
 
+    // --- Sintesi Vocale ad Alta Fedeltà (TTS) ---
+    let availableVoices = [];
+
+    function initVoices() {
+        if (!window.speechSynthesis) return;
+        availableVoices = window.speechSynthesis.getVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                availableVoices = window.speechSynthesis.getVoices();
+            };
+        }
+    }
+    initVoices();
+
+    function getBestVoice(langCode) {
+        if (!availableVoices || availableVoices.length === 0) {
+            if (window.speechSynthesis) availableVoices = window.speechSynthesis.getVoices();
+        }
+        if (!availableVoices || availableVoices.length === 0) return null;
+
+        // Escludi voci legacy/robotica storiche di macOS o browser (es. Fred, Albert, Whisper, ecc.)
+        const blacklistedVoices = [
+            'fred', 'albert', 'whisper', 'bad news', 'bahh', 'bells', 'boing', 
+            'bubbles', 'cellos', 'deranged', 'good news', 'hysterical', 
+            'pipe organ', 'trinoids', 'zarvox', 'junior', 'ralph', 'organ'
+        ];
+
+        const validVoices = availableVoices.filter(v => {
+            const name = (v.name || '').toLowerCase();
+            return !blacklistedVoices.some(b => name.includes(b));
+        });
+
+        const targetPrefix = (langCode || 'it').substring(0, 2).toLowerCase();
+        const matching = validVoices.filter(v => (v.lang || '').toLowerCase().startsWith(targetPrefix));
+
+        if (matching.length === 0) return null;
+
+        // Voci naturali moderne preferite per ciascuna lingua
+        const preferredVoices = [
+            'natural', 'premium', 'enhanced', 'siri',
+            // Inglese
+            'samantha', 'karen', 'daniel', 'serena', 'oliver', 'google us english', 'google uk english female', 'microsoft aria', 'microsoft guy',
+            // Italiano
+            'alice', 'federica', 'luca', 'cosimo', 'google italiano', 'microsoft elsa', 'microsoft diego',
+            // Tedesco
+            'anna', 'petra', 'markus', 'google deutsch', 'microsoft katja', 'microsoft conrad'
+        ];
+
+        for (const pref of preferredVoices) {
+            const found = matching.find(v => (v.name || '').toLowerCase().includes(pref));
+            if (found) return found;
+        }
+
+        return matching.find(v => v.default) || matching[0];
+    }
+
     function speakInstruction(text) {
         if (!voiceEnabled || !window.speechSynthesis || !text) return;
         if (text === lastSpokenInstruction) return;
@@ -1689,8 +1745,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             const lang = I18n.getLanguage() || 'it';
-            utterance.lang = lang === 'de' ? 'de-DE' : (lang === 'en' ? 'en-US' : 'it-IT');
-            utterance.rate = 1.0;
+            const targetLocale = lang === 'de' ? 'de-DE' : (lang === 'en' ? 'en-US' : 'it-IT');
+            utterance.lang = targetLocale;
+
+            const bestVoice = getBestVoice(lang);
+            if (bestVoice) {
+                utterance.voice = bestVoice;
+            }
+
+            utterance.rate = 0.95; // Cadenza naturale e rilassata
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+
             window.speechSynthesis.speak(utterance);
         } catch (e) {
             console.warn('Speech synthesis not available:', e);
