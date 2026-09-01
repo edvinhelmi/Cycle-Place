@@ -54,8 +54,8 @@
   "auth.errName": "Vorname muss mindestens 2 Zeichen lang sein",
   "auth.errSurname": "Nachname muss mindestens 2 Zeichen lang sein",
   "auth.errEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
-  "auth.errPasswordLength": "Das Passwort muss mindestens 8 Zeichen lang sein",
-  "auth.errPasswordRequirements": "Das Passwort muss mindestens 8 Zeichen, einen Großbuchstaben und ein Sonderzeichen enthalten",
+  "auth.passwordHint": "Mind. 8 Zeichen, 1 Großbuchstabe, 1 Zahl und 1 Sonderzeichen",
+  "auth.errPasswordRequirements": "Das Passwort muss mindestens 8 Zeichen lang sein, einen Großbuchstaben, eine Zahl und ein Sonderzeichen enthalten"
   "auth.errPasswordMismatch": "Passwörter stimmen nicht überein",
   "auth.errEmptyFields": "Bitte füllen Sie alle Pflichtfelder aus",
   "auth.successRegister": "Registrierung erfolgreich! Sie können sich jetzt anmelden.",
