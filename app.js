@@ -9,6 +9,8 @@ const proj4      = require('proj4');
 const { OAuth2Client } = require('google-auth-library');
 const jwt        = require('jsonwebtoken');
 const tokenChecker = require('./middleware/tokenChecker');
+const bcrypt = require('bcrypt');
+const SALT_ROUNDS = 10;
 
 // --- Configurazione ---
 const app  = express();
@@ -170,6 +172,8 @@ app.get('/api/v1/config', (req, res) => {
 // =======================================================
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Regex: Minimo 8 caratteri, almeno una maiuscola, almeno un numero e almeno un carattere speciale
+const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 
 app.post('/api/v1/register', (req, res) => {
     const { name, surname, email, password } = req.body;
@@ -191,33 +195,38 @@ app.post('/api/v1/register', (req, res) => {
     if (!EMAIL_REGEX.test(trimmedEmail)) {
         return res.status(400).json({ error: 'Inserisci un indirizzo email valido (es. nome@dominio.it)' });
     }
-    if (cleanPassword.length < 8) {
-        return res.status(400).json({ error: 'La password deve contenere almeno 8 caratteri' });
-    }
-    if (!/[A-Z]/.test(cleanPassword)) {
-        return res.status(400).json({ error: 'La password deve contenere almeno una lettera maiuscola' });
-    }
-    if (!/[^A-Za-z0-9]/.test(cleanPassword)) {
-        return res.status(400).json({ error: 'La password deve contenere almeno un carattere speciale' });
+    if (!PASSWORD_REGEX.test(cleanPassword)) {
+        return res.status(400).json({ 
+            error: 'La password deve contenere almeno 8 caratteri, una lettera maiuscola, un numero e un carattere speciale' 
+        });
     }
 
-    readJsonFile(usersFile, (err, users) => {
+    readJsonFile(usersFile, async (err, users) => {
         if (err) users = [];
         if (users.find(u => u.email && u.email.toLowerCase() === trimmedEmail)) {
             return res.status(409).json({ error: 'Utente già registrato con questa email' });
         }
 
-        users.push({
-            id: Date.now().toString(),
-            name: trimmedName,
-            surname: trimmedSurname,
-            email: trimmedEmail,
-            password: cleanPassword
-        });
-        writeJsonFile(usersFile, users, werr => {
-            if (werr) return res.status(500).json({ error: 'Errore nel salvataggio utente' });
-            res.status(201).json({ message: 'Registrazione completata con successo' });
-        });
+        try {
+            // Hashing sicuro della password prima di salvarla
+            const hashedPassword = await bcrypt.hash(cleanPassword, SALT_ROUNDS);
+
+            users.push({
+                id: Date.now().toString(),
+                name: trimmedName,
+                surname: trimmedSurname,
+                email: trimmedEmail,
+                password: hashedPassword
+            });
+
+            writeJsonFile(usersFile, users, werr => {
+                if (werr) return res.status(500).json({ error: 'Errore nel salvataggio utente' });
+                res.status(201).json({ message: 'Registrazione completata con successo' });
+            });
+        } catch (hashErr) {
+            console.error('[Bcrypt] Errore hashing:', hashErr);
+            return res.status(500).json({ error: 'Errore interno durante la registrazione' });
+        }
     });
 });
 
@@ -234,19 +243,39 @@ app.post('/api/v1/login', (req, res) => {
         return res.status(400).json({ error: 'Formato email non valido' });
     }
 
-    readJsonFile(usersFile, (err, users) => {
+    readJsonFile(usersFile, async (err, users) => {
         if (err) return res.status(500).json({ error: 'Errore interno del server' });
-        const user = users.find(u => u.email && u.email.toLowerCase() === trimmedEmail && u.password === cleanPassword);
-        if (!user) return res.status(401).json({ error: 'Credenziali non valide. Controlla email e password.' });
+        
+        // 1. Cerca l'utente tramite email
+        const user = users.find(u => u.email && u.email.toLowerCase() === trimmedEmail);
+        if (!user) {
+            return res.status(401).json({ error: 'Credenziali non valide. Controlla email e password.' });
+        }
 
-        const token = jwt.sign(
-            { sub: user.id, email: user.email, name: user.name, surname: user.surname, provider: 'local' },
-            JWT_SECRET, { expiresIn: '24h' }
-        );
-        res.status(200).json({ token, user: { name: user.name, surname: user.surname, email: user.email } });
+        try {
+            // 2. Confronta la password con l'hash memorizzato
+            const isMatch = await bcrypt.compare(cleanPassword, user.password);
+            if (!isMatch) {
+                return res.status(401).json({ error: 'Credenziali non valide. Controlla email e password.' });
+            }
+
+            // 3. Genera il JWT
+            const token = jwt.sign(
+                { sub: user.id, email: user.email, name: user.name, surname: user.surname, provider: 'local' },
+                JWT_SECRET, 
+                { expiresIn: '24h' }
+            );
+
+            res.status(200).json({ 
+                token, 
+                user: { name: user.name, surname: user.surname, email: user.email } 
+            });
+        } catch (compareErr) {
+            console.error('[Bcrypt] Errore verifica password:', compareErr);
+            return res.status(500).json({ error: 'Errore durante la verifica delle credenziali' });
+        }
     });
 });
-
 // =======================================================
 // API: Google SSO
 // =======================================================
