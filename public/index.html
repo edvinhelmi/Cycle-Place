@@ -42,15 +42,19 @@
             <button id="btn-logout" class="btn btn-outline btn-error btn-sm rounded-xl font-semibold hidden" data-i18n="nav.logout">
                 <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
             </button>
-            <!-- Selettore lingua con flag-icons SVG e hitbox completa -->
-            <label for="lang-select" class="lang-selector-wrapper flex items-center gap-2 bg-base-100/90 hover:bg-base-200/80 border border-base-300 rounded-xl px-2.5 py-1.5 shadow-xs cursor-pointer transition-colors select-none">
-                <span id="lang-flag-icon" class="fi fi-it text-base rounded-xs shadow-xs pointer-events-none"></span>
-                <select id="lang-select" class="lang-select select select-ghost select-xs font-bold text-slate-700 focus:outline-none p-0 h-auto min-h-0 cursor-pointer" aria-label="Seleziona lingua">
-                    <option value="it">IT</option>
-                    <option value="en">EN</option>
-                    <option value="de">DE</option>
+            <!-- Selettore lingua con hitbox a tutta ampiezza (100% cliccabile) -->
+            <div class="lang-selector-wrapper relative flex items-center justify-between gap-1.5 bg-base-100/90 hover:bg-base-200/80 border border-base-300 rounded-xl px-2.5 py-1.5 shadow-xs transition-colors select-none cursor-pointer">
+                <div class="flex items-center gap-1.5 pointer-events-none">
+                    <span id="lang-flag-icon" class="fi fi-it text-base rounded-xs shadow-xs"></span>
+                    <span id="lang-selected-code" class="text-xs font-bold text-slate-700 uppercase">IT</span>
+                    <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+                </div>
+                <select id="lang-select" class="lang-select absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" aria-label="Seleziona lingua">
+                    <option value="it">Italiano (IT)</option>
+                    <option value="en">English (EN)</option>
+                    <option value="de">Deutsch (DE)</option>
                 </select>
-            </label>
+            </div>
         </div>
     </header>
 

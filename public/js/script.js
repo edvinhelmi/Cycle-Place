@@ -148,9 +148,423 @@ function featureMatchesSearch(props, query) {
 document.addEventListener('DOMContentLoaded', async () => {
 
     await I18n.init();
-    I18n.onLanguageChange(() => {
-        applyFiltersAndSearch(false);
+
+    // =========================================================
+    // UI — Riferimenti DOM & Modali (Inizializzazione Immediata)
+    // =========================================================
+    const btnLoginModal    = document.getElementById('btn-login-modal');
+    const btnRegisterModal = document.getElementById('btn-register-modal');
+    const btnDashboard     = document.getElementById('btn-dashboard');
+    const btnLogout        = document.getElementById('btn-logout');
+    const userGreeting     = document.getElementById('user-greeting');
+    const loginModal       = document.getElementById('login-modal');
+    const registerModal    = document.getElementById('register-modal');
+    const segnalazioneModal= document.getElementById('segnalazione-modal');
+    const btnHamburger     = document.getElementById('btn-hamburger');
+    const userControls     = document.getElementById('user-controls');
+
+    const openModal = m => {
+        if (!m) return;
+        m.classList.remove('hidden');
+        m.classList.add('modal-open');
+    };
+    const closeModal = m => {
+        if (!m) return;
+        m.classList.remove('modal-open');
+        m.classList.add('hidden');
+        clearForms();
+    };
+
+    function clearForms() {
+        ['register-form', 'login-form'].forEach(id => {
+            const f = document.getElementById(id); 
+            if (f) {
+                f.reset();
+                f.querySelectorAll('input').forEach(inp => {
+                    inp.classList.remove('input-error');
+                    if (inp.type === 'text' && (inp.id.includes('password') || inp.id.includes('pass'))) {
+                        inp.type = 'password';
+                    }
+                });
+            }
+        });
+        document.querySelectorAll('.btn-toggle-pwd').forEach(btn => {
+            btn.innerHTML = '<i class="fa-solid fa-eye text-sm"></i>';
+        });
+        ['reg-error', 'reg-success', 'login-error', 'google-error'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.textContent = '';
+        });
+    }
+
+    // Toggle visibilità password (eye icon)
+    document.querySelectorAll('.btn-toggle-pwd').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            btn.innerHTML = isPassword ? '<i class="fa-solid fa-eye-slash text-sm"></i>' : '<i class="fa-solid fa-eye text-sm"></i>';
+        });
     });
+
+    // Rimuovi input-error in tempo reale alla digitazione
+    document.querySelectorAll('#register-form input, #login-form input').forEach(input => {
+        input.addEventListener('input', () => {
+            input.classList.remove('input-error');
+            const form = input.closest('form');
+            if (form) {
+                const errEl = form.querySelector('.error-msg');
+                if (errEl) errEl.textContent = '';
+            }
+        });
+    });
+
+    if (btnLoginModal)    btnLoginModal.addEventListener('click',    () => openModal(loginModal));
+    if (btnRegisterModal) btnRegisterModal.addEventListener('click', () => openModal(registerModal));
+
+    document.querySelectorAll('.close').forEach(btn => {
+        btn.addEventListener('click', e => {
+            const id = e.currentTarget.getAttribute('data-modal');
+            closeModal(document.getElementById(id));
+        });
+    });
+
+    [loginModal, registerModal, segnalazioneModal].forEach(m => {
+        if (m) {
+            m.addEventListener('click', e => {
+                if (e.target === m) closeModal(m);
+            });
+        }
+    });
+
+    // Mobile Hamburger Menu (RNF1, RNF6)
+    function toggleMobileMenu() {
+        if (!userControls || !btnHamburger) return;
+        const isActive = userControls.classList.toggle('active');
+        btnHamburger.setAttribute('aria-expanded', String(isActive));
+        const iconSpan = btnHamburger.querySelector('.hamburger-icon');
+        if (iconSpan) {
+            iconSpan.innerHTML = isActive ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
+        }
+        if (isActive) {
+            const filterPanel = document.getElementById('filter-panel');
+            const mapLegend = document.getElementById('map-legend');
+            const btnFilterToggle = document.getElementById('btn-filter-toggle');
+            const btnLegendToggle = document.getElementById('btn-legend-toggle');
+            if (filterPanel && filterPanel.classList.contains('open-mobile')) {
+                filterPanel.classList.remove('open-mobile');
+                if (btnFilterToggle) btnFilterToggle.classList.remove('active');
+            }
+            if (mapLegend && mapLegend.classList.contains('open-mobile')) {
+                mapLegend.classList.remove('open-mobile');
+                if (btnLegendToggle) btnLegendToggle.classList.remove('active');
+            }
+        }
+    }
+
+    function closeMobileMenu() {
+        if (!userControls || !btnHamburger) return;
+        userControls.classList.remove('active');
+        btnHamburger.setAttribute('aria-expanded', 'false');
+        const iconSpan = btnHamburger.querySelector('.hamburger-icon');
+        if (iconSpan) iconSpan.innerHTML = '<i class="fa-solid fa-bars"></i>';
+    }
+
+    if (btnHamburger) {
+        btnHamburger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
+    }
+
+    [btnLoginModal, btnRegisterModal, btnDashboard, btnLogout].forEach(btn => {
+        if (btn) btn.addEventListener('click', closeMobileMenu);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (userControls && userControls.classList.contains('active')) {
+            if (!userControls.contains(e.target) && !btnHamburger.contains(e.target)) {
+                closeMobileMenu();
+            }
+        }
+    });
+
+    // Stato utente — login / logout
+    function loginSuccess(user) {
+        if (btnLoginModal)    btnLoginModal.classList.add('hidden');
+        if (btnRegisterModal) btnRegisterModal.classList.add('hidden');
+        if (btnDashboard)     btnDashboard.classList.remove('hidden');
+        if (btnLogout)        btnLogout.classList.remove('hidden');
+        if (userGreeting) {
+            userGreeting.classList.remove('hidden');
+            userGreeting.innerHTML = `<i class="fa-solid fa-circle-user"></i> <span>Ciao, <strong>${user.name}</strong>!</span>`;
+        }
+        loadUserPreferiti();
+    }
+
+    function logoutUser() {
+        removeToken();
+        userFavoritiIds.clear();
+        if (window.google?.accounts) google.accounts.id.disableAutoSelect();
+        if (btnLoginModal)    btnLoginModal.classList.remove('hidden');
+        if (btnRegisterModal) btnRegisterModal.classList.remove('hidden');
+        if (btnDashboard)     btnDashboard.classList.add('hidden');
+        if (btnLogout)        btnLogout.classList.add('hidden');
+        if (userGreeting) {
+            userGreeting.classList.add('hidden');
+            userGreeting.textContent = '';
+        }
+        closeMobileMenu();
+    }
+
+    // Ripristino sessione da localStorage
+    const storedToken = getToken();
+    if (isTokenValid(storedToken)) {
+        const d = decodeToken(storedToken);
+        loginSuccess({ name: d.name, surname: d.surname, email: d.email });
+    }
+
+    if (btnLogout) btnLogout.addEventListener('click', logoutUser);
+
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Registrazione
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const errorEl   = document.getElementById('reg-error');
+            const successEl = document.getElementById('reg-success');
+            const btnSubmit = document.getElementById('btn-reg-submit');
+            if (errorEl) errorEl.textContent = '';
+            if (successEl) successEl.textContent = '';
+
+            const nameInput    = document.getElementById('reg-name');
+            const surnameInput = document.getElementById('reg-surname');
+            const emailInput   = document.getElementById('reg-email');
+            const passInput    = document.getElementById('reg-password');
+            const passConfInput= document.getElementById('reg-password-confirm');
+
+            const name     = nameInput ? nameInput.value.trim() : '';
+            const surname  = surnameInput ? surnameInput.value.trim() : '';
+            const email    = emailInput ? emailInput.value.trim().toLowerCase() : '';
+            const password = passInput ? passInput.value : '';
+            const passConf = passConfInput ? passConfInput.value : password;
+
+            [nameInput, surnameInput, emailInput, passInput, passConfInput].forEach(inp => inp && inp.classList.remove('input-error'));
+
+            if (!name || !surname || !email || !password || !passConf) {
+                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errEmptyFields');
+                if (!name && nameInput) nameInput.classList.add('input-error');
+                if (!surname && surnameInput) surnameInput.classList.add('input-error');
+                if (!email && emailInput) emailInput.classList.add('input-error');
+                if (!password && passInput) passInput.classList.add('input-error');
+                if (!passConf && passConfInput) passConfInput.classList.add('input-error');
+                return;
+            }
+
+            if (name.length < 2) {
+                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errName');
+                if (nameInput) { nameInput.classList.add('input-error'); nameInput.focus(); }
+                return;
+            }
+
+            if (surname.length < 2) {
+                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errSurname');
+                if (surnameInput) { surnameInput.classList.add('input-error'); surnameInput.focus(); }
+                return;
+            }
+
+            if (!EMAIL_REGEX.test(email)) {
+                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errEmail');
+                if (emailInput) { emailInput.classList.add('input-error'); emailInput.focus(); }
+                return;
+            }
+
+            if (password.length < 6) {
+                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errPasswordLength');
+                if (passInput) { passInput.classList.add('input-error'); passInput.focus(); }
+                return;
+            }
+
+            if (password !== passConf) {
+                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errPasswordMismatch');
+                if (passConfInput) { passConfInput.classList.add('input-error'); passConfInput.focus(); }
+                return;
+            }
+
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<span class="loading loading-spinner loading-xs"></span> ' + tr('nav.register');
+            }
+
+            try {
+                const res  = await fetch('/api/v1/register', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, surname, email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+
+                if (successEl) successEl.textContent = '✅ ' + tr('auth.successRegister');
+                registerForm.reset();
+                
+                setTimeout(() => {
+                    closeModal(registerModal);
+                    openModal(loginModal);
+                    const loginEmailInput = document.getElementById('login-email');
+                    if (loginEmailInput) {
+                        loginEmailInput.value = email;
+                        document.getElementById('login-password')?.focus();
+                    }
+                }, 1600);
+            } catch (err) {
+                if (errorEl) errorEl.textContent = '❌ ' + (err.message || 'Errore di registrazione');
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = tr('nav.register');
+                }
+            }
+        });
+    }
+
+    // Login
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const errorEl   = document.getElementById('login-error');
+            const btnSubmit = document.getElementById('btn-login-submit');
+            if (errorEl) errorEl.textContent = '';
+
+            const emailInput = document.getElementById('login-email');
+            const passInput  = document.getElementById('login-password');
+
+            const email    = emailInput ? emailInput.value.trim().toLowerCase() : '';
+            const password = passInput ? passInput.value : '';
+
+            [emailInput, passInput].forEach(inp => inp && inp.classList.remove('input-error'));
+
+            if (!email || !password) {
+                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errEmptyFields');
+                if (!email && emailInput) emailInput.classList.add('input-error');
+                if (!password && passInput) passInput.classList.add('input-error');
+                return;
+            }
+
+            if (!EMAIL_REGEX.test(email)) {
+                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errEmail');
+                if (emailInput) { emailInput.classList.add('input-error'); emailInput.focus(); }
+                return;
+            }
+
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<span class="loading loading-spinner loading-xs"></span> ' + tr('nav.login');
+            }
+
+            try {
+                const res  = await fetch('/api/v1/login', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+                saveToken(data.token);
+                closeModal(loginModal);
+                loginSuccess(data.user);
+                setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
+            } catch (err) {
+                if (errorEl) errorEl.textContent = '❌ ' + (err.message || 'Credenziali non valide');
+                if (emailInput) emailInput.classList.add('input-error');
+                if (passInput) passInput.classList.add('input-error');
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = tr('nav.login');
+                }
+            }
+        });
+    }
+
+    // Google SSO
+    async function handleGoogleCredential(response) {
+        const googleErrorEl = document.getElementById('google-error');
+        if (googleErrorEl) googleErrorEl.textContent = '';
+        try {
+            const res  = await fetch('/api/v1/auth/google', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential: response.credential })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            saveToken(data.token);
+            closeModal(loginModal);
+            loginSuccess(data.user);
+            setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
+        } catch (err) {
+            if (googleErrorEl) googleErrorEl.textContent = '❌ Errore Google SSO: ' + (err.message || 'Autenticazione Google fallita');
+        }
+    }
+
+    async function initGoogleSSO() {
+        try {
+            const res = await fetch('/api/v1/config');
+            const { googleClientId } = await res.json();
+            const container = document.getElementById('google-btn-container');
+            if (!container) return;
+            if (!googleClientId || googleClientId.includes('IL_TUO')) {
+                container.innerHTML = '<small style="color:#888">Google Login: aggiungi GOOGLE_CLIENT_ID nel file .env</small>';
+                return;
+            }
+            await new Promise(resolve => {
+                if (window.google?.accounts) return resolve();
+                const t = setInterval(() => { if (window.google?.accounts) { clearInterval(t); resolve(); } }, 100);
+            });
+            google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential, ux_mode: 'popup' });
+            google.accounts.id.renderButton(container, {
+                type: 'standard', shape: 'rectangular', theme: 'outline',
+                text: 'signin_with', size: 'large', width: 340,
+                locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
+            });
+        } catch (err) { console.error('Errore Google SSO:', err); }
+    }
+
+    initGoogleSSO();
+
+    // Segnalazione Submit Handler
+    const segSubmitBtn = document.getElementById('seg-submit');
+    if (segSubmitBtn) {
+        segSubmitBtn.addEventListener('click', async () => {
+            const errorEl   = document.getElementById('seg-error');
+            const successEl = document.getElementById('seg-success');
+            if (errorEl) errorEl.textContent = '';
+            if (successEl) successEl.textContent = '';
+
+            const id   = document.getElementById('seg-rastrelliera-id')?.value;
+            const lat  = parseFloat(document.getElementById('seg-lat')?.value);
+            const lng  = parseFloat(document.getElementById('seg-lng')?.value);
+            const tipo = document.getElementById('seg-tipo')?.value;
+            const note = document.getElementById('seg-note')?.value?.trim();
+
+            try {
+                const res  = await fetch('/api/v1/segnalazioni', {
+                    method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ rastrellieraId: parseInt(id), tipo, note, lat, lng })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+                if (successEl) successEl.textContent = '✅ Segnalazione inviata! Grazie per il tuo contributo.';
+                const noteEl = document.getElementById('seg-note');
+                if (noteEl) noteEl.value = '';
+                setTimeout(() => closeModal(segnalazioneModal), 2000);
+            } catch (err) {
+                if (errorEl) errorEl.textContent = '❌ ' + (err.message || 'Errore invio segnalazione');
+            }
+        });
+    }
 
     // =========================================================
     // 1. MAPPA — inizializzazione
@@ -1049,426 +1463,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     await loadMapData();
-
-    // =========================================================
-    // UI — Riferimenti DOM (PRIMA di loginSuccess)
-    // =========================================================
-    const btnLoginModal    = document.getElementById('btn-login-modal');
-    const btnRegisterModal = document.getElementById('btn-register-modal');
-    const btnDashboard     = document.getElementById('btn-dashboard');
-    const btnLogout        = document.getElementById('btn-logout');
-    const userGreeting     = document.getElementById('user-greeting');
-    const loginModal       = document.getElementById('login-modal');
-    const registerModal    = document.getElementById('register-modal');
-    const segnalazioneModal= document.getElementById('segnalazione-modal');
-    const btnHamburger     = document.getElementById('btn-hamburger');
-    const userControls     = document.getElementById('user-controls');
-
-    // =========================================================
-    // Mobile Hamburger Menu (RNF1, RNF6)
-    // =========================================================
-    function toggleMobileMenu() {
-        if (!userControls || !btnHamburger) return;
-        const isActive = userControls.classList.toggle('active');
-        btnHamburger.setAttribute('aria-expanded', String(isActive));
-        const iconSpan = btnHamburger.querySelector('.hamburger-icon');
-        if (iconSpan) {
-            iconSpan.innerHTML = isActive ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
-        }
-        if (isActive) {
-            // Chiudi filtri e legenda per evitare sovrapposizioni
-            if (filterPanel && filterPanel.classList.contains('open-mobile')) {
-                filterPanel.classList.remove('open-mobile');
-                if (btnFilterToggle) btnFilterToggle.classList.remove('active');
-            }
-            if (mapLegend && mapLegend.classList.contains('open-mobile')) {
-                mapLegend.classList.remove('open-mobile');
-                if (btnLegendToggle) btnLegendToggle.classList.remove('active');
-            }
-        }
-    }
-
-    function closeMobileMenu() {
-        if (!userControls || !btnHamburger) return;
-        userControls.classList.remove('active');
-        btnHamburger.setAttribute('aria-expanded', 'false');
-        const iconSpan = btnHamburger.querySelector('.hamburger-icon');
-        if (iconSpan) iconSpan.innerHTML = '<i class="fa-solid fa-bars"></i>';
-    }
-
-
-    if (btnHamburger) {
-        btnHamburger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleMobileMenu();
-        });
-    }
-
-    // Chiudi il menu mobile quando si clicca su un pulsante di azione
-    [btnLoginModal, btnRegisterModal, btnDashboard, btnLogout].forEach(btn => {
-        if (btn) btn.addEventListener('click', closeMobileMenu);
-    });
-
-    // Chiudi se si clicca fuori dalla navbar
-    document.addEventListener('click', (e) => {
-        if (userControls && userControls.classList.contains('active')) {
-            if (!userControls.contains(e.target) && !btnHamburger.contains(e.target)) {
-                closeMobileMenu();
-            }
-        }
-    });
-
-    // =========================================================
-    // TASK 1: Stato utente — login / logout
-    // =========================================================
-    function loginSuccess(user) {
-        btnLoginModal.classList.add('hidden');
-        btnRegisterModal.classList.add('hidden');
-        btnDashboard.classList.remove('hidden');
-        btnLogout.classList.remove('hidden');
-        userGreeting.classList.remove('hidden');
-        userGreeting.innerHTML = `<i class="fa-solid fa-circle-user"></i> <span>Ciao, <strong>${user.name}</strong>!</span>`;
-        loadUserPreferiti();
-    }
-
-    function logoutUser() {
-        removeToken();
-        userFavoritiIds.clear();
-        if (window.google?.accounts) google.accounts.id.disableAutoSelect();
-        btnLoginModal.classList.remove('hidden');
-        btnRegisterModal.classList.remove('hidden');
-        btnDashboard.classList.add('hidden');
-        btnLogout.classList.add('hidden');
-        userGreeting.classList.add('hidden');
-        userGreeting.textContent = '';
-        closeMobileMenu();
-    }
-
-    // Ripristino sessione da localStorage
-    const storedToken = getToken();
-    if (isTokenValid(storedToken)) {
-        const d = decodeToken(storedToken);
-        loginSuccess({ name: d.name, surname: d.surname, email: d.email });
-    }
-
-    btnLogout.addEventListener('click', logoutUser);
-
-    // =========================================================
-    // UI — Modali (apri / chiudi)
-    // =========================================================
-    const openModal = m => {
-        if (!m) return;
-        m.classList.remove('hidden');
-        m.classList.add('modal-open');
-    };
-    const closeModal = m => {
-        if (!m) return;
-        m.classList.remove('modal-open');
-        m.classList.add('hidden');
-        clearForms();
-    };
-
-    btnLoginModal.addEventListener('click',    () => openModal(loginModal));
-    btnRegisterModal.addEventListener('click', () => openModal(registerModal));
-
-    document.querySelectorAll('.close').forEach(btn => {
-        btn.addEventListener('click', e => {
-            const id = e.currentTarget.getAttribute('data-modal');
-            closeModal(document.getElementById(id));
-        });
-    });
-
-    [loginModal, registerModal, segnalazioneModal].forEach(m => {
-        if (m) {
-            m.addEventListener('click', e => {
-                if (e.target === m) closeModal(m);
-            });
-        }
-    });
-
-
-
-    function clearForms() {
-        ['register-form', 'login-form'].forEach(id => {
-            const f = document.getElementById(id); 
-            if (f) {
-                f.reset();
-                f.querySelectorAll('input').forEach(inp => {
-                    inp.classList.remove('input-error');
-                    if (inp.type === 'text' && (inp.id.includes('password') || inp.id.includes('pass'))) {
-                        inp.type = 'password';
-                    }
-                });
-            }
-        });
-        document.querySelectorAll('.btn-toggle-pwd').forEach(btn => {
-            btn.innerHTML = '<i class="fa-solid fa-eye text-sm"></i>';
-        });
-        ['reg-error', 'reg-success', 'login-error', 'google-error'].forEach(id => {
-            const el = document.getElementById(id); if (el) el.textContent = '';
-        });
-    }
-
-    // Toggle visibilità password (eye icon)
-    document.querySelectorAll('.btn-toggle-pwd').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.getAttribute('data-target');
-            const input = document.getElementById(targetId);
-            if (!input) return;
-            const isPassword = input.type === 'password';
-            input.type = isPassword ? 'text' : 'password';
-            btn.innerHTML = isPassword ? '<i class="fa-solid fa-eye-slash text-sm"></i>' : '<i class="fa-solid fa-eye text-sm"></i>';
-        });
-    });
-
-    // Rimuovi input-error in tempo reale alla digitazione
-    document.querySelectorAll('#register-form input, #login-form input').forEach(input => {
-        input.addEventListener('input', () => {
-            input.classList.remove('input-error');
-            const form = input.closest('form');
-            if (form) {
-                const errEl = form.querySelector('.error-msg');
-                if (errEl) errEl.textContent = '';
-            }
-        });
-    });
-
-    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // =========================================================
-    // Auth locale: Registrazione
-    // =========================================================
-    document.getElementById('register-form').addEventListener('submit', async e => {
-        e.preventDefault();
-        const errorEl   = document.getElementById('reg-error');
-        const successEl = document.getElementById('reg-success');
-        const btnSubmit = document.getElementById('btn-reg-submit');
-        errorEl.textContent = successEl.textContent = '';
-
-        const nameInput    = document.getElementById('reg-name');
-        const surnameInput = document.getElementById('reg-surname');
-        const emailInput   = document.getElementById('reg-email');
-        const passInput    = document.getElementById('reg-password');
-        const passConfInput= document.getElementById('reg-password-confirm');
-
-        const name     = nameInput ? nameInput.value.trim() : '';
-        const surname  = surnameInput ? surnameInput.value.trim() : '';
-        const email    = emailInput ? emailInput.value.trim().toLowerCase() : '';
-        const password = passInput ? passInput.value : '';
-        const passConf = passConfInput ? passConfInput.value : password;
-
-        // Reset visual error state
-        [nameInput, surnameInput, emailInput, passInput, passConfInput].forEach(inp => inp && inp.classList.remove('input-error'));
-
-        // Controlli di validazione approfonditi
-        if (!name || !surname || !email || !password || !passConf) {
-            errorEl.textContent = '❌ ' + tr('auth.errEmptyFields');
-            if (!name && nameInput) nameInput.classList.add('input-error');
-            if (!surname && surnameInput) surnameInput.classList.add('input-error');
-            if (!email && emailInput) emailInput.classList.add('input-error');
-            if (!password && passInput) passInput.classList.add('input-error');
-            if (!passConf && passConfInput) passConfInput.classList.add('input-error');
-            return;
-        }
-
-        if (name.length < 2) {
-            errorEl.textContent = '❌ ' + tr('auth.errName');
-            if (nameInput) { nameInput.classList.add('input-error'); nameInput.focus(); }
-            return;
-        }
-
-        if (surname.length < 2) {
-            errorEl.textContent = '❌ ' + tr('auth.errSurname');
-            if (surnameInput) { surnameInput.classList.add('input-error'); surnameInput.focus(); }
-            return;
-        }
-
-        if (!EMAIL_REGEX.test(email)) {
-            errorEl.textContent = '❌ ' + tr('auth.errEmail');
-            if (emailInput) { emailInput.classList.add('input-error'); emailInput.focus(); }
-            return;
-        }
-
-        if (password.length < 6) {
-            errorEl.textContent = '❌ ' + tr('auth.errPasswordLength');
-            if (passInput) { passInput.classList.add('input-error'); passInput.focus(); }
-            return;
-        }
-
-        if (password !== passConf) {
-            errorEl.textContent = '❌ ' + tr('auth.errPasswordMismatch');
-            if (passConfInput) { passConfInput.classList.add('input-error'); passConfInput.focus(); }
-            return;
-        }
-
-        // Stato di caricamento
-        if (btnSubmit) {
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = '<span class="loading loading-spinner loading-xs"></span> ' + tr('nav.register');
-        }
-
-        try {
-            const res  = await fetch('/api/v1/register', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, surname, email, password })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-
-            successEl.textContent = '✅ ' + tr('auth.successRegister');
-            document.getElementById('register-form').reset();
-            
-            // Dopo 1.6s chiude la registrazione e apre il login con l'email già compilata
-            setTimeout(() => {
-                closeModal(registerModal);
-                openModal(loginModal);
-                const loginEmailInput = document.getElementById('login-email');
-                if (loginEmailInput) {
-                    loginEmailInput.value = email;
-                    document.getElementById('login-password')?.focus();
-                }
-            }, 1600);
-        } catch (err) {
-            errorEl.textContent = '❌ ' + (err.message || 'Errore di registrazione');
-        } finally {
-            if (btnSubmit) {
-                btnSubmit.disabled = false;
-                btnSubmit.textContent = tr('nav.register');
-            }
-        }
-    });
-
-    // =========================================================
-    // Auth locale: Login
-    // =========================================================
-    document.getElementById('login-form').addEventListener('submit', async e => {
-        e.preventDefault();
-        const errorEl   = document.getElementById('login-error');
-        const btnSubmit = document.getElementById('btn-login-submit');
-        errorEl.textContent = '';
-
-        const emailInput = document.getElementById('login-email');
-        const passInput  = document.getElementById('login-password');
-
-        const email    = emailInput ? emailInput.value.trim().toLowerCase() : '';
-        const password = passInput ? passInput.value : '';
-
-        [emailInput, passInput].forEach(inp => inp && inp.classList.remove('input-error'));
-
-        if (!email || !password) {
-            errorEl.textContent = '❌ ' + tr('auth.errEmptyFields');
-            if (!email && emailInput) emailInput.classList.add('input-error');
-            if (!password && passInput) passInput.classList.add('input-error');
-            return;
-        }
-
-        if (!EMAIL_REGEX.test(email)) {
-            errorEl.textContent = '❌ ' + tr('auth.errEmail');
-            if (emailInput) { emailInput.classList.add('input-error'); emailInput.focus(); }
-            return;
-        }
-
-        if (btnSubmit) {
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = '<span class="loading loading-spinner loading-xs"></span> ' + tr('nav.login');
-        }
-
-        try {
-            const res  = await fetch('/api/v1/login', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-            saveToken(data.token);
-            closeModal(loginModal);
-            loginSuccess(data.user);
-            setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
-        } catch (err) {
-            errorEl.textContent = '❌ ' + (err.message || 'Credenziali non valide');
-            if (emailInput) emailInput.classList.add('input-error');
-            if (passInput) passInput.classList.add('input-error');
-        } finally {
-            if (btnSubmit) {
-                btnSubmit.disabled = false;
-                btnSubmit.textContent = tr('nav.login');
-            }
-        }
-    });
-
-    // =========================================================
-    // Google SSO
-    // =========================================================
-    async function handleGoogleCredential(response) {
-        const googleErrorEl = document.getElementById('google-error');
-        googleErrorEl.textContent = '';
-        try {
-            const res  = await fetch('/api/v1/auth/google', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ credential: response.credential })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-            saveToken(data.token);
-            closeModal(loginModal);
-            loginSuccess(data.user);
-            setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
-        } catch (err) {
-            googleErrorEl.textContent = '❌ Errore Google SSO: ' + (err.message || 'Autenticazione Google fallita');
-        }
-    }
-
-    async function initGoogleSSO() {
-        try {
-            const res = await fetch('/api/v1/config');
-            const { googleClientId } = await res.json();
-            const container = document.getElementById('google-btn-container');
-            if (!googleClientId || googleClientId.includes('IL_TUO')) {
-                container.innerHTML = '<small style="color:#888">Google Login: aggiungi GOOGLE_CLIENT_ID nel file .env</small>';
-                return;
-            }
-            await new Promise(resolve => {
-                if (window.google?.accounts) return resolve();
-                const t = setInterval(() => { if (window.google?.accounts) { clearInterval(t); resolve(); } }, 100);
-            });
-            google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential, ux_mode: 'popup' });
-            google.accounts.id.renderButton(container, {
-                type: 'standard', shape: 'rectangular', theme: 'outline',
-                text: 'signin_with', size: 'large', width: 340,
-                locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
-            });
-        } catch (err) { console.error('Errore Google SSO:', err); }
-    }
-
-    initGoogleSSO();
-
-    // =========================================================
-    // TASK 3: Segnalazione — submit
-    // =========================================================
-    document.getElementById('seg-submit').addEventListener('click', async () => {
-        const errorEl   = document.getElementById('seg-error');
-        const successEl = document.getElementById('seg-success');
-        errorEl.textContent = successEl.textContent = '';
-
-        const id   = document.getElementById('seg-rastrelliera-id').value;
-        const lat  = parseFloat(document.getElementById('seg-lat').value);
-        const lng  = parseFloat(document.getElementById('seg-lng').value);
-        const tipo = document.getElementById('seg-tipo').value;
-        const note = document.getElementById('seg-note').value.trim();
-
-        try {
-            const res  = await fetch('/api/v1/segnalazioni', {
-                method: 'POST', headers: authHeaders(),
-                body: JSON.stringify({ rastrellieraId: parseInt(id), tipo, note, lat, lng })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-            successEl.textContent = '✅ Segnalazione inviata! Grazie per il tuo contributo.';
-            document.getElementById('seg-note').value = '';
-            setTimeout(() => closeModal(segnalazioneModal), 2000);
-        } catch (err) {
-            errorEl.textContent = '❌ ' + (err.message || 'Errore invio segnalazione');
-        }
+    I18n.onLanguageChange(() => {
+        applyFiltersAndSearch(false);
     });
 
 }); // fine DOMContentLoaded

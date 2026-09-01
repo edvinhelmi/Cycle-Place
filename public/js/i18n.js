@@ -47,13 +47,17 @@ const I18n = (function() {
     }
 
     /**
-     * Aggiorna la bandiera SVG (flag-icons)
+     * Aggiorna la bandiera SVG (flag-icons) e il testo visuale del selettore
      */
     function updateFlagIcon() {
         const flagIcon = document.getElementById('lang-flag-icon');
         if (flagIcon) {
             flagIcon.className = currentLang === 'en' ? 'fi fi-gb text-base rounded-xs shadow-xs pointer-events-none' :
                                 (currentLang === 'de' ? 'fi fi-de text-base rounded-xs shadow-xs pointer-events-none' : 'fi fi-it text-base rounded-xs shadow-xs pointer-events-none');
+        }
+        const selectedCode = document.getElementById('lang-selected-code');
+        if (selectedCode) {
+            selectedCode.textContent = currentLang.toUpperCase();
         }
     }
 
