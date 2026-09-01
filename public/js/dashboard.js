@@ -358,7 +358,7 @@ if (profileEditForm) {
 
             // Salva il nuovo token rigenerato
             if (data.token) {
-                saveToken(data.token);
+                localStorage.setItem(TOKEN_KEY, data.token);
             }
 
             // Aggiorna anagrafica a schermo
