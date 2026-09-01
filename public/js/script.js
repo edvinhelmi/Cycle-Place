@@ -682,6 +682,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Stato Navigazione Live Turn-by-Turn
     let isLiveNavigating        = false;
     let isFollowMode            = true;
+    let isProgrammaticMove      = false;
     let liveWatchId             = null;
     let routeSteps              = [];
     let currentStepIndex        = 0;
@@ -1096,8 +1097,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Se la navigazione live è attiva e abbiamo già le coordinate dell'utente, recentra all'istante!
         if (isLiveNavigating && lastUserCoords) {
             isFollowMode = true;
+            isProgrammaticMove = true;
             map.flyTo([lastUserCoords.lat, lastUserCoords.lng], 18, { animate: true, duration: 0.8 });
+            setTimeout(() => { isProgrammaticMove = false; }, 1000);
             updateTurnBanner(lastUserCoords.lat, lastUserCoords.lng);
+            const btnRecenter = document.getElementById('btn-recenter-nav');
+            if (btnRecenter) btnRecenter.classList.add('hidden');
             return;
         }
 
@@ -1913,7 +1918,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (isLiveNavigating) {
             if (isFollowMode) {
+                isProgrammaticMove = true;
                 map.panTo([lat, lng], { animate: true, duration: 0.8 });
+                setTimeout(() => { isProgrammaticMove = false; }, 1000);
             }
 
             // Verifica deviazione dal percorso (Off-route > 50m)
@@ -1952,10 +1959,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (lblToggle) lblToggle.textContent = tr('routing.stopLive') || 'Termina Navigazione';
         if (iconToggle) iconToggle.className = 'fa-solid fa-stop';
-        if (btnRecenter) btnRecenter.classList.add('hidden'); // Parte già centrato e in follow mode, appare solo se l'utente sposta la mappa
+        if (btnRecenter) btnRecenter.classList.add('hidden'); // Rimane nascosto perché la navigazione parte già centrata
 
         if (lastUserCoords) {
+            isProgrammaticMove = true;
             map.setView([lastUserCoords.lat, lastUserCoords.lng], 18, { animate: true });
+            setTimeout(() => { isProgrammaticMove = false; }, 1000);
             updateTurnBanner(lastUserCoords.lat, lastUserCoords.lng);
         }
 
@@ -2200,10 +2209,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnRecenterNav) {
         btnRecenterNav.addEventListener('click', () => {
             isFollowMode = true;
-            if (lastUserCoords) {
-                map.panTo([lastUserCoords.lat, lastUserCoords.lng], { animate: true });
-            }
             btnRecenterNav.classList.add('hidden');
+            if (lastUserCoords) {
+                isProgrammaticMove = true;
+                map.setView([lastUserCoords.lat, lastUserCoords.lng], 18, { animate: true });
+                setTimeout(() => { isProgrammaticMove = false; }, 1000);
+                updateTurnBanner(lastUserCoords.lat, lastUserCoords.lng);
+            }
         });
     }
 
@@ -2219,7 +2231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Se l'utente sposta manualmente la mappa durante la navigazione, sospende l'auto-follow
     const handleManualMapInterruption = () => {
-        if (isLiveNavigating) {
+        if (isLiveNavigating && !isProgrammaticMove) {
             isFollowMode = false;
             if (btnRecenterNav) btnRecenterNav.classList.remove('hidden');
         }
