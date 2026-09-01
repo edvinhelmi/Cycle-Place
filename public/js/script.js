@@ -97,7 +97,7 @@ async function loadUserPreferiti() {
     try {
         const res  = await fetch('/api/v1/user/preferiti', { headers: authHeaders() });
         const data = await res.json();
-        userFavoritiIds = new Set((data.preferiti || []).map(f => f.id));
+        userFavoritiIds = new Set((data.preferiti || []).map(f => Number(f.id)));
     } catch (e) { console.error('Errore caricamento preferiti:', e); }
 }
 
@@ -112,21 +112,21 @@ window.toggleFavorito = async function(id, tipologia, stalli, zona, lat, lng) {
         }
         return;
     }
-    const isFav = userFavoritiIds.has(id);
+    const numId = Number(id);
+    const isFav = userFavoritiIds.has(numId) || userFavoritiIds.has(id);
     try {
+        // 1. Aggiornamento ottimistico istantaneo dello stato
         if (isFav) {
-            await fetch(`/api/v1/user/preferiti/${id}`, { method: 'DELETE', headers: authHeaders() });
+            userFavoritiIds.delete(numId);
             userFavoritiIds.delete(id);
         } else {
-            await fetch('/api/v1/user/preferiti', {
-                method: 'POST', headers: authHeaders(),
-                body: JSON.stringify({ rastrellieraId: id, tipologia, stalli, zona, lat, lng })
-            });
-            userFavoritiIds.add(id);
+            userFavoritiIds.add(numId);
         }
+
+        // 2. Aggiornamento visivo immediato del pulsante nel popup
+        const isNowFav = userFavoritiIds.has(numId);
         const btn = document.getElementById(`fav-btn-${id}`);
         if (btn) {
-            const isNowFav = userFavoritiIds.has(id);
             const icon = isNowFav ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>';
             btn.innerHTML = `${icon} <span class="truncate">${isNowFav ? tr('popup.fav.remove') : tr('popup.fav.add')}</span>`;
             if (isNowFav) {
@@ -135,7 +135,51 @@ window.toggleFavorito = async function(id, tipologia, stalli, zona, lat, lng) {
                 btn.className = "popup-btn btn btn-sm btn-outline btn-error rounded-xl font-bold flex-1 min-w-0 text-xs px-2 shadow-xs whitespace-normal text-center leading-tight py-1.5 h-auto min-h-[2.4rem] flex items-center justify-center gap-1.5";
             }
         }
-        applyFiltersAndSearch(false);
+
+        // 3. Salva la posizione del popup attualmente aperto
+        const openPopup = map._popup;
+        let openLatLng = null;
+        if (openPopup && openPopup.isOpen()) {
+            openLatLng = openPopup.getLatLng();
+        }
+
+        // 4. Ridisegna istantaneamente tutti i marker sulla mappa per mostrare/togliere l'icona a cuore
+        if (currentSearchLocation && currentSearchLocation.query === currentSearchQuery) {
+            const showTrad      = document.getElementById('filter-tradizionali')?.checked ?? true;
+            const showBlocca    = document.getElementById('filter-bloccatelaio')?.checked ?? true;
+            const showPark      = document.getElementById('filter-parcheggi')?.checked ?? true;
+            const hidePiene     = document.getElementById('filter-piene')?.checked ?? false;
+            const soloPreferiti = document.getElementById('filter-preferiti')?.checked ?? false;
+            renderRadialSearch(currentSearchLocation.latLng, currentSearchLocation.displayName, showTrad, showBlocca, showPark, hidePiene, soloPreferiti);
+        } else {
+            await applyFiltersAndSearch(false);
+        }
+
+        // 5. Se il popup era aperto, riaprilo fluidamente sul nuovo marker corrispondente
+        if (openLatLng) {
+            let targetLayer = null;
+            [groupTradizionale, groupBloccatelaio, groupParcheggi].forEach(group => {
+                group.eachLayer(layer => {
+                    const lLatLng = layer.getLatLng ? layer.getLatLng() : null;
+                    if (lLatLng && Math.abs(lLatLng.lat - openLatLng.lat) < 0.00005 && Math.abs(lLatLng.lng - openLatLng.lng) < 0.00005) {
+                        targetLayer = layer;
+                    }
+                });
+            });
+            if (targetLayer) {
+                targetLayer.openPopup();
+            }
+        }
+
+        // 6. Persistenza asincrona sul backend
+        if (isFav) {
+            await fetch(`/api/v1/user/preferiti/${numId}`, { method: 'DELETE', headers: authHeaders() });
+        } else {
+            await fetch('/api/v1/user/preferiti', {
+                method: 'POST', headers: authHeaders(),
+                body: JSON.stringify({ rastrellieraId: numId, tipologia, stalli, zona, lat, lng })
+            });
+        }
     } catch (e) { console.error('Errore toggle preferito:', e); }
 };
 
@@ -807,7 +851,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pienaVisible = hidePiene ? !isPiena : true;
                 if (!typeVisible || !pienaVisible) return;
 
-                const isFav = userFavoritiIds.has(props.id);
+                const isFav = userFavoritiIds.has(Number(props.id));
                 if (soloPreferiti && !isFav) return;
 
                 const baseStile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
@@ -842,7 +886,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!showPark) return;
 
                 const parkId = feature.properties.id || 10001;
-                const isFav = userFavoritiIds.has(parkId);
+                const isFav = userFavoritiIds.has(Number(parkId));
                 if (soloPreferiti && !isFav) return;
 
                 const layer = isFav 
@@ -943,7 +987,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pienaVisible = hidePiene ? !isPiena : true;
                 if (!typeVisible || !pienaVisible) return;
 
-                const isFav = userFavoritiIds.has(props.id);
+                const isFav = userFavoritiIds.has(Number(props.id));
                 if (soloPreferiti && !isFav) return;
 
                 const baseStile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
@@ -980,7 +1024,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!showPark) return;
 
                 const parkId = props.id || 10001;
-                const isFav = userFavoritiIds.has(parkId);
+                const isFav = userFavoritiIds.has(Number(parkId));
                 if (soloPreferiti && !isFav) return;
                 
                 // Se è nei preferiti crea il marker con il cuore, altrimenti il solito cerchietto
@@ -1411,7 +1455,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function buildRastrellieraPopup(props, lat, lng) {
         const isBlocca = props.Tipo_generale === 'Rastr_bloccatelaio';
         const stalli   = props.n_posti ?? props.tot_bici ?? 'N/D';
-        const isFav    = userFavoritiIds.has(props.id);
+        const isFav    = userFavoritiIds.has(Number(props.id));
 
         // Calcolo e risoluzione telemetria IoT realistica
         let freeSlots = props.posti_liberi;
@@ -1544,7 +1588,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function buildParcheggioPopup(props, lat, lng) {
         const parkId = props.id || 10001;
-        const isFav = userFavoritiIds.has(parkId);
+        const isFav = userFavoritiIds.has(Number(parkId));
         const stalli = props.posti ?? 0;
         const parkName = (props.park || 'Parcheggio Protetto').replace(/'/g, "\\'");
         const viaName = (props.via || '').replace(/'/g, "\\'");
