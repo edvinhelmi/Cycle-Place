@@ -10,6 +10,7 @@
 .glass-popup,
 .popup-content,
 .dash-card,
+.stat-box,
 .leaflet-control-zoom {
     background: rgba(255, 255, 255, 0.56) !important;
     border-radius: 16px !important;
@@ -712,6 +713,14 @@
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: #ffffff;
+}
+
+#turn-banner-icon-box {
+    aspect-ratio: 1 / 1 !important;
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+    flex-shrink: 0 !important;
+    border-radius: 0.85rem !important;
 }
 
 @media (min-width: 769px) {

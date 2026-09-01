@@ -162,7 +162,7 @@
         <!-- Banner Istruzioni Turn-by-Turn (Navigazione Live in Alto) -->
         <div id="turn-by-turn-banner" class="turn-by-turn-banner hidden" aria-live="assertive">
             <div class="turn-banner-card glass-box-dark shadow-2xl p-3 sm:p-3.5 rounded-2xl flex items-center gap-3 border border-emerald-500/40">
-                <div id="turn-banner-icon-box" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 text-lg sm:text-xl shadow-md">
+                <div id="turn-banner-icon-box" class="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 text-lg sm:text-xl shadow-md">
                     <i id="turn-banner-icon" class="fa-solid fa-diamond-turn-right"></i>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -237,17 +237,17 @@
 
         <!-- Cruscotto Statistiche (Alta Leggibilità & Testi Completi) -->
         <div id="stats-dashboard" class="stats-dashboard flex items-center justify-center gap-2 sm:gap-4 pointer-events-none select-none z-[500]">
-            <div class="stat-box bg-white/95 backdrop-blur-[65px] rounded-2xl py-2 px-3 sm:py-2.5 sm:px-5 shadow-2xl border border-white/90 flex flex-col items-center justify-center min-w-[85px] sm:min-w-[125px] h-auto text-center">
+            <div class="stat-box glass-box py-2 px-3 sm:py-2.5 sm:px-5 flex flex-col items-center justify-center min-w-[85px] sm:min-w-[125px] h-auto text-center pointer-events-auto">
                 <span class="text-primary text-base sm:text-lg mb-0.5"><i class="fa-solid fa-bicycle"></i></span>
                 <span class="text-base sm:text-2xl font-black text-slate-900 leading-none mb-1" id="stat-rastrelliere">—</span>
                 <span class="text-[10px] sm:text-xs font-extrabold text-slate-700 tracking-tight whitespace-nowrap" data-i18n="stats.racks">Rastrelliere</span>
             </div>
-            <div class="stat-box bg-white/95 backdrop-blur-[65px] rounded-2xl py-2 px-3 sm:py-2.5 sm:px-5 shadow-2xl border border-white/90 flex flex-col items-center justify-center min-w-[85px] sm:min-w-[125px] h-auto text-center">
+            <div class="stat-box glass-box py-2 px-3 sm:py-2.5 sm:px-5 flex flex-col items-center justify-center min-w-[85px] sm:min-w-[125px] h-auto text-center pointer-events-auto">
                 <span class="text-secondary text-base sm:text-lg mb-0.5"><i class="fa-solid fa-square-parking"></i></span>
                 <span class="text-base sm:text-2xl font-black text-slate-900 leading-none mb-1" id="stat-parcheggi">—</span>
                 <span class="text-[10px] sm:text-xs font-extrabold text-slate-700 tracking-tight whitespace-nowrap" data-i18n="stats.protected">Parcheggi</span>
             </div>
-            <div class="stat-box bg-white/95 backdrop-blur-[65px] rounded-2xl py-2 px-3 sm:py-2.5 sm:px-5 shadow-2xl border border-white/90 flex flex-col items-center justify-center min-w-[85px] sm:min-w-[125px] h-auto text-center">
+            <div class="stat-box glass-box py-2 px-3 sm:py-2.5 sm:px-5 flex flex-col items-center justify-center min-w-[85px] sm:min-w-[125px] h-auto text-center pointer-events-auto">
                 <span class="text-accent text-base sm:text-lg mb-0.5"><i class="fa-solid fa-hashtag"></i></span>
                 <span class="text-base sm:text-2xl font-black text-slate-900 leading-none mb-1" id="stat-stalli">—</span>
                 <span class="text-[10px] sm:text-xs font-extrabold text-slate-700 tracking-tight whitespace-nowrap" data-i18n="stats.slots">Stalli totali</span>
