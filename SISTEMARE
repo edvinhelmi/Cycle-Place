@@ -14,8 +14,6 @@ senza meccanismo di refresh né blacklist per invalidare token pregressi.
 3. Gestione Profilo Utente 
 - (RF 3)Dati della Bicicletta assenti (RF 3.1, US 5):Requisito: Sezione nel profilo per salvare dati della propria bici 
 (marca, modello, colore, numero di telaio, descrizione). -> Codice: In dashboard.html e dashboard.js sono presenti solo i campi anagrafici di base.  
-- Modifica Dati e Password (RF 3.2, RF 3.3):Requisito: Possibilità di modificare dati personali, password e preferenze notifiche dal profilo.  
-Codice: La dashboard è in sola lettura per l'anagrafica (mancano form ed endpoint PUT/PATCH /api/v1/user/...).  
 - Cancellazione Account (RF 3.4):Requisito: Cancellazione definitiva dell'account e di tutti i dati personali associati (GDPR).  -> Codice: 
 Nessun endpoint o pulsante implementato.  
 - Opzione Anonimizzazione Recensioni (RF 3.5):Requisito: Toggle per pubblicare recensioni come "Utente" anonimo.  Codice: Assente.  
