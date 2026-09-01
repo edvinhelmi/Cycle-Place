@@ -1,11 +1,11 @@
 # Trento Bike Parking 🚲
 
 Trento Bike Parking è una Web Application interattiva e responsiva che mappa l'intera rete di rastrelliere e parcheggi sicuri (Bici Box) del Comune di Trento.
-Il progetto offre una mappa cartografica interattiva, funzioni di geolocalizzazione, un sistema di ricerca spaziale, e permette agli utenti (tramite account locale o Google OAuth) di salvare i propri parcheggi preferiti e inviare segnalazioni di guasti o problemi.
+Il progetto offre una mappa cartografica interattiva, funzioni di geolocalizzazione, navigazione live Turn-by-Turn in-app con guida vocale multilingua (IT/EN/DE), un sistema di ricerca spaziale, e permette agli utenti (tramite account locale o Google OAuth) di salvare i propri parcheggi preferiti e inviare segnalazioni di guasti o problemi.
 
 ## Tecnologie Utilizzate
-*   **Backend:** Node.js, Express, JSON Web Token (JWT)
-*   **Frontend:** HTML5, JavaScript (Vanilla), Tailwind CSS, DaisyUI
+*   **Backend:** Node.js, Express, JSON Web Token (JWT), OpenRouteService Proxy
+*   **Frontend:** HTML5, JavaScript (Vanilla), Tailwind CSS, DaisyUI, Web Speech API (TTS)
 *   **Mappa & Dati:** Leaflet.js, OpenStreetMap, GeoJSON, proj4
 
 ---
@@ -36,7 +36,7 @@ Scegli le istruzioni corrispondenti al tuo sistema operativo:
 4. **Apri l'app:**
    Apri il tuo browser preferito e vai all'indirizzo: **`http://localhost:3000`**
 
-*(Nota: il progetto è configurato in modalità Plug&Play. Non è necessario configurare chiavi API o file .env per testare il login tramite Google in locale).*
+*(Nota: il progetto è configurato in modalità Plug&Play. Non è necessario configurare alcun file `.env` o chiavi API per testare tutte le funzionalità — inclusi percorsi bici/pedonali, navigazione live e login Google — in locale).*
 
 ---
 
