@@ -16,13 +16,33 @@ const SALT_ROUNDS = 10;
 
 // --- Configurazione ---
 const app  = express();
-const PORT = process.env.PORT || 3000;
-const JWT_SECRET       = process.env.SUPER_SECRET || 'segreto_universitario_trento_bike_parking';
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '455956234516-62c55ghdcsl2tffohcancm7is467jgda.apps.googleusercontent.com';
 
-app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// =======================================================
+// RATE LIMITERS (RNF 2.5)
+// =======================================================
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Troppi tentativi di accesso. Riprova tra 15 minuti.' }
+});
+
+const segnalazioniLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Hai inviato troppe segnalazioni. Attendi qualche minuto prima di riprovare.' }
+});
+
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET       = process.env.SUPER_SECRET || 'segreto_universitario_cycle_place';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '455956234516-62c55ghdcsl2tffohcancm7is467jgda.apps.googleusercontent.com';
 
 // --- Proiezione EPSG:25832 → WGS84 ---
 proj4.defs('EPSG:25832', '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
@@ -232,7 +252,7 @@ app.post('/api/v1/register', (req, res) => {
     });
 });
 
-app.post('/api/v1/login', (req, res) => {
+app.post('/api/v1/login', authLimiter, (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ error: 'Email e password sono obbligatorie' });
@@ -497,7 +517,7 @@ app.delete('/api/v1/user/account', tokenChecker, (req, res) => {
 // API: Segnalazioni (protette da JWT)
 // =======================================================
 
-app.post('/api/v1/segnalazioni', tokenChecker, (req, res) => {
+app.post('/api/v1/segnalazioni', segnalazioniLimiter, tokenChecker, (req, res) => {
     const { rastrellieraId, tipo, note, lat, lng } = req.body;
     if (!rastrellieraId || !tipo)
         return res.status(400).json({ error: 'rastrellieraId e tipo sono obbligatori' });
@@ -537,6 +557,6 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`\n🚲 Trento Bike Parking → http://localhost:${PORT}`);
+    console.log(`\n🚲 Cycle Place → http://localhost:${PORT}`);
     console.log(`   Google SSO: ${GOOGLE_CLIENT_ID ? '✅ Configurato' : '⚠️  Non configurato'}`);
 });
