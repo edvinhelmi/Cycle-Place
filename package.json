@@ -1,7 +1,7 @@
 {
-  "name": "trento_bike_parking",
+  "name": "cycle_place",
   "version": "1.0.0",
-  "description": "Trento Bike Parking - Mappa interattiva delle rastrelliere e parcheggi protetti di Trento",
+  "description": "Cycle Place - Mappa interattiva delle rastrelliere e parcheggi protetti di Trento",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
