@@ -10,13 +10,13 @@
       "savedAt": "2026-08-30T09:23:44.849Z"
     },
     {
-      "id": 302,
-      "tipologia": "Rastr_tradizionale",
-      "stalli": 7,
-      "zona": "S. GIUSEPPE_S. CHIARA",
-      "lat": 46.05888298305331,
-      "lng": 11.124407070944253,
-      "savedAt": "2026-08-31T11:34:37.028Z"
+      "id": 524,
+      "tipologia": "Rastr_bloccatelaio",
+      "stalli": 6,
+      "zona": "ARGENTARIO",
+      "lat": 46.07643815001698,
+      "lng": 11.141677305425826,
+      "savedAt": "2026-08-31T15:31:40.377Z"
     }
   ],
   "117827982692808573140": [
@@ -37,6 +37,15 @@
       "lat": 46.07288835191425,
       "lng": 11.12314846529625,
       "savedAt": "2026-08-30T21:21:59.655Z"
+    },
+    {
+      "id": 420,
+      "tipologia": "Rastr_bloccatelaio",
+      "stalli": 8,
+      "zona": "COGNOLA",
+      "lat": 46.07321320916661,
+      "lng": 11.149899287432948,
+      "savedAt": "2026-09-01T13:49:54.981Z"
     }
   ]
 }

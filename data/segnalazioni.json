@@ -70,5 +70,17 @@
     "lng": 11.149899287432948,
     "timestamp": "2026-08-31T11:02:51.646Z",
     "stato": "inviata"
+  },
+  {
+    "id": "seg_1788190327005",
+    "userId": "1788080000225",
+    "userEmail": "ciao",
+    "rastrellieraId": 420,
+    "tipo": "rastrelliera_piena",
+    "note": "huhu",
+    "lat": 46.07321320916661,
+    "lng": 11.149899287432948,
+    "timestamp": "2026-08-31T15:32:07.005Z",
+    "stato": "inviata"
   }
 ]
