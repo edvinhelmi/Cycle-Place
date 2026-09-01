@@ -558,6 +558,68 @@ app.get('/api/v1/segnalazioni/user', tokenChecker, (req, res) => {
     });
 });
 
+// =======================================================
+// API: Routing In-App con OpenRouteService (RF 3.4)
+// =======================================================
+app.get('/api/v1/routing', async (req, res) => {
+    const { startLat, startLng, endLat, endLng, profile } = req.query;
+
+    if (!startLat || !startLng || !endLat || !endLng) {
+        return res.status(400).json({ error: 'Parametri startLat, startLng, endLat, endLng sono obbligatori' });
+    }
+
+    const sLat = parseFloat(startLat);
+    const sLng = parseFloat(startLng);
+    const eLat = parseFloat(endLat);
+    const eLng = parseFloat(endLng);
+
+    if (isNaN(sLat) || isNaN(sLng) || isNaN(eLat) || isNaN(eLng)) {
+        return res.status(400).json({ error: 'Coordinate fornite non valide' });
+    }
+
+    // Profili consentiti: cycling-regular (default) o foot-walking
+    const validProfiles = ['cycling-regular', 'foot-walking', 'driving-car'];
+    const chosenProfile = validProfiles.includes(profile) ? profile : 'cycling-regular';
+
+    const apiKey = process.env.ORS_API_KEY ? process.env.ORS_API_KEY.trim() : '';
+    if (!apiKey) {
+        return res.status(503).json({
+            error: 'OpenRouteService API key non configurata sul server. Aggiungere ORS_API_KEY nel file .env.'
+        });
+    }
+
+    try {
+        const orsUrl = `https://api.openrouteservice.org/v2/directions/${chosenProfile}/geojson`;
+        const response = await fetch(orsUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': apiKey
+            },
+            body: JSON.stringify({
+                coordinates: [
+                    [sLng, sLat],
+                    [eLng, eLat]
+                ]
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('[Routing Error ORS]', data);
+            return res.status(response.status).json({
+                error: data.error?.message || 'Errore durante il calcolo del percorso da OpenRouteService'
+            });
+        }
+
+        res.status(200).json(data);
+    } catch (err) {
+        console.error('[Routing Server Exception]', err);
+        res.status(500).json({ error: 'Errore interno durante la richiesta di percorso' });
+    }
+});
+
 // SPA fallback
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));

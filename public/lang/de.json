@@ -116,5 +116,19 @@
   "tipo.danno_strutturale": "Strukturschaden",
   "tipo.rastrelliera_piena": "Ständer ist voll",
   "tipo.vandalismo": "Vandalismus",
-  "tipo.altro": "Sonstiges"
+  "tipo.altro": "Sonstiges",
+
+  "routing.title": "Empfohlene Route",
+  "routing.directions": "Route berechnen",
+  "routing.distance": "Entfernung",
+  "routing.duration": "Geschätzte Zeit",
+  "routing.modeBike": "Mit dem Rad",
+  "routing.modeWalk": "Zu Fuß",
+  "routing.calculating": "Route wird berechnet...",
+  "routing.error": "Route konnte nicht berechnet werden. Überprüfen Sie Standort oder API-Schlüssel.",
+  "routing.geoRequired": "GPS-Standortberechtigung ist erforderlich, um die Route zu berechnen.",
+  "routing.min": "Min.",
+  "routing.hours": "Std.",
+  "routing.meters": "m",
+  "routing.km": "km"
 }

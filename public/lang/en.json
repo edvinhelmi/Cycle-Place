@@ -116,5 +116,19 @@
   "tipo.danno_strutturale": "Structural damage",
   "tipo.rastrelliera_piena": "Rack is full",
   "tipo.vandalismo": "Vandalism",
-  "tipo.altro": "Other"
+  "tipo.altro": "Other",
+
+  "routing.title": "Suggested route",
+  "routing.directions": "Calculate route",
+  "routing.distance": "Distance",
+  "routing.duration": "Estimated time",
+  "routing.modeBike": "By bike",
+  "routing.modeWalk": "Walking",
+  "routing.calculating": "Calculating route...",
+  "routing.error": "Unable to calculate route. Check your location or API key.",
+  "routing.geoRequired": "GPS geolocation permission is required to calculate the route.",
+  "routing.min": "min",
+  "routing.hours": "h",
+  "routing.meters": "m",
+  "routing.km": "km"
 }

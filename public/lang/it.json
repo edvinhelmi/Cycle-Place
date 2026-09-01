@@ -116,5 +116,19 @@
   "tipo.danno_strutturale": "Danno strutturale",
   "tipo.rastrelliera_piena": "Rastrelliera piena",
   "tipo.vandalismo": "Vandalismo",
-  "tipo.altro": "Altro"
+  "tipo.altro": "Altro",
+
+  "routing.title": "Percorso consigliato",
+  "routing.directions": "Calcola percorso",
+  "routing.distance": "Distanza",
+  "routing.duration": "Tempo stimato",
+  "routing.modeBike": "In bici",
+  "routing.modeWalk": "A piedi",
+  "routing.calculating": "Calcolo percorso...",
+  "routing.error": "Impossibile calcolare il percorso. Verifica la posizione o la chiave API.",
+  "routing.geoRequired": "È necessario consentire la posizione GPS per calcolare il percorso.",
+  "routing.min": "min",
+  "routing.hours": "h",
+  "routing.meters": "m",
+  "routing.km": "km"
 }

@@ -671,6 +671,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Layer per la posizione GPS dell'utente (User Story 1)
     let userLocationMarker = null;
     let userAccuracyCircle = null;
+    let lastUserCoords     = null; // { lat, lng }
+
+    // Layer per il Routing In-App (OpenRouteService)
+    let currentRouteLayer       = null;
+    let currentRouteCasingLayer = null;
+    let currentNavDestination   = null; // { lat, lng, name }
+    let currentNavMode          = 'cycling-regular'; // 'cycling-regular' | 'foot-walking'
 
     const groupSearchRadius = L.layerGroup().addTo(map);
     const groupTradizionale = L.layerGroup().addTo(map);
@@ -1101,6 +1108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
                 const accuracy = position.coords.accuracy || 30; // raggio in metri
+                lastUserCoords = { lat, lng };
 
                 // Rimuovi eventuali indicatori precedenti
                 if (userLocationMarker) map.removeLayer(userLocationMarker);
@@ -1409,14 +1417,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         </button>`;
 
 
-        // Link Google Maps - Indicazioni stradali in bici
-        const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=bicycling`;
+        // Calcola Percorso In-App con OpenRouteService
+        const rackTitle = (props.zona || props.Tipo_generale || 'Rastrelliera').replace(/'/g, "\\'");
         const dirBtn = `
-            <a class="popup-btn btn btn-sm btn-primary text-white font-extrabold rounded-xl w-full gap-2 shadow-md mt-2 flex items-center justify-center text-xs py-2 h-auto min-h-[2.4rem] tracking-wide"
-                href="${gmapsUrl}"
-                target="_blank" rel="noopener noreferrer">
-                <i class="fa-solid fa-diamond-turn-right text-white"></i> <span class="text-white">${tr('popup.directions')}</span>
-            </a>`;
+            <button class="popup-btn btn btn-sm btn-primary text-white font-extrabold rounded-xl w-full gap-2 shadow-md mt-2 flex items-center justify-center text-xs py-2 h-auto min-h-[2.4rem] tracking-wide"
+                onclick="window.startNavigation(${lat}, ${lng}, '${rackTitle}')">
+                <i class="fa-solid fa-route text-white"></i> <span class="text-white">${tr('routing.directions') || tr('popup.directions')}</span>
+            </button>`;
 
         return `
             <div class="popup-content card glass-popup rounded-2xl p-4 text-slate-800 space-y-3">
@@ -1512,14 +1519,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const note = props.note ? `<div class="popup-note alert bg-info/10 border border-info/20 text-info font-medium text-xs rounded-xl p-2.5 flex items-center gap-2 mb-2"><i class="fa-solid fa-circle-info"></i> <span>${props.note}</span></div>` : '';
 
-        // Link Google Maps - Indicazioni stradali in bici
-        const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=bicycling`;
+        // Calcola Percorso In-App con OpenRouteService
         const dirBtn = `
-            <a class="popup-btn btn btn-sm btn-primary text-white font-extrabold rounded-xl w-full gap-2 shadow-md mt-2 flex items-center justify-center text-xs py-2 h-auto min-h-[2.4rem] tracking-wide"
-                href="${gmapsUrl}"
-                target="_blank" rel="noopener noreferrer">
-                <i class="fa-solid fa-diamond-turn-right text-white"></i> <span class="text-white">${tr('popup.directions')}</span>
-            </a>`;
+            <button class="popup-btn btn btn-sm btn-primary text-white font-extrabold rounded-xl w-full gap-2 shadow-md mt-2 flex items-center justify-center text-xs py-2 h-auto min-h-[2.4rem] tracking-wide"
+                onclick="window.startNavigation(${lat}, ${lng}, '${parkName}')">
+                <i class="fa-solid fa-route text-white"></i> <span class="text-white">${tr('routing.directions') || tr('popup.directions')}</span>
+            </button>`;
 
         return `
             <div class="popup-content card glass-popup rounded-2xl p-4 text-slate-800 space-y-3">
@@ -1558,8 +1563,243 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>`;
     }
 
+    // =========================================================
+    // ROUTING IN-APP (OpenRouteService Proxy)
+    // =========================================================
 
+    function updateNavUIState(profile) {
+        const btnBike  = document.getElementById('btn-nav-mode-bike');
+        const btnWalk  = document.getElementById('btn-nav-mode-walk');
+        const iconEl   = document.getElementById('nav-mode-icon');
+        const avatarEl = document.getElementById('nav-mode-avatar');
 
+        if (profile === 'cycling-regular') {
+            if (btnBike) {
+                btnBike.className = 'btn btn-xs flex-1 rounded-lg font-bold border-none bg-primary text-white shadow-xs gap-1.5 transition-all';
+            }
+            if (btnWalk) {
+                btnWalk.className = 'btn btn-xs flex-1 rounded-lg font-bold border-none btn-ghost text-slate-600 hover:text-slate-900 gap-1.5 transition-all';
+            }
+            if (iconEl) iconEl.className = 'fa-solid fa-bicycle';
+            if (avatarEl) avatarEl.className = 'w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-sm';
+        } else {
+            if (btnWalk) {
+                btnWalk.className = 'btn btn-xs flex-1 rounded-lg font-bold border-none bg-emerald-600 text-white shadow-xs gap-1.5 transition-all';
+            }
+            if (btnBike) {
+                btnBike.className = 'btn btn-xs flex-1 rounded-lg font-bold border-none btn-ghost text-slate-600 hover:text-slate-900 gap-1.5 transition-all';
+            }
+            if (iconEl) iconEl.className = 'fa-solid fa-person-walking';
+            if (avatarEl) avatarEl.className = 'w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 text-sm';
+        }
+    }
+
+    async function calculateAndRenderRoute(startLat, startLng, endLat, endLng, profile = 'cycling-regular') {
+        const loadingOverlay = document.getElementById('nav-loading-overlay');
+        const distEl         = document.getElementById('nav-stat-distance');
+        const durEl          = document.getElementById('nav-stat-duration');
+
+        if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+        updateNavUIState(profile);
+
+        try {
+            const url = `/api/v1/routing?startLat=${startLat}&startLng=${startLng}&endLat=${endLat}&endLng=${endLng}&profile=${profile}`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || tr('routing.error'));
+            }
+
+            if (!data.features || data.features.length === 0) {
+                throw new Error(tr('routing.error'));
+            }
+
+            const feature = data.features[0];
+            const summary = feature.properties?.summary || {};
+            const distMeters = summary.distance || 0;
+            const durSeconds = summary.duration || 0;
+
+            // Formattazione Distanza
+            if (distEl) {
+                if (distMeters >= 1000) {
+                    distEl.textContent = `${(distMeters / 1000).toFixed(1)} ${tr('routing.km') || 'km'}`;
+                } else {
+                    distEl.textContent = `${Math.round(distMeters)} ${tr('routing.meters') || 'm'}`;
+                }
+            }
+
+            // Formattazione Durata
+            if (durEl) {
+                const totalMinutes = Math.round(durSeconds / 60);
+                if (totalMinutes >= 60) {
+                    const h = Math.floor(totalMinutes / 60);
+                    const m = totalMinutes % 60;
+                    durEl.textContent = `${h} ${tr('routing.hours') || 'h'} ${m} ${tr('routing.min') || 'min'}`;
+                } else {
+                    durEl.textContent = `${Math.max(1, totalMinutes)} ${tr('routing.min') || 'min'}`;
+                }
+            }
+
+            // Pulizia layer precedenti
+            if (currentRouteCasingLayer) map.removeLayer(currentRouteCasingLayer);
+            if (currentRouteLayer) map.removeLayer(currentRouteLayer);
+
+            const isBike = (profile === 'cycling-regular');
+
+            // Casing Layer (ombra/bordo morbido)
+            currentRouteCasingLayer = L.geoJSON(feature, {
+                style: {
+                    color: isBike ? '#1e3a8a' : '#064e3b',
+                    weight: 8,
+                    opacity: 0.35,
+                    lineCap: 'round',
+                    lineJoin: 'round',
+                    interactive: false
+                }
+            }).addTo(map);
+
+            // Layer Percorso principale
+            currentRouteLayer = L.geoJSON(feature, {
+                style: {
+                    color: isBike ? '#2563eb' : '#059669',
+                    weight: 5,
+                    opacity: 0.95,
+                    dashArray: isBike ? null : '6, 8',
+                    lineCap: 'round',
+                    lineJoin: 'round',
+                    interactive: true
+                }
+            }).addTo(map);
+
+            // Inquadra l'intero tragitto con animazione
+            map.fitBounds(currentRouteLayer.getBounds(), {
+                padding: [60, 60],
+                maxZoom: 17,
+                animate: true,
+                duration: 1.2
+            });
+
+        } catch (err) {
+            console.error('[Routing Error]', err);
+            alert(err.message || tr('routing.error'));
+        } finally {
+            if (loadingOverlay) loadingOverlay.classList.add('hidden');
+        }
+    }
+
+    function closeRouting() {
+        if (currentRouteCasingLayer) {
+            map.removeLayer(currentRouteCasingLayer);
+            currentRouteCasingLayer = null;
+        }
+        if (currentRouteLayer) {
+            map.removeLayer(currentRouteLayer);
+            currentRouteLayer = null;
+        }
+        currentNavDestination = null;
+        const panel = document.getElementById('routing-panel');
+        if (panel) panel.classList.add('hidden');
+    }
+
+    window.startNavigation = function(destLat, destLng, destName) {
+        currentNavDestination = { lat: destLat, lng: destLng, name: destName };
+        const panel = document.getElementById('routing-panel');
+        const titleEl = document.getElementById('nav-destination-title');
+        const distEl  = document.getElementById('nav-stat-distance');
+        const durEl   = document.getElementById('nav-stat-duration');
+
+        if (titleEl) titleEl.textContent = destName || tr('routing.title');
+        if (distEl)  distEl.textContent = '--';
+        if (durEl)   durEl.textContent = '--';
+        if (panel)   panel.classList.remove('hidden');
+
+        map.closePopup();
+
+        if (lastUserCoords) {
+            calculateAndRenderRoute(lastUserCoords.lat, lastUserCoords.lng, destLat, destLng, currentNavMode);
+        } else {
+            if (!navigator.geolocation) {
+                if (panel) panel.classList.add('hidden');
+                alert(tr('geo.notSupported') || 'Geolocalizzazione non supportata');
+                return;
+            }
+
+            const loadingOverlay = document.getElementById('nav-loading-overlay');
+            if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    lastUserCoords = { lat, lng };
+
+                    // Aggiorna marker utente
+                    if (userLocationMarker) map.removeLayer(userLocationMarker);
+                    if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
+
+                    userAccuracyCircle = L.circle([lat, lng], {
+                        radius: Math.min(pos.coords.accuracy || 30, 400),
+                        color: '#1a73e8',
+                        fillColor: '#1a73e8',
+                        fillOpacity: 0.15,
+                        weight: 1.5,
+                        interactive: false
+                    }).addTo(map);
+
+                    userLocationMarker = L.circleMarker([lat, lng], {
+                        radius: 9,
+                        fillColor: '#1a73e8',
+                        color: '#ffffff',
+                        weight: 3,
+                        opacity: 1,
+                        fillOpacity: 1
+                    }).addTo(map);
+
+                    calculateAndRenderRoute(lat, lng, destLat, destLng, currentNavMode);
+                },
+                (err) => {
+                    if (loadingOverlay) loadingOverlay.classList.add('hidden');
+                    if (panel) panel.classList.add('hidden');
+                    let errMsg = tr('routing.geoRequired') || tr('geo.errorUnavailable');
+                    if (err.code === err.PERMISSION_DENIED) {
+                        errMsg = tr('geo.errorPermission');
+                    }
+                    alert(errMsg);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+    };
+
+    // Listener Pannello Routing
+    const btnCloseRouting = document.getElementById('btn-close-routing');
+    const btnNavBike      = document.getElementById('btn-nav-mode-bike');
+    const btnNavWalk      = document.getElementById('btn-nav-mode-walk');
+
+    if (btnCloseRouting) {
+        btnCloseRouting.addEventListener('click', closeRouting);
+    }
+
+    if (btnNavBike) {
+        btnNavBike.addEventListener('click', () => {
+            if (currentNavMode === 'cycling-regular') return;
+            currentNavMode = 'cycling-regular';
+            if (currentNavDestination && lastUserCoords) {
+                calculateAndRenderRoute(lastUserCoords.lat, lastUserCoords.lng, currentNavDestination.lat, currentNavDestination.lng, currentNavMode);
+            }
+        });
+    }
+
+    if (btnNavWalk) {
+        btnNavWalk.addEventListener('click', () => {
+            if (currentNavMode === 'foot-walking') return;
+            currentNavMode = 'foot-walking';
+            if (currentNavDestination && lastUserCoords) {
+                calculateAndRenderRoute(lastUserCoords.lat, lastUserCoords.lng, currentNavDestination.lat, currentNavDestination.lng, currentNavMode);
+            }
+        });
+    }
 
     await loadMapData();
     I18n.onLanguageChange(() => {

@@ -147,6 +147,52 @@
             </div>
         </div>
 
+        <!-- Pannello di Navigazione Fluttuante (In-App Routing) -->
+        <div id="routing-panel" class="routing-panel card glass-box shadow-2xl p-3.5 rounded-2xl hidden" aria-live="polite">
+            <div class="flex items-center justify-between gap-3 border-b border-base-200/80 pb-2 mb-2.5">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span id="nav-mode-avatar" class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-sm">
+                        <i id="nav-mode-icon" class="fa-solid fa-bicycle"></i>
+                    </span>
+                    <div class="min-w-0">
+                        <h4 id="nav-destination-title" class="font-bold text-xs sm:text-sm text-slate-900 truncate max-w-[170px] sm:max-w-[210px]">Destinazione</h4>
+                        <div class="text-[11px] text-slate-500 font-medium" data-i18n="routing.title">Percorso consigliato</div>
+                    </div>
+                </div>
+                <button id="btn-close-routing" class="btn btn-ghost btn-circle btn-xs text-slate-500 hover:text-slate-900 hover:bg-base-200/60 transition-colors" title="Chiudi percorso" aria-label="Chiudi percorso">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Stats: Distanza & Durata -->
+            <div class="grid grid-cols-2 gap-2 mb-2.5">
+                <div class="bg-base-200/60 rounded-xl p-2 text-center border border-base-200/80">
+                    <span class="text-[10px] uppercase font-bold text-slate-500 block leading-tight mb-0.5" data-i18n="routing.distance">Distanza</span>
+                    <span id="nav-stat-distance" class="text-sm sm:text-base font-black text-primary">--</span>
+                </div>
+                <div class="bg-base-200/60 rounded-xl p-2 text-center border border-base-200/80">
+                    <span class="text-[10px] uppercase font-bold text-slate-500 block leading-tight mb-0.5" data-i18n="routing.duration">Tempo stimato</span>
+                    <span id="nav-stat-duration" class="text-sm sm:text-base font-black text-slate-800">--</span>
+                </div>
+            </div>
+
+            <!-- Switch Modalità: Bici / A piedi -->
+            <div class="flex items-center justify-center gap-1 bg-base-200/80 p-1 rounded-xl border border-base-200/80">
+                <button id="btn-nav-mode-bike" class="btn btn-xs flex-1 rounded-lg font-bold border-none bg-primary text-white shadow-xs gap-1.5 transition-all">
+                    <i class="fa-solid fa-bicycle text-xs"></i> <span data-i18n="routing.modeBike">In bici</span>
+                </button>
+                <button id="btn-nav-mode-walk" class="btn btn-xs flex-1 rounded-lg font-bold border-none btn-ghost text-slate-600 hover:text-slate-900 gap-1.5 transition-all">
+                    <i class="fa-solid fa-person-walking text-xs"></i> <span data-i18n="routing.modeWalk">A piedi</span>
+                </button>
+            </div>
+
+            <!-- Overlay di Caricamento Percorso -->
+            <div id="nav-loading-overlay" class="hidden absolute inset-0 bg-white/90 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center gap-1.5 text-xs font-bold text-slate-800 z-20">
+                <span class="loading loading-spinner loading-md text-primary"></span>
+                <span data-i18n="routing.calculating">Calcolo percorso...</span>
+            </div>
+        </div>
+
         <!-- Cruscotto Statistiche (Alta Leggibilità & Testi Completi) -->
         <div id="stats-dashboard" class="stats-dashboard flex items-center justify-center gap-2 sm:gap-4 pointer-events-none select-none z-[500]">
             <div class="stat-box bg-white/95 backdrop-blur-[65px] rounded-2xl py-2 px-3 sm:py-2.5 sm:px-5 shadow-2xl border border-white/90 flex flex-col items-center justify-center min-w-[85px] sm:min-w-[125px] h-auto text-center">
