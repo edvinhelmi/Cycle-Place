@@ -55,7 +55,7 @@
   "auth.errSurname": "Il cognome deve contenere almeno 2 caratteri",
   "auth.errEmail": "Inserisci un indirizzo email valido",
   "auth.passwordHint": "Min. 8 caratteri, 1 maiuscola, 1 numero e 1 speciale",
-  "auth.errPasswordRequirements": "La password deve contenere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale"
+  "auth.errPasswordRequirements": "La password deve contenere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale",
   "auth.errPasswordMismatch": "Le password non coincidono",
   "auth.errEmptyFields": "Compila tutti i campi obbligatori",
   "auth.successRegister": "Registrazione completata! Ora puoi effettuare il login.",
