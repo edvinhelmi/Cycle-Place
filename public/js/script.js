@@ -641,19 +641,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         tradizionale: { radius: 7,  fillColor: '#2980b9', color: '#1a5276', weight: 1.5, fillOpacity: 0.9  },
         bloccatelaio: { radius: 8,  fillColor: '#e67e22', color: '#a04000', weight: 1.5, fillOpacity: 0.9  },
         piena:        { radius: 7,  fillColor: '#c0392b', color: '#7b241c', weight: 1.5, fillOpacity: 0.9  },
-        parcheggio:   { radius: 10, fillColor: '#27ae60', color: '#1a7a40', weight: 2,   fillOpacity: 0.95 },
-        preferito:    { radius: 9,  fillColor: '#e11d48', color: '#ffffff', weight: 2.5, fillOpacity: 1.0  }
+        parcheggio:   { radius: 10, fillColor: '#27ae60', color: '#1a7a40', weight: 2,   fillOpacity: 0.95 }
     };
 
     const favMarkerIcon = L.divIcon({
         className: 'custom-fav-heart-icon',
-        html: `<div style="display:flex; align-items:center; justify-content:center; width:24px; height:24px;">
-                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="#ff0033" stroke="#7a0014" stroke-width="1.8" stroke-linejoin="round" style="filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));">
-                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                 </svg>
+        html: `<div class="w-6 h-6 rounded-full bg-[#e11d48] text-white flex items-center justify-center shadow-md border-2 border-white text-[11px] leading-none transition-transform hover:scale-110">
+                 <i class="fa-solid fa-heart"></i>
                </div>`,
         iconSize: [24, 24],
-        iconAnchor: [12, 12] // 12 è la metà esatta del box 24x24
+        iconAnchor: [12, 12]
     });
 
     const mapErrorBanner = document.getElementById('map-error-banner');
@@ -765,7 +762,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (feedbackTimeout) clearTimeout(feedbackTimeout);
     }
 
-    function renderRadialSearch(searchLatLng, placeName, showTrad, showBlocca, showPark, hidePiene) {
+    function renderRadialSearch(searchLatLng, placeName, showTrad, showBlocca, showPark, hidePiene, soloPreferiti = false) {
         groupTradizionale.clearLayers();
         groupBloccatelaio.clearLayers();
         groupParcheggi.clearLayers();
@@ -792,9 +789,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!typeVisible || !pienaVisible) return;
 
                 const isFav = userFavoritiIds.has(props.id);
+                if (soloPreferiti && !isFav) return;
+
                 const baseStile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
-                const stile = isFav ? STILI.preferito : baseStile;
-                const layer = L.circleMarker(latlng, stile);
+                const layer = isFav 
+                    ? L.marker(latlng, { icon: favMarkerIcon }) 
+                    : L.circleMarker(latlng, baseStile);
                 layer.bindPopup(() => buildRastrellieraPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
                     minWidth: 260,
@@ -824,8 +824,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const parkId = feature.properties.id || 10001;
                 const isFav = userFavoritiIds.has(parkId);
-                const stile = isFav ? STILI.preferito : STILI.parcheggio;
-                const layer = L.circleMarker(latlng, stile);
+                if (soloPreferiti && !isFav) return;
+
+                const layer = isFav 
+                    ? L.marker(latlng, { icon: favMarkerIcon }) 
+                    : L.circleMarker(latlng, STILI.parcheggio);
                 layer.bindPopup(() => buildParcheggioPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
                     minWidth: 260,
@@ -883,10 +886,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function applyFiltersAndSearch(isExplicitSearch = false) {
-        const showTrad   = document.getElementById('filter-tradizionali')?.checked ?? true;
-        const showBlocca = document.getElementById('filter-bloccatelaio')?.checked ?? true;
-        const showPark   = document.getElementById('filter-parcheggi')?.checked ?? true;
-        const hidePiene  = document.getElementById('filter-piene')?.checked ?? false;
+        const showTrad      = document.getElementById('filter-tradizionali')?.checked ?? true;
+        const showBlocca    = document.getElementById('filter-bloccatelaio')?.checked ?? true;
+        const showPark      = document.getElementById('filter-parcheggi')?.checked ?? true;
+        const hidePiene     = document.getElementById('filter-piene')?.checked ?? false;
+        const soloPreferiti = document.getElementById('filter-preferiti')?.checked ?? false;
 
         // Pulisci i layer attuali per aggiornare la mappa
         groupTradizionale.clearLayers();
@@ -920,11 +924,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pienaVisible = hidePiene ? !isPiena : true;
                 if (!typeVisible || !pienaVisible) return;
 
-                // Stile marker:
-                // - Bloccatelaio piena (0 posti) -> STILI.piena (ROSSO)
-                // - Bloccatelaio con posti liberi -> STILI.bloccatelaio (ARANCIONE)
-                // - Tradizionale -> SEMPRE STILI.tradizionale (BLU)
                 const isFav = userFavoritiIds.has(props.id);
+                if (soloPreferiti && !isFav) return;
+
                 const baseStile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
                 
                 // Se è nei preferiti crea il marker con il cuore, altrimenti il solito cerchietto
@@ -960,6 +962,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const parkId = props.id || 10001;
                 const isFav = userFavoritiIds.has(parkId);
+                if (soloPreferiti && !isFav) return;
                 
                 // Se è nei preferiti crea il marker con il cuore, altrimenti il solito cerchietto
                 const layer = isFav 
@@ -1030,7 +1033,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     currentSearchLocation = { latLng: searchLatLng, displayName: placeName, query: currentSearchQuery };
 
-                    renderRadialSearch(searchLatLng, placeName, showTrad, showBlocca, showPark, hidePiene);
+                    renderRadialSearch(searchLatLng, placeName, showTrad, showBlocca, showPark, hidePiene, soloPreferiti);
                 } catch (err) {
                     console.error('[Nominatim error]', err);
                     showSearchFeedback(tr('search.noResults'), true);
@@ -1038,7 +1041,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     aggiornaStatistiche(visibleRastrelliere, visibleParcheggi);
                 }
             } else if (currentSearchLocation && currentSearchLocation.query === currentSearchQuery) {
-                renderRadialSearch(currentSearchLocation.latLng, currentSearchLocation.displayName, showTrad, showBlocca, showPark, hidePiene);
+                renderRadialSearch(currentSearchLocation.latLng, currentSearchLocation.displayName, showTrad, showBlocca, showPark, hidePiene, soloPreferiti);
             } else {
                 updateFilterBadge();
                 aggiornaStatistiche(visibleRastrelliere, visibleParcheggi);
@@ -1053,13 +1056,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     function updateFilterBadge() {
-        const showTrad   = document.getElementById('filter-tradizionali')?.checked ?? true;
-        const showBlocca = document.getElementById('filter-bloccatelaio')?.checked ?? true;
-        const showPark   = document.getElementById('filter-parcheggi')?.checked ?? true;
-        const hidePiene  = document.getElementById('filter-piene')?.checked ?? false;
-        const badge      = document.getElementById('filter-badge');
+        const showTrad      = document.getElementById('filter-tradizionali')?.checked ?? true;
+        const showBlocca    = document.getElementById('filter-bloccatelaio')?.checked ?? true;
+        const showPark      = document.getElementById('filter-parcheggi')?.checked ?? true;
+        const hidePiene     = document.getElementById('filter-piene')?.checked ?? false;
+        const soloPreferiti = document.getElementById('filter-preferiti')?.checked ?? false;
+        const badge         = document.getElementById('filter-badge');
 
-        const isCustomized = (!showTrad || !showBlocca || !showPark || hidePiene);
+        const isCustomized = (!showTrad || !showBlocca || !showPark || hidePiene || soloPreferiti);
         if (badge) {
             badge.classList.toggle('hidden', !isCustomized);
         }
@@ -1223,9 +1227,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // Listener checkbox filtri
-    ['filter-tradizionali', 'filter-bloccatelaio', 'filter-parcheggi', 'filter-piene'].forEach(id => {
+    ['filter-tradizionali', 'filter-bloccatelaio', 'filter-parcheggi', 'filter-piene', 'filter-preferiti'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('change', () => applyFiltersAndSearch(false));
+        if (el) el.addEventListener('change', () => {
+            if (id === 'filter-preferiti' && el.checked && !isTokenValid(getToken())) {
+                alert(tr('popup.loginToFav') || 'Accedi per gestire i tuoi preferiti.');
+            }
+            applyFiltersAndSearch(false);
+        });
     });
 
     // Listener Ricerca Spaziale (RF3)

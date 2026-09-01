@@ -98,6 +98,13 @@
                 <input type="checkbox" id="filter-piene" class="checkbox checkbox-sm checkbox-error rounded-md">
                 <span class="label-text font-semibold text-slate-700 text-xs sm:text-sm" data-i18n="filter.nascondiPiene">Nascondi rastrelliere piene</span>
             </label>
+            <label class="filter-item label cursor-pointer justify-start gap-3 py-1.5 hover:bg-base-200/50 rounded-lg px-1 transition-colors">
+                <input type="checkbox" id="filter-preferiti" class="checkbox checkbox-sm checkbox-secondary rounded-md">
+                <span class="label-text font-semibold text-slate-700 text-xs sm:text-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-heart text-rose-500 text-xs"></i>
+                    <span data-i18n="filter.soloPreferiti">Mostra solo preferiti</span>
+                </span>
+            </label>
         </div>
 
         <div id="search-feedback" class="search-feedback hidden"></div>
@@ -133,6 +140,10 @@
             <div class="legend-item flex items-center gap-2 text-slate-700 font-medium">
                 <span class="legend-dot" style="background:#27ae60"></span>
                 <span data-i18n="legend.parcheggio">Parcheggio protetto</span>
+            </div>
+            <div class="legend-item flex items-center gap-2 text-slate-700 font-medium">
+                <span class="w-3 h-3 rounded-full bg-rose-600 text-white flex items-center justify-center text-[7px] leading-none shrink-0"><i class="fa-solid fa-heart"></i></span>
+                <span data-i18n="legend.preferito">Parcheggio preferito</span>
             </div>
         </div>
 

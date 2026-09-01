@@ -10,6 +10,7 @@
   "filter.bloccatelaio": "Rastrelliere Bloccatelaio",
   "filter.parcheggi": "Parcheggi Protetti",
   "filter.nascondiPiene": "Nascondi rastrelliere piene",
+  "filter.soloPreferiti": "Mostra solo preferiti",
 
   "legend.title": "Legenda",
   "legend.button": "Legenda",
@@ -17,6 +18,7 @@
   "legend.bloccatelaio": "Rastrelliera bloccatelaio",
   "legend.piena": "Bloccatelaio piena (0 posti)",
   "legend.parcheggio": "Parcheggio protetto",
+  "legend.preferito": "Parcheggio preferito",
 
   "search.placeholder": "Cerca via o parcheggio...",
   "search.button": "Cerca",

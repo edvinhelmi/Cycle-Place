@@ -10,6 +10,7 @@
   "filter.bloccatelaio": "Frame-Lock Racks",
   "filter.parcheggi": "Protected Parking",
   "filter.nascondiPiene": "Hide full racks",
+  "filter.soloPreferiti": "Show favorites only",
 
   "legend.title": "Legend",
   "legend.button": "Legend",
@@ -17,6 +18,7 @@
   "legend.bloccatelaio": "Frame-lock rack",
   "legend.piena": "Full frame-lock rack (0 slots)",
   "legend.parcheggio": "Protected parking",
+  "legend.preferito": "Favorite parking",
 
   "search.placeholder": "Search street or parking...",
   "search.button": "Search",

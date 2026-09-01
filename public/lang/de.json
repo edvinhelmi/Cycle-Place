@@ -10,6 +10,7 @@
   "filter.bloccatelaio": "Rahmensichere Ständer",
   "filter.parcheggi": "Geschützte Parkplätze",
   "filter.nascondiPiene": "Volle Ständer ausblenden",
+  "filter.soloPreferiti": "Nur Favoriten anzeigen",
 
   "legend.title": "Legende",
   "legend.button": "Legende",
@@ -17,6 +18,7 @@
   "legend.bloccatelaio": "Rahmensicherer Ständer",
   "legend.piena": "Voller Rahmensicherer Ständer (0 Plätze)",
   "legend.parcheggio": "Geschützter Parkplatz",
+  "legend.preferito": "Favorisierter Parkplatz",
 
   "search.placeholder": "Straße oder Parkplatz suchen...",
   "search.button": "Suchen",
