@@ -63,13 +63,13 @@
 
         <!-- Barra di Ricerca Spaziale (RF3) come componente Join DaisyUI -->
         <div class="search-panel join glass-box rounded-full shadow-2xl p-0 z-[1000] h-10 sm:h-11" id="search-panel">
-            <label class="input input-ghost join-item rounded-s-full flex items-center gap-2 bg-base-100/80 pl-4 pr-3 border-none flex-1 focus-within:bg-base-100 h-full min-h-0 py-0">
+            <label class="input input-ghost join-item rounded-s-full flex items-center gap-2 bg-transparent pl-4 pr-3 border-none flex-1 focus-within:bg-white/30 h-full min-h-0 py-0">
                 <span class="label p-0 text-slate-500 text-sm"><i class="fa-solid fa-magnifying-glass"></i></span>
                 <input type="text" id="search-input" class="grow bg-transparent text-slate-800 text-xs sm:text-sm font-semibold placeholder:text-slate-400 focus:outline-none" placeholder="Cerca via o parcheggio..." data-i18n-placeholder="search.placeholder" autocomplete="off">
                 <button id="btn-clear-search" class="search-clear-btn hidden btn btn-ghost btn-xs btn-circle text-slate-400 hover:text-slate-700 p-0 min-h-0 h-6 w-6" title="Cancella" aria-label="Cancella ricerca">&times;</button>
             </label>
             <!-- Pulsante Toggle Filtri per Mobile (join-item, visibile solo su mobile) -->
-            <button id="btn-filter-toggle" class="btn btn-ghost join-item border-l border-r border-base-300/60 bg-base-100/60 px-3.5 relative h-full min-h-0 rounded-none md:hidden flex items-center justify-center py-0" title="Filtri" aria-label="Filtri">
+            <button id="btn-filter-toggle" class="btn btn-ghost join-item border-l border-r border-white/40 bg-transparent px-3.5 relative h-full min-h-0 rounded-none md:hidden flex items-center justify-center py-0" title="Filtri" aria-label="Filtri">
                 <span class="filter-toggle-icon text-slate-700"><i class="fa-solid fa-sliders"></i></span>
                 <span id="filter-badge" class="filter-badge badge badge-xs badge-accent absolute -top-1 -right-1 hidden"></span>
             </button>
