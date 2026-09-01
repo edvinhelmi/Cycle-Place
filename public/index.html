@@ -82,6 +82,13 @@
             <div class="filter-header card-title text-sm font-bold text-slate-800 pb-2 border-b border-base-200/80 mb-2 flex items-center gap-2">
                 <strong data-i18n="filter.title"><i class="fa-solid fa-filter text-primary"></i> Filtri & Legenda</strong>
             </div>
+            <label class="filter-item label cursor-pointer justify-start gap-3 py-1.5 hover:bg-base-200/50 rounded-lg px-1 transition-colors border-b border-base-200/80 mb-1 pb-2">
+                <input type="checkbox" id="filter-preferiti" class="checkbox checkbox-sm checkbox-error rounded-md">
+                <span class="label-text font-semibold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-heart text-[#e11d48] text-xs"></i>
+                    <span data-i18n="filter.soloPreferiti">Mostra solo preferiti</span>
+                </span>
+            </label>
             <label class="filter-item label cursor-pointer justify-start gap-3 py-1.5 hover:bg-base-200/50 rounded-lg px-1 transition-colors">
                 <input type="checkbox" id="filter-tradizionali" class="checkbox checkbox-sm checkbox-primary rounded-md" checked>
                 <span class="label-text font-semibold text-slate-700 text-xs sm:text-sm" data-i18n="filter.tradizionali">Rastrelliere Tradizionali</span>
@@ -97,13 +104,6 @@
             <label class="filter-item label cursor-pointer justify-start gap-3 py-1.5 hover:bg-base-200/50 rounded-lg px-1 transition-colors border-t border-base-200/80 mt-1 pt-2">
                 <input type="checkbox" id="filter-piene" class="checkbox checkbox-sm checkbox-error rounded-md">
                 <span class="label-text font-semibold text-slate-700 text-xs sm:text-sm" data-i18n="filter.nascondiPiene">Nascondi rastrelliere piene</span>
-            </label>
-            <label class="filter-item label cursor-pointer justify-start gap-3 py-1.5 hover:bg-base-200/50 rounded-lg px-1 transition-colors">
-                <input type="checkbox" id="filter-preferiti" class="checkbox checkbox-sm checkbox-secondary rounded-md">
-                <span class="label-text font-semibold text-slate-700 text-xs sm:text-sm flex items-center gap-1.5">
-                    <i class="fa-solid fa-heart text-rose-500 text-xs"></i>
-                    <span data-i18n="filter.soloPreferiti">Mostra solo preferiti</span>
-                </span>
             </label>
         </div>
 

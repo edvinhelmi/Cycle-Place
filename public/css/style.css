@@ -472,3 +472,15 @@
     transform: translateY(0) scale(1);
 }
 
+/* =====================
+   Filtro Preferiti Checkbox Style
+   ===================== */
+#filter-preferiti:checked {
+    background-color: #e11d48 !important;
+    border-color: #e11d48 !important;
+}
+
+#filter-preferiti:focus-visible {
+    outline-color: #e11d48 !important;
+}
+
