@@ -645,13 +645,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         preferito:    { radius: 9,  fillColor: '#e11d48', color: '#ffffff', weight: 2.5, fillOpacity: 1.0  }
     };
 
+    // Icona a forma di cuore puro rosso vivo (proporzionata e senza contorni)
     const favMarkerIcon = L.divIcon({
         className: 'custom-fav-heart-icon',
-        html: `<div style="display:flex; align-items:center; justify-content:center; width:28px; height:28px;">
-                 <i class="fa-solid fa-heart" style="color: #e11d48; font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));"></i>
+        html: `<div style="display:flex; align-items:center; justify-content:center; width:22px; height:22px;">
+                 <i class="fa-solid fa-heart" style="color: #ff0033; font-size: 20px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));"></i>
                </div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14]
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
     });
 
     const mapErrorBanner = document.getElementById('map-error-banner');
