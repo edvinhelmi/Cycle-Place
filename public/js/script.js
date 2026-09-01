@@ -383,6 +383,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnLogout) btnLogout.addEventListener('click', logoutUser);
 
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 
     // Registrazione
     const registerForm = document.getElementById('register-form');
@@ -437,8 +438,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            if (password.length < 8 || !/[A-Z]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
-                if (errorEl) errorEl.textContent = '❌ ' + tr('auth.errPasswordRequirements');
+            // Controllo complessità password (min 8 car., 1 maiuscola, 1 numero, 1 speciale)
+            if (!PASSWORD_REGEX.test(password)) {
+                if (errorEl) errorEl.textContent = '❌ ' + (tr('auth.errPasswordRequirements') || 'La password deve contenere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale');
                 if (passInput) { passInput.classList.add('input-error'); passInput.focus(); }
                 return;
             }
