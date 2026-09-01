@@ -176,6 +176,41 @@
     box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4), 0 2px 5px rgba(0, 0, 0, 0.25);
 }
 
+/* Badge per la Legenda (Desktop e Mobile) */
+.legend-badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #ffffff;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    border: 1.5px solid #ffffff;
+}
+
+.legend-badge.badge-tradizionale {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+}
+
+.legend-badge.badge-bloccatelaio {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.legend-badge.badge-piena {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.legend-badge.badge-parcheggio {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.legend-badge.badge-preferito {
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+}
+
 .custom-fav-heart-pin {
     width: 28px;
     height: 28px;
