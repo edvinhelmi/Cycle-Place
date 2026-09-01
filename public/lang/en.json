@@ -54,8 +54,8 @@
   "auth.errName": "First name must contain at least 2 characters",
   "auth.errSurname": "Last name must contain at least 2 characters",
   "auth.errEmail": "Please enter a valid email address",
-  "auth.errPasswordLength": "Password must be at least 8 characters",
-  "auth.errPasswordRequirements": "Password must be at least 8 characters, with 1 uppercase and 1 special character",
+  "auth.passwordHint": "Min. 8 chars, 1 uppercase, 1 number, and 1 special char",
+  "auth.errPasswordRequirements": "Password must be at least 8 characters long, contain an uppercase letter, a number, and a special character"
   "auth.errPasswordMismatch": "Passwords do not match",
   "auth.errEmptyFields": "Please fill in all required fields",
   "auth.successRegister": "Registration successful! You can now log in.",
