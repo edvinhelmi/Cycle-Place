@@ -1202,13 +1202,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }).addTo(map);
 
             if (!isLiveNavigating) {
-                userLocationMarker.bindPopup(`
-                    <div class="popup-content" style="text-align:center;">
-                        <h3 class="popup-title">📍 ${tr('geo.youAreHere') || 'La tua posizione'}</h3>
-                        <p><small>${tr('geo.accuracy') || 'Precisione'}: ±${Math.round(accuracy)}m</small></p>
-                    </div>
-                `).openPopup();
-
                 // Spostamento fluido verso la posizione dell'utente
                 map.flyTo([lat, lng], 16, { animate: true, duration: 1.2 });
             } else {
