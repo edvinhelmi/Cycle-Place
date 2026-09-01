@@ -922,8 +922,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // - Tradizionale -> SEMPRE STILI.tradizionale (BLU)
                 const isFav = userFavoritiIds.has(props.id);
                 const baseStile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
-                const stile = isFav ? STILI.preferito : baseStile;
-                const layer = L.circleMarker(latlng, stile);
+                
+                // Se è nei preferiti crea il marker con il cuore, altrimenti il solito cerchietto
+                const layer = isFav 
+                    ? L.marker(latlng, { icon: favMarkerIcon }) 
+                    : L.circleMarker(latlng, baseStile);
                 layer.bindPopup(() => buildRastrellieraPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
                     minWidth: 260,
@@ -953,8 +956,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const parkId = props.id || 10001;
                 const isFav = userFavoritiIds.has(parkId);
-                const stile = isFav ? STILI.preferito : STILI.parcheggio;
-                const layer = L.circleMarker(latlng, stile);
+                
+                // Se è nei preferiti crea il marker con il cuore, altrimenti il solito cerchietto
+                const layer = isFav 
+                    ? L.marker(latlng, { icon: favMarkerIcon }) 
+                    : L.circleMarker(latlng, STILI.parcheggio);
                 layer.bindPopup(() => buildParcheggioPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
                     minWidth: 260,
