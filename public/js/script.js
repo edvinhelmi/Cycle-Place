@@ -623,16 +623,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-    const STILI = {
-        tradizionale: { radius: 7,  fillColor: '#2980b9', color: '#1a5276', weight: 1.5, fillOpacity: 0.9  },
-        bloccatelaio: { radius: 8,  fillColor: '#e67e22', color: '#a04000', weight: 1.5, fillOpacity: 0.9  },
-        piena:        { radius: 7,  fillColor: '#c0392b', color: '#7b241c', weight: 1.5, fillOpacity: 0.9  },
-        parcheggio:   { radius: 10, fillColor: '#27ae60', color: '#1a7a40', weight: 2,   fillOpacity: 0.95 }
-    };
+    const markerIconTradizionale = L.divIcon({
+        className: 'custom-marker-icon-wrapper',
+        html: `<div class="custom-marker-pin pin-tradizionale" title="Rastrelliera Tradizionale"><i class="fa-solid fa-bicycle"></i></div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+        popupAnchor: [0, -13]
+    });
+
+    const markerIconBloccatelaio = L.divIcon({
+        className: 'custom-marker-icon-wrapper',
+        html: `<div class="custom-marker-pin pin-bloccatelaio" title="Rastrelliera Bloccatelaio"><i class="fa-solid fa-lock"></i></div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+        popupAnchor: [0, -13]
+    });
+
+    const markerIconPiena = L.divIcon({
+        className: 'custom-marker-icon-wrapper',
+        html: `<div class="custom-marker-pin pin-piena" title="Rastrelliera Piena (0 posti)"><i class="fa-solid fa-ban"></i></div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+        popupAnchor: [0, -13]
+    });
+
+    const markerIconParcheggio = L.divIcon({
+        className: 'custom-marker-icon-wrapper',
+        html: `<div class="custom-marker-pin pin-parcheggio" title="Parcheggio Protetto"><i class="fa-solid fa-shield-halved"></i></div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -14]
+    });
 
     const favMarkerIcon = L.divIcon({
         className: 'custom-fav-heart-icon',
-        html: `<div class="custom-fav-heart-pin"><i class="fa-solid fa-heart"></i></div>`,
+        html: `<div class="custom-fav-heart-pin" title="Preferito"><i class="fa-solid fa-heart"></i></div>`,
         iconSize: [28, 28],
         iconAnchor: [14, 14],
         popupAnchor: [0, -14]
@@ -795,10 +820,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const isFav = userFavoritiIds.has(Number(props.id));
                 if (soloPreferiti && !isFav) return;
 
-                const baseStile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
-                const layer = isFav 
-                    ? L.marker(latlng, { icon: favMarkerIcon }) 
-                    : L.circleMarker(latlng, baseStile);
+                const baseIcon = isBlocca ? (isPiena ? markerIconPiena : markerIconBloccatelaio) : markerIconTradizionale;
+                const layer = L.marker(latlng, { icon: isFav ? favMarkerIcon : baseIcon });
                 layer.bindPopup(() => buildRastrellieraPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
                     minWidth: 260,
@@ -830,9 +853,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const isFav = userFavoritiIds.has(Number(parkId));
                 if (soloPreferiti && !isFav) return;
 
-                const layer = isFav 
-                    ? L.marker(latlng, { icon: favMarkerIcon }) 
-                    : L.circleMarker(latlng, STILI.parcheggio);
+                const layer = L.marker(latlng, { icon: isFav ? favMarkerIcon : markerIconParcheggio });
                 layer.bindPopup(() => buildParcheggioPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
                     minWidth: 260,
@@ -931,12 +952,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const isFav = userFavoritiIds.has(Number(props.id));
                 if (soloPreferiti && !isFav) return;
 
-                const baseStile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
-                
-                // Se è nei preferiti crea il marker con il cuore, altrimenti il solito cerchietto
-                const layer = isFav 
-                    ? L.marker(latlng, { icon: favMarkerIcon }) 
-                    : L.circleMarker(latlng, baseStile);
+                const baseIcon = isBlocca ? (isPiena ? markerIconPiena : markerIconBloccatelaio) : markerIconTradizionale;
+                const layer = L.marker(latlng, { icon: isFav ? favMarkerIcon : baseIcon });
                 layer.bindPopup(() => buildRastrellieraPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
                     minWidth: 260,
@@ -968,10 +985,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const isFav = userFavoritiIds.has(Number(parkId));
                 if (soloPreferiti && !isFav) return;
                 
-                // Se è nei preferiti crea il marker con il cuore, altrimenti il solito cerchietto
-                const layer = isFav 
-                    ? L.marker(latlng, { icon: favMarkerIcon }) 
-                    : L.circleMarker(latlng, STILI.parcheggio);
+                const layer = L.marker(latlng, { icon: isFav ? favMarkerIcon : markerIconParcheggio });
                 layer.bindPopup(() => buildParcheggioPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
                     minWidth: 260,
