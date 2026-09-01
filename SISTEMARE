@@ -1,6 +1,3 @@
-1. Requisiti di Sicurezza  
-- Mancanza di Rate Limiting (RNF 2.5):Requisito: Limitazione del rateo di invio segnalazioni e voti per prevenire spam.  
--> Codice: Gli endpoint /api/v1/segnalazioni e /api/v1/login non implementano alcun middleware di rate-limiting (es. express-rate-limit).  
 
 2. Autenticazione e Registrazione (RF 1 & RF 2)
 - Username Univoco Pubblico mancante (RF 2.1, RF 2.2):Requisito: La registrazione (sia locale che Google) deve richiedere uno username univoco pubblico, 
