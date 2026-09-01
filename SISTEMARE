@@ -2,9 +2,6 @@
 2. Autenticazione e Registrazione (RF 1 & RF 2)
 - Recupero Password assente (RF 1.4, US 3):Requisito: Servizio di invio email con link monouso/token temporaneo per il reset password.  Codice: Nessun endpoint 
 o modale per il recupero password.  
-- Gestione Sessione e Invalidazione (RF 1.6, RF 1.7, RNF 4.4):Requisito: Refresh token automatico per sessioni fino a 30 giorni e 
-invalidazione automatica delle sessioni precedenti al nuovo login.  -> Codice: Viene emesso un semplice JWT con durata fissa a 24 ore (expiresIn: '24h') 
-senza meccanismo di refresh né blacklist per invalidare token pregressi.  
 
 4. Mappa, Routing e Dettagli Aree di Sosta 
 - (RF 5)Calcolo Percorso e Routing Sicuro in-app (RF 5.5 / RF 5.6 / RF 5.7 / RF 5.8, US 7, US 8):Requisito: Calcolo del percorso ciclabile interno
