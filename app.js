@@ -369,6 +369,95 @@ app.delete('/api/v1/user/preferiti/:id', tokenChecker, (req, res) => {
 });
 
 // =======================================================
+// API: Aggiornamento Profilo, Password e Notifiche (RF 3.2, RF 3.3)
+// =======================================================
+app.put('/api/v1/user/profile', tokenChecker, (req, res) => {
+    const { name, surname, currentPassword, newPassword, notificheEmail, notificheGuasti } = req.body;
+    const userId = req.user.sub;
+
+    readJsonFile(usersFile, async (err, users) => {
+        if (err) return res.status(500).json({ error: 'Errore nella lettura del database utenti' });
+        
+        const userIndex = users.findIndex(u => u.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).json({ error: 'Utente non trovato' });
+        }
+
+        const user = users[userIndex];
+
+        // 1. Aggiornamento Anagrafica di base
+        if (name && String(name).trim().length >= 2) {
+            user.name = String(name).trim();
+        }
+        if (surname && String(surname).trim().length >= 2) {
+            user.surname = String(surname).trim();
+        }
+
+        // 2. Aggiornamento Preferenze Notifiche
+        if (notificheEmail !== undefined || notificheGuasti !== undefined) {
+            user.notifiche = {
+                email: notificheEmail !== undefined ? Boolean(notificheEmail) : (user.notifiche?.email ?? true),
+                guasti: notificheGuasti !== undefined ? Boolean(notificheGuasti) : (user.notifiche?.guasti ?? true)
+            };
+        }
+
+        // 3. Cambio Password (solo se richiesto)
+        if (newPassword) {
+            // Se l'utente è registrato via Google SSO non ha una password locale
+            if (!user.password) {
+                return res.status(400).json({ error: 'Gli account registrati con Google non possono modificare la password locale' });
+            }
+            if (!currentPassword) {
+                return res.status(400).json({ error: 'Inserisci la password attuale per confermare la modifica' });
+            }
+
+            try {
+                const isMatch = await bcrypt.compare(String(currentPassword), user.password);
+                if (!isMatch) {
+                    return res.status(401).json({ error: 'La password attuale non è corretta' });
+                }
+
+                const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+                if (!PASSWORD_REGEX.test(String(newPassword))) {
+                    return res.status(400).json({ 
+                        error: 'La nuova password deve contenere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale' 
+                    });
+                }
+
+                user.password = await bcrypt.hash(String(newPassword), SALT_ROUNDS);
+            } catch (pErr) {
+                console.error('[Profile Update] Errore cambio password:', pErr);
+                return res.status(500).json({ error: 'Errore durante la modifica della password' });
+            }
+        }
+
+        users[userIndex] = user;
+
+        writeJsonFile(usersFile, users, werr => {
+            if (werr) return res.status(500).json({ error: 'Errore nel salvataggio del profilo' });
+
+            // Genera nuovo JWT aggiornato con i nuovi dati anagrafici
+            const newToken = jwt.sign(
+                { sub: user.id, email: user.email, name: user.name, surname: user.surname, provider: user.password ? 'local' : 'google' },
+                JWT_SECRET,
+                { expiresIn: '24h' }
+            );
+
+            res.status(200).json({
+                message: 'Profilo aggiornato con successo',
+                token: newToken,
+                user: {
+                    name: user.name,
+                    surname: user.surname,
+                    email: user.email,
+                    notifiche: user.notifiche || { email: true, guasti: true }
+                }
+            });
+        });
+    });
+});
+
+// =======================================================
 // API: Segnalazioni (protette da JWT)
 // =======================================================
 
