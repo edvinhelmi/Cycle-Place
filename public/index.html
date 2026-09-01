@@ -147,6 +147,28 @@
             </div>
         </div>
 
+        <!-- Banner Istruzioni Turn-by-Turn (Navigazione Live in Alto) -->
+        <div id="turn-by-turn-banner" class="turn-by-turn-banner hidden" aria-live="assertive">
+            <div class="turn-banner-card glass-box-dark shadow-2xl p-3 sm:p-3.5 rounded-2xl flex items-center gap-3 border border-emerald-500/40">
+                <div id="turn-banner-icon-box" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 text-lg sm:text-xl shadow-md">
+                    <i id="turn-banner-icon" class="fa-solid fa-diamond-turn-right"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div id="turn-banner-distance" class="text-[11px] sm:text-xs font-black text-emerald-400 uppercase tracking-wider">--</div>
+                    <div id="turn-banner-instruction" class="text-xs sm:text-sm font-bold text-white truncate">--</div>
+                </div>
+                <button id="btn-toggle-voice" class="btn btn-ghost btn-circle btn-xs sm:btn-sm text-white/80 hover:text-white hover:bg-white/10" title="Audio indicazioni" aria-label="Audio indicazioni">
+                    <i id="voice-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottone Segui Posizione / Recentra Navigazione -->
+        <button id="btn-recenter-nav" class="btn-recenter-nav btn glass-box rounded-full shadow-xl text-emerald-600 hover:text-emerald-700 border border-white/60 px-3.5 py-2 font-bold text-xs hidden items-center gap-2" aria-label="Segui posizione">
+            <i class="fa-solid fa-location-crosshairs text-sm"></i>
+            <span data-i18n="routing.recenter">Segui</span>
+        </button>
+
         <!-- Pannello di Navigazione Fluttuante (In-App Routing) -->
         <div id="routing-panel" class="routing-panel card glass-box shadow-2xl p-3.5 rounded-2xl hidden" aria-live="polite">
             <div class="flex items-center justify-between gap-3 border-b border-base-200/80 pb-2 mb-2.5">
@@ -177,12 +199,20 @@
             </div>
 
             <!-- Switch Modalità: Bici / A piedi -->
-            <div class="flex items-center justify-center gap-1 bg-base-200/80 p-1 rounded-xl border border-base-200/80">
+            <div class="flex items-center justify-center gap-1 bg-base-200/80 p-1 rounded-xl border border-base-200/80 mb-2.5">
                 <button id="btn-nav-mode-bike" class="btn btn-xs flex-1 rounded-lg font-bold border-none bg-primary text-white shadow-xs gap-1.5 transition-all">
                     <i class="fa-solid fa-bicycle text-xs"></i> <span data-i18n="routing.modeBike">In bici</span>
                 </button>
                 <button id="btn-nav-mode-walk" class="btn btn-xs flex-1 rounded-lg font-bold border-none btn-ghost text-slate-600 hover:text-slate-900 gap-1.5 transition-all">
                     <i class="fa-solid fa-person-walking text-xs"></i> <span data-i18n="routing.modeWalk">A piedi</span>
+                </button>
+            </div>
+
+            <!-- Azione Avvia / Termina Navigazione Live -->
+            <div>
+                <button id="btn-toggle-live-nav" class="btn btn-sm w-full rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-md gap-2 transition-colors">
+                    <i id="icon-toggle-live-nav" class="fa-solid fa-location-arrow"></i>
+                    <span id="lbl-toggle-live-nav" data-i18n="routing.startLive">Avvia Navigazione</span>
                 </button>
             </div>
 

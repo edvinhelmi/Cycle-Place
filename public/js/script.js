@@ -679,6 +679,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentNavDestination   = null; // { lat, lng, name }
     let currentNavMode          = 'cycling-regular'; // 'cycling-regular' | 'foot-walking'
 
+    // Stato Navigazione Live Turn-by-Turn
+    let isLiveNavigating        = false;
+    let isFollowMode            = true;
+    let liveWatchId             = null;
+    let routeSteps              = [];
+    let currentStepIndex        = 0;
+    let routeCoordinates        = []; // [[lat, lng], ...]
+    let voiceEnabled            = true;
+    let lastSpokenInstruction   = null;
+    let lastRerouteTime         = 0;
+
     const groupSearchRadius = L.layerGroup().addTo(map);
     const groupTradizionale = L.layerGroup().addTo(map);
     const groupBloccatelaio = L.layerGroup().addTo(map);
@@ -1564,8 +1575,85 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // =========================================================
-    // ROUTING IN-APP (OpenRouteService Proxy)
+    // ROUTING IN-APP (OpenRouteService Proxy & Live Turn-by-Turn)
     // =========================================================
+
+    // --- Funzioni Matematiche per Distanze e Percorsi ---
+    function calcDistanceMeters(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // Raggio terrestre in metri
+        const phi1 = lat1 * Math.PI / 180;
+        const phi2 = lat2 * Math.PI / 180;
+        const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+        const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+        const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+                  Math.cos(phi1) * Math.cos(phi2) *
+                  Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
+    }
+
+    function distanceToSegmentMeters(pLat, pLng, aLat, aLng, bLat, bLng) {
+        const dx = bLng - aLng;
+        const dy = bLat - aLat;
+        if (dx === 0 && dy === 0) {
+            return calcDistanceMeters(pLat, pLng, aLat, aLng);
+        }
+        const t = Math.max(0, Math.min(1, ((pLng - aLng) * dx + (pLat - aLat) * dy) / (dx * dx + dy * dy)));
+        const projLng = aLng + t * dx;
+        const projLat = aLat + t * dy;
+        return calcDistanceMeters(pLat, pLng, projLat, projLng);
+    }
+
+    function minDistanceToPolyline(lat, lng, coords) {
+        if (!coords || coords.length === 0) return 0;
+        if (coords.length === 1) return calcDistanceMeters(lat, lng, coords[0][0], coords[0][1]);
+
+        let min = Infinity;
+        for (let i = 0; i < coords.length - 1; i++) {
+            const d = distanceToSegmentMeters(lat, lng, coords[i][0], coords[i][1], coords[i+1][0], coords[i+1][1]);
+            if (d < min) min = d;
+        }
+        return min;
+    }
+
+    function getManeuverIcon(type) {
+        switch (type) {
+            case 0: return 'fa-solid fa-arrow-left';
+            case 1: return 'fa-solid fa-arrow-right';
+            case 2: return 'fa-solid fa-arrow-turn-left';
+            case 3: return 'fa-solid fa-arrow-turn-right';
+            case 4: return 'fa-solid fa-arrow-left';
+            case 5: return 'fa-solid fa-arrow-right';
+            case 6: return 'fa-solid fa-arrow-up';
+            case 7: return 'fa-solid fa-arrows-rotate';
+            case 8: return 'fa-solid fa-arrow-right-from-bracket';
+            case 9: return 'fa-solid fa-rotate-left';
+            case 10: return 'fa-solid fa-diamond-turn-right';
+            case 11: return 'fa-solid fa-flag-checkered';
+            case 12: return 'fa-solid fa-location-arrow';
+            case 13: return 'fa-solid fa-arrow-left';
+            case 14: return 'fa-solid fa-arrow-right';
+            default: return 'fa-solid fa-diamond-turn-right';
+        }
+    }
+
+    function speakInstruction(text) {
+        if (!voiceEnabled || !window.speechSynthesis || !text) return;
+        if (text === lastSpokenInstruction) return;
+        lastSpokenInstruction = text;
+        try {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            const lang = I18n.getLanguage() || 'it';
+            utterance.lang = lang === 'de' ? 'de-DE' : (lang === 'en' ? 'en-US' : 'it-IT');
+            utterance.rate = 1.0;
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {
+            console.warn('Speech synthesis not available:', e);
+        }
+    }
 
     function updateNavUIState(profile) {
         const btnBike  = document.getElementById('btn-nav-mode-bike');
@@ -1594,16 +1682,193 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function calculateAndRenderRoute(startLat, startLng, endLat, endLng, profile = 'cycling-regular') {
+    function updateTurnBanner(userLat, userLng) {
+        const banner = document.getElementById('turn-by-turn-banner');
+        if (!isLiveNavigating || !banner) {
+            if (banner) banner.classList.add('hidden');
+            return;
+        }
+
+        banner.classList.remove('hidden');
+
+        const iconEl = document.getElementById('turn-banner-icon');
+        const distEl = document.getElementById('turn-banner-distance');
+        const instEl = document.getElementById('turn-banner-instruction');
+
+        // Controlla se l'utente è arrivato a destinazione (< 15 metri)
+        if (currentNavDestination) {
+            const distToDest = calcDistanceMeters(userLat, userLng, currentNavDestination.lat, currentNavDestination.lng);
+            if (distToDest < 15) {
+                if (iconEl) iconEl.className = 'fa-solid fa-flag-checkered text-emerald-300';
+                if (distEl) distEl.textContent = '0 m';
+                if (instEl) instEl.textContent = tr('routing.arrived') || 'Sei arrivato a destinazione!';
+                speakInstruction(tr('routing.arrived') || 'Sei arrivato a destinazione!');
+                return;
+            }
+        }
+
+        if (!routeSteps || routeSteps.length === 0) return;
+
+        // Avanzamento step se l'utente è vicino (< 18m) al termine dello step corrente
+        let step = routeSteps[currentStepIndex];
+        if (step && step.way_points) {
+            const endIdx = step.way_points[1];
+            const targetCoord = routeCoordinates[endIdx];
+            if (targetCoord) {
+                const distToStepEnd = calcDistanceMeters(userLat, userLng, targetCoord[0], targetCoord[1]);
+                if (distToStepEnd < 18 && currentStepIndex < routeSteps.length - 1) {
+                    currentStepIndex++;
+                    step = routeSteps[currentStepIndex];
+                }
+            }
+        }
+
+        if (!step) return;
+
+        const nextIdx = step.way_points ? step.way_points[1] : 0;
+        const nextCoord = routeCoordinates[nextIdx];
+        let distanceText = '--';
+        if (nextCoord) {
+            const d = Math.round(calcDistanceMeters(userLat, userLng, nextCoord[0], nextCoord[1]));
+            if (d >= 1000) {
+                distanceText = (tr('routing.inDistance') || 'Tra {dist}').replace('{dist}', (d / 1000).toFixed(1) + ' ' + (tr('routing.km') || 'km'));
+            } else {
+                distanceText = (tr('routing.inDistance') || 'Tra {dist}').replace('{dist}', d + ' ' + (tr('routing.meters') || 'm'));
+            }
+        }
+
+        if (iconEl) iconEl.className = getManeuverIcon(step.type);
+        if (distEl) distEl.textContent = distanceText;
+        if (instEl) instEl.textContent = step.instruction || step.name || '';
+
+        if (step.instruction) {
+            speakInstruction(step.instruction);
+        }
+    }
+
+    function handleLivePosition(pos) {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        lastUserCoords = { lat, lng };
+
+        // Aggiorna layer marker utente
+        if (userLocationMarker) map.removeLayer(userLocationMarker);
+        if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
+
+        userAccuracyCircle = L.circle([lat, lng], {
+            radius: Math.min(pos.coords.accuracy || 20, 300),
+            color: '#1a73e8',
+            fillColor: '#1a73e8',
+            fillOpacity: 0.15,
+            weight: 1.5,
+            interactive: false
+        }).addTo(map);
+
+        userLocationMarker = L.circleMarker([lat, lng], {
+            radius: 9,
+            fillColor: '#1a73e8',
+            color: '#ffffff',
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 1
+        }).addTo(map);
+
+        if (isLiveNavigating) {
+            if (isFollowMode) {
+                map.panTo([lat, lng], { animate: true, duration: 0.8 });
+            }
+
+            // Verifica deviazione dal percorso (Off-route > 50m)
+            if (routeCoordinates && routeCoordinates.length > 0) {
+                const distOffRoute = minDistanceToPolyline(lat, lng, routeCoordinates);
+                const now = Date.now();
+                if (distOffRoute > 50 && (now - lastRerouteTime > 6000)) {
+                    lastRerouteTime = now;
+                    console.log(`[Routing] Rilevata deviazione (${Math.round(distOffRoute)}m). Ricalcolo percorso...`);
+                    const instEl = document.getElementById('turn-banner-instruction');
+                    if (instEl) instEl.textContent = tr('routing.recalculating') || 'Ricalcolo percorso...';
+                    if (currentNavDestination) {
+                        calculateAndRenderRoute(lat, lng, currentNavDestination.lat, currentNavDestination.lng, currentNavMode, true);
+                    }
+                    return;
+                }
+            }
+
+            updateTurnBanner(lat, lng);
+        }
+    }
+
+    function startLiveNavigation() {
+        if (!currentNavDestination) return;
+        isLiveNavigating = true;
+        isFollowMode = true;
+
+        const btnToggle   = document.getElementById('btn-toggle-live-nav');
+        const lblToggle   = document.getElementById('lbl-toggle-live-nav');
+        const iconToggle  = document.getElementById('icon-toggle-live-nav');
+        const btnRecenter = document.getElementById('btn-recenter-nav');
+
+        if (btnToggle) {
+            btnToggle.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+            btnToggle.classList.add('bg-rose-600', 'hover:bg-rose-700');
+        }
+        if (lblToggle) lblToggle.textContent = tr('routing.stopLive') || 'Termina Navigazione';
+        if (iconToggle) iconToggle.className = 'fa-solid fa-stop';
+        if (btnRecenter) btnRecenter.classList.remove('hidden');
+
+        if (lastUserCoords) {
+            map.setView([lastUserCoords.lat, lastUserCoords.lng], 18, { animate: true });
+            updateTurnBanner(lastUserCoords.lat, lastUserCoords.lng);
+        }
+
+        if (!liveWatchId && navigator.geolocation) {
+            liveWatchId = navigator.geolocation.watchPosition(
+                handleLivePosition,
+                (err) => console.warn('watchPosition error:', err),
+                { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
+            );
+        }
+    }
+
+    function stopLiveNavigation() {
+        isLiveNavigating = false;
+        isFollowMode = false;
+
+        if (liveWatchId !== null && navigator.geolocation) {
+            navigator.geolocation.clearWatch(liveWatchId);
+            liveWatchId = null;
+        }
+
+        const btnToggle   = document.getElementById('btn-toggle-live-nav');
+        const lblToggle   = document.getElementById('lbl-toggle-live-nav');
+        const iconToggle  = document.getElementById('icon-toggle-live-nav');
+        const btnRecenter = document.getElementById('btn-recenter-nav');
+        const turnBanner  = document.getElementById('turn-by-turn-banner');
+
+        if (btnToggle) {
+            btnToggle.classList.remove('bg-rose-600', 'hover:bg-rose-700');
+            btnToggle.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+        }
+        if (lblToggle) lblToggle.textContent = tr('routing.startLive') || 'Avvia Navigazione';
+        if (iconToggle) iconToggle.className = 'fa-solid fa-location-arrow';
+        if (btnRecenter) btnRecenter.classList.add('hidden');
+        if (turnBanner) turnBanner.classList.add('hidden');
+
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        lastSpokenInstruction = null;
+    }
+
+    async function calculateAndRenderRoute(startLat, startLng, endLat, endLng, profile = 'cycling-regular', isReroute = false) {
         const loadingOverlay = document.getElementById('nav-loading-overlay');
         const distEl         = document.getElementById('nav-stat-distance');
         const durEl          = document.getElementById('nav-stat-duration');
 
-        if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+        if (loadingOverlay && !isReroute) loadingOverlay.classList.remove('hidden');
         updateNavUIState(profile);
 
         try {
-            const url = `/api/v1/routing?startLat=${startLat}&startLng=${startLng}&endLat=${endLat}&endLng=${endLng}&profile=${profile}`;
+            const lang = I18n.getLanguage() || 'it';
+            const url = `/api/v1/routing?startLat=${startLat}&startLng=${startLng}&endLat=${endLat}&endLng=${endLng}&profile=${profile}&language=${lang}`;
             const res = await fetch(url);
             const data = await res.json();
 
@@ -1619,6 +1884,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const summary = feature.properties?.summary || {};
             const distMeters = summary.distance || 0;
             const durSeconds = summary.duration || 0;
+
+            // Salva coordinate tracciato [lat, lng] e relativi step
+            if (feature.geometry && feature.geometry.coordinates) {
+                routeCoordinates = feature.geometry.coordinates.map(c => [c[1], c[0]]);
+            } else {
+                routeCoordinates = [];
+            }
+            routeSteps = feature.properties?.segments?.[0]?.steps || [];
+            currentStepIndex = 0;
 
             // Formattazione Distanza
             if (distEl) {
@@ -1672,23 +1946,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }).addTo(map);
 
-            // Inquadra l'intero tragitto con animazione
-            map.fitBounds(currentRouteLayer.getBounds(), {
-                padding: [60, 60],
-                maxZoom: 17,
-                animate: true,
-                duration: 1.2
-            });
+            if (!isLiveNavigating) {
+                // Inquadra l'intero tragitto con animazione
+                map.fitBounds(currentRouteLayer.getBounds(), {
+                    padding: [60, 60],
+                    maxZoom: 17,
+                    animate: true,
+                    duration: 1.2
+                });
+            } else {
+                updateTurnBanner(startLat, startLng);
+            }
 
         } catch (err) {
             console.error('[Routing Error]', err);
-            alert(err.message || tr('routing.error'));
+            if (!isReroute) {
+                alert(err.message || tr('routing.error'));
+            }
         } finally {
             if (loadingOverlay) loadingOverlay.classList.add('hidden');
         }
     }
 
     function closeRouting() {
+        stopLiveNavigation();
+
         if (currentRouteCasingLayer) {
             map.removeLayer(currentRouteCasingLayer);
             currentRouteCasingLayer = null;
@@ -1698,6 +1980,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentRouteLayer = null;
         }
         currentNavDestination = null;
+        routeCoordinates = [];
+        routeSteps = [];
+        currentStepIndex = 0;
+
         const panel = document.getElementById('routing-panel');
         if (panel) panel.classList.add('hidden');
     }
@@ -1730,33 +2016,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
-                    lastUserCoords = { lat, lng };
-
-                    // Aggiorna marker utente
-                    if (userLocationMarker) map.removeLayer(userLocationMarker);
-                    if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
-
-                    userAccuracyCircle = L.circle([lat, lng], {
-                        radius: Math.min(pos.coords.accuracy || 30, 400),
-                        color: '#1a73e8',
-                        fillColor: '#1a73e8',
-                        fillOpacity: 0.15,
-                        weight: 1.5,
-                        interactive: false
-                    }).addTo(map);
-
-                    userLocationMarker = L.circleMarker([lat, lng], {
-                        radius: 9,
-                        fillColor: '#1a73e8',
-                        color: '#ffffff',
-                        weight: 3,
-                        opacity: 1,
-                        fillOpacity: 1
-                    }).addTo(map);
-
-                    calculateAndRenderRoute(lat, lng, destLat, destLng, currentNavMode);
+                    handleLivePosition(pos);
+                    calculateAndRenderRoute(pos.coords.latitude, pos.coords.longitude, destLat, destLng, currentNavMode);
                 },
                 (err) => {
                     if (loadingOverlay) loadingOverlay.classList.add('hidden');
@@ -1772,14 +2033,55 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // Listener Pannello Routing
-    const btnCloseRouting = document.getElementById('btn-close-routing');
-    const btnNavBike      = document.getElementById('btn-nav-mode-bike');
-    const btnNavWalk      = document.getElementById('btn-nav-mode-walk');
+    // Listener Pannello Routing e Live Navigation
+    const btnCloseRouting   = document.getElementById('btn-close-routing');
+    const btnNavBike        = document.getElementById('btn-nav-mode-bike');
+    const btnNavWalk        = document.getElementById('btn-nav-mode-walk');
+    const btnToggleLiveNav  = document.getElementById('btn-toggle-live-nav');
+    const btnRecenterNav    = document.getElementById('btn-recenter-nav');
+    const btnToggleVoice    = document.getElementById('btn-toggle-voice');
 
     if (btnCloseRouting) {
         btnCloseRouting.addEventListener('click', closeRouting);
     }
+
+    if (btnToggleLiveNav) {
+        btnToggleLiveNav.addEventListener('click', () => {
+            if (isLiveNavigating) {
+                stopLiveNavigation();
+            } else {
+                startLiveNavigation();
+            }
+        });
+    }
+
+    if (btnRecenterNav) {
+        btnRecenterNav.addEventListener('click', () => {
+            isFollowMode = true;
+            if (lastUserCoords) {
+                map.panTo([lastUserCoords.lat, lastUserCoords.lng], { animate: true });
+            }
+            btnRecenterNav.classList.add('hidden');
+        });
+    }
+
+    if (btnToggleVoice) {
+        btnToggleVoice.addEventListener('click', () => {
+            voiceEnabled = !voiceEnabled;
+            const icon = document.getElementById('voice-icon');
+            if (icon) {
+                icon.className = voiceEnabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+            }
+        });
+    }
+
+    // Se l'utente sposta manualmente la mappa durante la navigazione, sospende l'auto-follow
+    map.on('dragstart', () => {
+        if (isLiveNavigating) {
+            isFollowMode = false;
+            if (btnRecenterNav) btnRecenterNav.classList.remove('hidden');
+        }
+    });
 
     if (btnNavBike) {
         btnNavBike.addEventListener('click', () => {

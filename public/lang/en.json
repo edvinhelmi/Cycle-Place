@@ -130,5 +130,13 @@
   "routing.min": "min",
   "routing.hours": "h",
   "routing.meters": "m",
-  "routing.km": "km"
+  "routing.km": "km",
+  "routing.startLive": "Start Navigation",
+  "routing.stopLive": "Stop Navigation",
+  "routing.recenter": "Follow",
+  "routing.arrived": "You have arrived at your destination!",
+  "routing.recalculating": "Recalculating route...",
+  "routing.inDistance": "In {dist}",
+  "routing.voiceOn": "Voice guidance enabled",
+  "routing.voiceOff": "Voice guidance disabled"
 }

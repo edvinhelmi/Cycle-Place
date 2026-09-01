@@ -532,3 +532,65 @@
     }
 }
 
+/* ================================
+   Live Turn-by-Turn Navigation UI
+   ================================ */
+.turn-by-turn-banner {
+    position: absolute;
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100vw - 2rem);
+    max-width: 440px;
+    z-index: 1050;
+    pointer-events: auto;
+    animation: bannerSlideDown 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bannerSlideDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -18px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}
+
+.glass-box-dark {
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.btn-recenter-nav {
+    position: absolute;
+    bottom: 12.5rem;
+    left: 1.5rem;
+    z-index: 1000;
+    pointer-events: auto;
+    transition: all 0.2s ease;
+}
+
+.btn-recenter-nav:hover {
+    transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+    .turn-by-turn-banner {
+        top: 4.5rem;
+        width: calc(100vw - 1.25rem);
+        max-width: 380px;
+    }
+
+    .btn-recenter-nav {
+        bottom: 14rem;
+        left: 0.75rem;
+        z-index: 1050;
+    }
+}
+
+

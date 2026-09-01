@@ -589,6 +589,7 @@ app.get('/api/v1/routing', async (req, res) => {
     }
 
     try {
+        const lang = ['it', 'en', 'de'].includes(req.query.language) ? req.query.language : 'it';
         const orsUrl = `https://api.openrouteservice.org/v2/directions/${chosenProfile}/geojson`;
         const response = await fetch(orsUrl, {
             method: 'POST',
@@ -600,7 +601,9 @@ app.get('/api/v1/routing', async (req, res) => {
                 coordinates: [
                     [sLng, sLat],
                     [eLng, eLat]
-                ]
+                ],
+                language: lang,
+                instructions: true
             })
         });
 
