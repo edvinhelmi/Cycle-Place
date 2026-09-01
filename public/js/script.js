@@ -2106,6 +2106,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadMapData();
     I18n.onLanguageChange(() => {
         applyFiltersAndSearch(false);
+        // Se c'è un percorso aperto o navigazione attiva, ricarica le istruzioni nella nuova lingua
+        if (currentNavDestination && lastUserCoords) {
+            calculateAndRenderRoute(lastUserCoords.lat, lastUserCoords.lng, currentNavDestination.lat, currentNavDestination.lng, currentNavMode, isLiveNavigating);
+        }
     });
 
 }); // fine DOMContentLoaded
