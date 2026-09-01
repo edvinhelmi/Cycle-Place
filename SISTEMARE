@@ -1,0 +1,56 @@
+1. Requisiti di Sicurezza  
+- (RNF 2.3):Requisito: Le password devono essere archiviate tramite hashing sicuro (es. bcrypt o Argon2).  -> Codice: In app.js (righe 146 e 172) le password vengono 
+memorizzate e verificate in testo in chiaro all'interno di users.json (password: cleanPassword).  
+- Mancanza di Rate Limiting (RNF 2.5):Requisito: Limitazione del rateo di invio segnalazioni e voti per prevenire spam.  
+-> Codice: Gli endpoint /api/v1/segnalazioni e /api/v1/login non implementano alcun middleware di rate-limiting (es. express-rate-limit).  
+
+2. Autenticazione e Registrazione (RF 1 & RF 2)
+- Username Univoco Pubblico mancante (RF 2.1, RF 2.2):Requisito: La registrazione (sia locale che Google) deve richiedere uno username univoco pubblico, 
+da usare nelle interazioni.  Codice: Vengono gestiti solo name, surname, email, password.  
+Politica di Complessità Password (RF 2.1):Requisito: Minimo 8 caratteri con almeno 1 maiuscola e 1 numero/carattere speciale.  
+-> Codice: Sia in frontend (script.js) che backend (app.js) il controllo è limitato a password.length >= 6.  
+- Recupero Password assente (RF 1.4, US 3):Requisito: Servizio di invio email con link monouso/token temporaneo per il reset password.  Codice: Nessun endpoint 
+o modale per il recupero password.  
+- Gestione Sessione e Invalidazione (RF 1.6, RF 1.7, RNF 4.4):Requisito: Refresh token automatico per sessioni fino a 30 giorni e 
+invalidazione automatica delle sessioni precedenti al nuovo login.  -> Codice: Viene emesso un semplice JWT con durata fissa a 24 ore (expiresIn: '24h') 
+senza meccanismo di refresh né blacklist per invalidare token pregressi.  
+
+3. Gestione Profilo Utente 
+- (RF 3)Dati della Bicicletta assenti (RF 3.1, US 5):Requisito: Sezione nel profilo per salvare dati della propria bici 
+(marca, modello, colore, numero di telaio, descrizione). -> Codice: In dashboard.html e dashboard.js sono presenti solo i campi anagrafici di base.  
+- Modifica Dati e Password (RF 3.2, RF 3.3):Requisito: Possibilità di modificare dati personali, password e preferenze notifiche dal profilo.  
+Codice: La dashboard è in sola lettura per l'anagrafica (mancano form ed endpoint PUT/PATCH /api/v1/user/...).  
+- Cancellazione Account (RF 3.4):Requisito: Cancellazione definitiva dell'account e di tutti i dati personali associati (GDPR).  -> Codice: 
+Nessun endpoint o pulsante implementato.  
+- Opzione Anonimizzazione Recensioni (RF 3.5):Requisito: Toggle per pubblicare recensioni come "Utente" anonimo.  Codice: Assente.  
+
+4. Mappa, Routing e Dettagli Aree di Sosta 
+- (RF 5)Calcolo Percorso e Routing Sicuro in-app (RF 5.5 / RF 5.6 / RF 5.7 / RF 5.8, US 7, US 8):Requisito: Calcolo del percorso ciclabile interno
+all'app (con distinzione tra percorso "Standard" e "Più Sicuro" che evita zone con criticità segnalate).  -> Codice: È presente solo un link esterno
+che reindirizza a Google Maps ([https://www.google.com/maps/dir/](https://www.google.com/maps/dir/)...). Non c'è alcun motore di routing interno né 
+evidenziazione delle criticità sul tracciato.  
+- Valutazione a 3 Criteri (RF 5.4, RF 8.1, RF 8.2, US 11):Requisito: Voto da 1 a 5 stelle su Sicurezza, Posizione e Disponibilità (senza commento libero) 
+e visualizzazione della media aggregata nel popup.  -> Codice: Il sistema di feedback/rating a 3 criteri è completamente assente sia nelle API che nei popup.  
+- Foto delle Aree di Sosta (RF 5.4):Requisito: Visualizzazione foto nel popup ove disponibili.  -> Codice: I popup mostrano solo attributi testuali 
+(stalli, zona, edificio, link GIS/MITT).  
+- Marker Grafico per i Preferiti sulla Mappa (US 9 Criterio 2):Requisito: Le aree salvate nei preferiti devono mostrare un'icona/marker dedicato direttamente sulla mappa.  
+-> Codice: Il cambio di stato preferito aggiorna il pulsante nel popup e la dashboard, ma non altera lo stile/icona del marker sulla mappa principale.  
+
+5. Modulo Segnalazione Furti e Iniziative 
+- (RF 6 & RF 1.1)Modulo Furto Specifico (RF 6, US 10):Requisito: Form dedicato per i furti con data/ora/luogo, pre-compilazione caratteristiche bici 
+dal profilo e upload foto opzionale.  -> Codice: Esiste solo un modale generico per guasti associati a una rastrelliera 
+(con opzione bici_abbandonata, vandalismo, danno_strutturale), senza upload immagini né dati specifici del furto.  
+- Sezione "Iniziative del Comune" (RF 1.1, US 1):Requisito: Accessibile pubblicamente senza autenticazione per visualizzare eventi/progetti comunali. ->
+Codice: Assente nella UI e nel backend.  
+
+6. Notifiche Push e Meteo (RF 9, RNF 6, US 13)Notifiche Push & Allerte Meteo:Requisito: Ricezione notifiche push per allerte meteo (entro 5 minuti) e
+gestione delle preferenze di notifica dal profilo. -> Codice: Completamente assente (nessun Service Worker, Web Push API, né feed meteo).  
+
+7. Portale Amministrativo Lato Comune (RF 10, US 14 – 18)Il documento richiede un set completo di funzionalità per operatori comunali, 
+attualmente assenti nell'intero progetto:Dashboard Amministrativa: Accesso con permessi operatore (RF 10.1).  
+- Gestione Segnalazioni: Workflow di presa in carico con note interne (RF 10.2, US 14).  
+- CRUD Aree di Sosta e Punti Futuri: Aggiunta/modifica aree di sosta e pianificazione punti futuri con data di apertura (RF 10.3, RF 10.5, US 15).  
+- Audit Trail non modificabile: Registro storico di tutte le azioni CRUD degli operatori (RNF 2.7, US 16).  
+Reportistica ed Export Dati: Esportazione aggregata in CSV/GeoJSON per pianificazione urbana (RF 10.4, US 17).  
+
+8. Denominazione e BrandingNome del Progetto: Il documento specifica Cycle-Place / Cycle-Spot, mentre l'applicazione è denominata Trento Bike Parking
