@@ -372,7 +372,7 @@ app.delete('/api/v1/user/preferiti/:id', tokenChecker, (req, res) => {
 // API: Aggiornamento Profilo, Password e Notifiche (RF 3.2, RF 3.3)
 // =======================================================
 app.put('/api/v1/user/profile', tokenChecker, (req, res) => {
-    const { name, surname, currentPassword, newPassword, notificheEmail, notificheGuasti } = req.body;
+    const { name, surname, currentPassword, newPassword, notificheEmail} = req.body;
     const userId = req.user.sub;
 
     readJsonFile(usersFile, async (err, users) => {
@@ -394,10 +394,9 @@ app.put('/api/v1/user/profile', tokenChecker, (req, res) => {
         }
 
         // 2. Aggiornamento Preferenze Notifiche
-        if (notificheEmail !== undefined || notificheGuasti !== undefined) {
+        if (notificheEmail !== undefined) {
             user.notifiche = {
                 email: notificheEmail !== undefined ? Boolean(notificheEmail) : (user.notifiche?.email ?? true),
-                guasti: notificheGuasti !== undefined ? Boolean(notificheGuasti) : (user.notifiche?.guasti ?? true)
             };
         }
 
@@ -450,7 +449,7 @@ app.put('/api/v1/user/profile', tokenChecker, (req, res) => {
                     name: user.name,
                     surname: user.surname,
                     email: user.email,
-                    notifiche: user.notifiche || { email: true, guasti: true }
+                    notifiche: user.notifiche || { email: true }
                 }
             });
         });
