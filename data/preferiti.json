@@ -21,31 +21,32 @@
   ],
   "117827982692808573140": [
     {
-      "id": 49,
+      "id": 480,
       "tipologia": "Rastr_bloccatelaio",
-      "stalli": 34,
-      "zona": "S. GIUSEPPE_S.CHIARA",
-      "lat": 46.0647744700224,
-      "lng": 11.125038966183144,
-      "savedAt": "2026-08-30T21:20:21.130Z"
+      "stalli": 8,
+      "zona": "CENTRO STORICO-PIEDICASTELLO",
+      "lat": 46.0728448857768,
+      "lng": 11.12665702609226,
+      "savedAt": "2026-09-01T20:40:58.799Z"
     },
     {
-      "id": 107,
-      "tipologia": "Rastr_bloccatelaio",
-      "stalli": 14,
-      "zona": "CENTRO STORICO_PIEDICASTELLO",
-      "lat": 46.07288835191425,
-      "lng": 11.12314846529625,
-      "savedAt": "2026-08-30T21:21:59.655Z"
-    },
-    {
-      "id": 420,
+      "id": 418,
       "tipologia": "Rastr_bloccatelaio",
       "stalli": 8,
       "zona": "COGNOLA",
-      "lat": 46.07321320916661,
-      "lng": 11.149899287432948,
-      "savedAt": "2026-09-01T13:49:54.981Z"
+      "lat": 46.075051249175395,
+      "lng": 11.143808353825078,
+      "savedAt": "2026-09-01T20:44:24.936Z"
+    },
+    {
+      "id": 419,
+      "tipologia": "Rastr_bloccatelaio",
+      "stalli": 6,
+      "zona": "COGNOLA",
+      "lat": 46.07481180107354,
+      "lng": 11.144269337007824,
+      "savedAt": "2026-09-01T20:44:30.224Z"
     }
-  ]
+  ],
+  "test_sub_999": []
 }
