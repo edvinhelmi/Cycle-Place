@@ -1,6 +1,4 @@
 1. Requisiti di Sicurezza  
-- (RNF 2.3):Requisito: Le password devono essere archiviate tramite hashing sicuro (es. bcrypt o Argon2).  -> Codice: In app.js (righe 146 e 172) le password vengono 
-memorizzate e verificate in testo in chiaro all'interno di users.json (password: cleanPassword).  
 - Mancanza di Rate Limiting (RNF 2.5):Requisito: Limitazione del rateo di invio segnalazioni e voti per prevenire spam.  
 -> Codice: Gli endpoint /api/v1/segnalazioni e /api/v1/login non implementano alcun middleware di rate-limiting (es. express-rate-limit).  
 
