@@ -16,6 +16,7 @@
 // =======================================================
 // JWT Helpers
 // =======================================================
+const TOKEN_KEY   = 'tbp_jwt';
 const saveToken   = t  => localStorage.setItem(TOKEN_KEY, t);
 const getToken    = () => localStorage.getItem(TOKEN_KEY);
 const removeToken = () => localStorage.removeItem(TOKEN_KEY);
