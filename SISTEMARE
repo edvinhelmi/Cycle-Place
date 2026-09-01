@@ -28,10 +28,7 @@ e visualizzazione della media aggregata nel popup.  -> Codice: Il sistema di fee
 dal profilo e upload foto opzionale.  -> Codice: Esiste solo un modale generico per guasti associati a una rastrelliera 
 (con opzione bici_abbandonata, vandalismo, danno_strutturale), senza upload immagini né dati specifici del furto.  
 - Sezione "Iniziative del Comune" (RF 1.1, US 1):Requisito: Accessibile pubblicamente senza autenticazione per visualizzare eventi/progetti comunali. ->
-Codice: Assente nella UI e nel backend.  
-
-6. Notifiche Push e Meteo (RF 9, RNF 6, US 13)Notifiche Push & Allerte Meteo:Requisito: Ricezione notifiche push per allerte meteo (entro 5 minuti) e
-gestione delle preferenze di notifica dal profilo. -> Codice: Completamente assente (nessun Service Worker, Web Push API, né feed meteo).  
+Codice: Assente nella UI e nel backend.   
 
 7. Portale Amministrativo Lato Comune (RF 10, US 14 – 18)Il documento richiede un set completo di funzionalità per operatori comunali, 
 attualmente assenti nell'intero progetto:Dashboard Amministrativa: Accesso con permessi operatore (RF 10.1).  
