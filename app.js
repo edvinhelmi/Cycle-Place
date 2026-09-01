@@ -456,6 +456,41 @@ app.put('/api/v1/user/profile', tokenChecker, (req, res) => {
     });
 });
 
+/**
+ * DELETE /api/v1/user/account — RF 3.4 (Cancellazione definitiva Account GDPR)
+ * Elimina l'utente dal database users.json e cancella tutte le sue segnalazioni e preferiti associati
+ */
+app.delete('/api/v1/user/account', tokenChecker, (req, res) => {
+    const userId = req.user.sub;
+
+    readJsonFile(usersFile, (err, users) => {
+        if (err) return res.status(500).json({ error: 'Errore durante la lettura del database utenti' });
+
+        const userIndex = users.findIndex(u => u.id === userId);
+        if (userIndex === -1) {
+            return res.status(404).json({ error: 'Utente non trovato' });
+        }
+
+        // Rimuovi l'utente dall'array
+        users.splice(userIndex, 1);
+
+        writeJsonFile(usersFile, users, (writeErr) => {
+            if (writeErr) return res.status(500).json({ error: 'Errore durante l\'eliminazione dell\'account' });
+
+            // GDPR Cleanup: Rimuovi anche le segnalazioni associate all'utente
+            const segnalazioniFile = path.join(__dirname, 'data', 'segnalazioni.json');
+            readJsonFile(segnalazioniFile, (segErr, segnalazioni) => {
+                if (!segErr && Array.isArray(segnalazioni)) {
+                    const cleanSegnalazioni = segnalazioni.filter(s => s.userId !== userId);
+                    writeJsonFile(segnalazioniFile, cleanSegnalazioni, () => {});
+                }
+            });
+
+            return res.json({ success: true, message: 'Account e dati personali eliminati definitivamente con successo.' });
+        });
+    });
+});
+
 // =======================================================
 // API: Segnalazioni (protette da JWT)
 // =======================================================
