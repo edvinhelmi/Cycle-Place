@@ -24,7 +24,6 @@ Codice: Assente nella UI e nel backend.
 7. Portale Amministrativo Lato Comune (RF 10, US 14 – 18)Il documento richiede un set completo di funzionalità per operatori comunali, 
 attualmente assenti nell'intero progetto:Dashboard Amministrativa: Accesso con permessi operatore (RF 10.1).  
 - Gestione Segnalazioni: Workflow di presa in carico con note interne (RF 10.2, US 14).  
-- CRUD Aree di Sosta e Punti Futuri: Aggiunta/modifica aree di sosta e pianificazione punti futuri con data di apertura (RF 10.3, RF 10.5, US 15).  
 - Audit Trail non modificabile: Registro storico di tutte le azioni CRUD degli operatori (RNF 2.7, US 16).  
 Reportistica ed Export Dati: Esportazione aggregata in CSV/GeoJSON per pianificazione urbana (RF 10.4, US 17).  
 
