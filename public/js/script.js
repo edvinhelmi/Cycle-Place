@@ -37,6 +37,49 @@ function authHeaders() {
 }
 
 // =======================================================
+// CUSTOM ALERTS (Toasts)
+// =======================================================
+window.alert = function(message, type = 'warning') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast toast-top toast-center sm:toast-end z-[9999] mt-14 sm:mt-0';
+        document.body.appendChild(container);
+    }
+    
+    const toast = document.createElement('div');
+    let alertClass = 'alert-warning';
+    let iconClass = 'fa-triangle-exclamation';
+    
+    if (type === 'error') { alertClass = 'alert-error text-white'; iconClass = 'fa-circle-xmark'; }
+    else if (type === 'success') { alertClass = 'alert-success text-white'; iconClass = 'fa-circle-check'; }
+    else if (type === 'info') { alertClass = 'alert-info text-white'; iconClass = 'fa-circle-info'; }
+    else { alertClass = 'alert-warning text-slate-800'; iconClass = 'fa-triangle-exclamation'; }
+
+    toast.className = `alert ${alertClass} shadow-2xl font-bold flex flex-row items-center gap-3 transition-all duration-300 opacity-0 translate-y-[-20px]`;
+    toast.innerHTML = `
+        <i class="fa-solid ${iconClass} text-xl"></i>
+        <span>${message}</span>
+    `;
+    
+    container.appendChild(toast);
+    
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            toast.classList.add('opacity-100', 'translate-y-0');
+        });
+    });
+    
+    setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-[-20px]');
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+};
+
+// =======================================================
 // TASK 1: Preferiti in memoria durante la sessione
 // =======================================================
 let userFavoritiIds = new Set();
