@@ -13,6 +13,7 @@ const jwt        = require('jsonwebtoken');
 const tokenChecker = require('./middleware/tokenChecker');
 const bcrypt = require('bcrypt');
 const SALT_ROUNDS = 10;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret_key';
 
 // --- Configurazione ---
 const app  = express();
@@ -289,16 +290,30 @@ app.post('/api/v1/login', authLimiter, (req, res) => {
                 return res.status(401).json({ error: 'Credenziali non valide. Controlla email e password.' });
             }
 
-            // 3. Genera il JWT
-            const token = jwt.sign(
-                { sub: user.id, email: user.email, name: user.name, surname: user.surname, provider: 'local' },
+            // 3. Genera Access Token (15m) e Refresh Token (30d)
+            const accessToken = jwt.sign(
+                { sub: user.id, email: user.email, name: user.name, surname: user.surname, provider: 'local' }, 
                 JWT_SECRET, 
-                { expiresIn: '24h' }
+                { expiresIn: '15m' }
             );
-
-            res.status(200).json({ 
-                token, 
-                user: { name: user.name, surname: user.surname, email: user.email } 
+            const refreshToken = jwt.sign(
+                { id: user.id }, 
+                JWT_REFRESH_SECRET, 
+                { expiresIn: '30d' }
+            );
+            
+            // 4. Salva il refresh token su file (RF 1.7)
+            user.refreshToken = refreshToken;
+            writeJsonFile(usersFile, users, (werr) => {
+                if (werr) return res.status(500).json({ error: 'Errore nel salvataggio della sessione' });
+            
+                res.status(200).json({ 
+                    message: "Login effettuato",
+                    accessToken,
+                    token: accessToken,
+                    refreshToken,
+                    user: { name: user.name, surname: user.surname, email: user.email } 
+                });
             });
         } catch (compareErr) {
             console.error('[Bcrypt] Errore verifica password:', compareErr);
@@ -306,6 +321,33 @@ app.post('/api/v1/login', authLimiter, (req, res) => {
         }
     });
 });
+
+app.post('/api/v1/refresh-token', (req, res) => {
+    const { refreshToken } = req.body;
+    if (!refreshToken) return res.status(401).json({ error: "Token mancante" });
+
+    jwt.verify(refreshToken, JWT_REFRESH_SECRET, (err, decoded) => {
+        if (err) return res.status(403).json({ error: "Token non valido o scaduto" });
+
+        readJsonFile(usersFile, (uErr, users) => {
+            if (uErr) return res.status(500).json({ error: "Errore lettura database utenti" });
+
+            const user = users.find(u => u.id === decoded.id);
+            if (!user || user.refreshToken !== refreshToken) {
+                return res.status(403).json({ error: "Sessione invalidata da un nuovo login" });
+            }
+
+            // Genera nuovo Access Token a 15 minuti
+            const newAccessToken = jwt.sign(
+                { sub: user.id, email: user.email, name: user.name, surname: user.surname, provider: 'local' }, 
+                JWT_SECRET, 
+                { expiresIn: '15m' }
+            );
+            res.status(200).json({ accessToken: newAccessToken, token: newAccessToken });
+        });
+    });
+});
+
 // =======================================================
 // API: Google SSO
 // =======================================================
