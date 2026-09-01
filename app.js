@@ -17,6 +17,7 @@ const SALT_ROUNDS = 10;
 // --- Configurazione ---
 const app  = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -29,7 +30,10 @@ const authLimiter = rateLimit({
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: 'Troppi tentativi di accesso. Riprova tra 15 minuti.' }
+    handler: (req, res, next, options) => {
+    const mins = Math.max(1, Math.ceil((req.rateLimit.resetTime.getTime() - Date.now()) / 60000));
+    res.status(options.statusCode).json({ error: `Troppi tentativi di accesso. Riprova tra ${mins} ${mins === 1 ? 'minuto' : 'minuti'}.` });
+    }
 });
 
 const segnalazioniLimiter = rateLimit({
@@ -37,7 +41,10 @@ const segnalazioniLimiter = rateLimit({
     max: 5,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: 'Hai inviato troppe segnalazioni. Attendi qualche minuto prima di riprovare.' }
+    handler: (req, res, next, options) => {
+    const mins = Math.max(1, Math.ceil((req.rateLimit.resetTime.getTime() - Date.now()) / 60000));
+    res.status(options.statusCode).json({ error: `Hai inviato troppe segnalazioni. Riprova tra ${mins} ${mins === 1 ? 'minuto' : 'minuti'}.` });
+    }
 });
 
 const PORT = process.env.PORT || 3000;
