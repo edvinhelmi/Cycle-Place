@@ -5,8 +5,6 @@
 2. Autenticazione e Registrazione (RF 1 & RF 2)
 - Username Univoco Pubblico mancante (RF 2.1, RF 2.2):Requisito: La registrazione (sia locale che Google) deve richiedere uno username univoco pubblico, 
 da usare nelle interazioni.  Codice: Vengono gestiti solo name, surname, email, password.  
-Politica di Complessità Password (RF 2.1):Requisito: Minimo 8 caratteri con almeno 1 maiuscola e 1 numero/carattere speciale.  
--> Codice: Sia in frontend (script.js) che backend (app.js) il controllo è limitato a password.length >= 6.  
 - Recupero Password assente (RF 1.4, US 3):Requisito: Servizio di invio email con link monouso/token temporaneo per il reset password.  Codice: Nessun endpoint 
 o modale per il recupero password.  
 - Gestione Sessione e Invalidazione (RF 1.6, RF 1.7, RNF 4.4):Requisito: Refresh token automatico per sessioni fino a 30 giorni e 
