@@ -569,8 +569,10 @@
     color: #ffffff;
 }
 
-.btn-recenter-nav {
-    display: none !important; /* Su desktop non è visibile, si usa il pulsante GPS principale */
+@media (min-width: 769px) {
+    .btn-recenter-nav {
+        display: none !important; /* Su desktop non è visibile, si usa il pulsante GPS principale */
+    }
 }
 
 @media (max-width: 768px) {

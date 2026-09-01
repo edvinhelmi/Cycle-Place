@@ -2218,12 +2218,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Se l'utente sposta manualmente la mappa durante la navigazione, sospende l'auto-follow
-    map.on('dragstart', () => {
+    const handleManualMapInterruption = () => {
         if (isLiveNavigating) {
             isFollowMode = false;
             if (btnRecenterNav) btnRecenterNav.classList.remove('hidden');
         }
-    });
+    };
+
+    map.on('dragstart', handleManualMapInterruption);
+    map.on('zoomstart', handleManualMapInterruption);
 
     if (btnNavBike) {
         btnNavBike.addEventListener('click', () => {
