@@ -263,6 +263,124 @@ function renderSegnalazioni(items) {
 // Esponi per onclick inline
 window.rimuoviPreferito = rimuoviPreferito;
 
+// =======================================================
+// GESTIONE MODIFICA PROFILO, PASSWORD & NOTIFICHE (RF 3.2, RF 3.3)
+// =======================================================
+const btnToggleEdit = document.getElementById('btn-toggle-edit-profile');
+const profileViewMode = document.getElementById('profile-view-mode');
+const profileEditForm = document.getElementById('profile-edit-form');
+const btnCancelEdit = document.getElementById('btn-cancel-edit');
+const editMsg = document.getElementById('edit-profile-msg');
+const editBtnText = document.getElementById('edit-profile-btn-text');
+
+function toggleEditProfile(show) {
+    if (!profileViewMode || !profileEditForm) return;
+    const isEditing = show !== undefined ? show : profileEditForm.classList.contains('hidden');
+    
+    if (isEditing) {
+        profileViewMode.classList.add('hidden');
+        profileEditForm.classList.remove('hidden');
+        if (editBtnText) editBtnText.textContent = 'Chiudi Modifica';
+        
+        // Pre-popola i campi con i dati correnti
+        const decoded = decodeToken(getToken());
+        if (decoded) {
+            document.getElementById('edit-name').value = decoded.name || '';
+            document.getElementById('edit-surname').value = decoded.surname || '';
+        }
+
+        // Se l'accesso è avvenuto tramite Google SSO, nascondi il cambio password
+        const pwdSection = document.getElementById('password-change-section');
+        if (pwdSection && decoded?.provider === 'google') {
+            pwdSection.classList.add('hidden');
+        }
+    } else {
+        profileViewMode.classList.remove('hidden');
+        profileEditForm.classList.add('hidden');
+        if (editBtnText) editBtnText.textContent = 'Modifica Dati';
+        profileEditForm.reset();
+        if (editMsg) editMsg.textContent = '';
+    }
+}
+
+if (btnToggleEdit) btnToggleEdit.addEventListener('click', () => toggleEditProfile());
+if (btnCancelEdit) btnCancelEdit.addEventListener('click', () => toggleEditProfile(false));
+
+if (profileEditForm) {
+    profileEditForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (editMsg) editMsg.textContent = '';
+
+        const name = document.getElementById('edit-name').value.trim();
+        const surname = document.getElementById('edit-surname').value.trim();
+        const notificheEmail = document.getElementById('edit-notif-email').checked;
+        const notificheGuasti = document.getElementById('edit-notif-guasti').checked;
+
+        const currentPassword = document.getElementById('edit-curr-pass').value;
+        const newPassword = document.getElementById('edit-new-pass').value;
+        const confPassword = document.getElementById('edit-conf-pass').value;
+
+        if (newPassword || currentPassword || confPassword) {
+            if (!currentPassword) {
+                editMsg.className = 'text-xs font-bold text-error';
+                editMsg.textContent = '❌ Inserisci la tua password attuale per confermare il cambio password.';
+                return;
+            }
+            if (newPassword !== confPassword) {
+                editMsg.className = 'text-xs font-bold text-error';
+                editMsg.textContent = '❌ La nuova password e la conferma non coincidono.';
+                return;
+            }
+            const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+            if (!PASSWORD_REGEX.test(newPassword)) {
+                editMsg.className = 'text-xs font-bold text-error';
+                editMsg.textContent = '❌ La nuova password deve contenere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale.';
+                return;
+            }
+        }
+
+        try {
+            const res = await fetch('/api/v1/user/profile', {
+                method: 'PUT',
+                headers: authHeaders(),
+                body: JSON.stringify({
+                    name,
+                    surname,
+                    notificheEmail,
+                    notificheGuasti,
+                    currentPassword: currentPassword || undefined,
+                    newPassword: newPassword || undefined
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+
+            // Salva il nuovo token rigenerato
+            if (data.token) {
+                saveToken(data.token);
+            }
+
+            // Aggiorna anagrafica a schermo
+            document.getElementById('p-name').textContent = data.user.name;
+            document.getElementById('p-surname').textContent = data.user.surname;
+            const greetEl = document.getElementById('dash-user-name');
+            if (greetEl) greetEl.textContent = data.user.name;
+
+            editMsg.className = 'text-xs font-bold text-success';
+            editMsg.textContent = '✅ Dati aggiornati con successo!';
+
+            setTimeout(() => {
+                toggleEditProfile(false);
+            }, 1200);
+
+        } catch (err) {
+            editMsg.className = 'text-xs font-bold text-error';
+            editMsg.textContent = '❌ ' + (err.message || 'Errore durante l\'aggiornamento dei dati');
+        }
+    });
+}
+
 // Avvio
 document.addEventListener('DOMContentLoaded', init);
 
