@@ -645,11 +645,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         preferito:    { radius: 9,  fillColor: '#e11d48', color: '#ffffff', weight: 2.5, fillOpacity: 1.0  }
     };
 
-    // Icona a forma di cuore puro rosso vivo (proporzionata e senza contorni)
     const favMarkerIcon = L.divIcon({
         className: 'custom-fav-heart-icon',
         html: `<div style="display:flex; align-items:center; justify-content:center; width:22px; height:22px;">
-                 <i class="fa-solid fa-heart" style="color: #ff0033; font-size: 20px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));"></i>
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="#ff0033" stroke="#7a0014" stroke-width="1.8" stroke-linejoin="round" style="filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));">
+                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                 </svg>
                </div>`,
         iconSize: [22, 22],
         iconAnchor: [11, 11]
