@@ -8,8 +8,6 @@ o modale per il recupero password.
 all'app (con distinzione tra percorso "Standard" e "Più Sicuro" che evita zone con criticità segnalate).  -> Codice: È presente solo un link esterno
 che reindirizza a Google Maps ([https://www.google.com/maps/dir/](https://www.google.com/maps/dir/)...). Non c'è alcun motore di routing interno né 
 evidenziazione delle criticità sul tracciato.    
-- Foto delle Aree di Sosta (RF 5.4):Requisito: Visualizzazione foto nel popup ove disponibili.  -> Codice: I popup mostrano solo attributi testuali 
-(stalli, zona, edificio, link GIS/MITT).  
 
 5. Modulo Segnalazione Furti e Iniziative 
 - (RF 6 & RF 1.1)Modulo Furto Specifico (RF 6, US 10):Requisito: Form dedicato per i furti con data/ora/luogo, pre-compilazione caratteristiche bici 
