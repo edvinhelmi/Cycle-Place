@@ -169,17 +169,45 @@ app.get('/api/v1/config', (req, res) => {
 // API: Autenticazione locale
 // =======================================================
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 app.post('/api/v1/register', (req, res) => {
     const { name, surname, email, password } = req.body;
-    if (!name || !surname || !email || !password)
+    if (!name || !surname || !email || !password) {
         return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
+    }
+
+    const trimmedName = String(name).trim();
+    const trimmedSurname = String(surname).trim();
+    const trimmedEmail = String(email).trim().toLowerCase();
+    const cleanPassword = String(password);
+
+    if (trimmedName.length < 2) {
+        return res.status(400).json({ error: 'Il nome deve contenere almeno 2 caratteri' });
+    }
+    if (trimmedSurname.length < 2) {
+        return res.status(400).json({ error: 'Il cognome deve contenere almeno 2 caratteri' });
+    }
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+        return res.status(400).json({ error: 'Inserisci un indirizzo email valido (es. nome@dominio.it)' });
+    }
+    if (cleanPassword.length < 6) {
+        return res.status(400).json({ error: 'La password deve contenere almeno 6 caratteri' });
+    }
 
     readJsonFile(usersFile, (err, users) => {
         if (err) users = [];
-        if (users.find(u => u.email === email))
+        if (users.find(u => u.email && u.email.toLowerCase() === trimmedEmail)) {
             return res.status(409).json({ error: 'Utente già registrato con questa email' });
+        }
 
-        users.push({ id: Date.now().toString(), name, surname, email, password });
+        users.push({
+            id: Date.now().toString(),
+            name: trimmedName,
+            surname: trimmedSurname,
+            email: trimmedEmail,
+            password: cleanPassword
+        });
         writeJsonFile(usersFile, users, werr => {
             if (werr) return res.status(500).json({ error: 'Errore nel salvataggio utente' });
             res.status(201).json({ message: 'Registrazione completata con successo' });
@@ -189,12 +217,20 @@ app.post('/api/v1/register', (req, res) => {
 
 app.post('/api/v1/login', (req, res) => {
     const { email, password } = req.body;
-    if (!email || !password)
+    if (!email || !password) {
         return res.status(400).json({ error: 'Email e password sono obbligatorie' });
+    }
+
+    const trimmedEmail = String(email).trim().toLowerCase();
+    const cleanPassword = String(password);
+
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+        return res.status(400).json({ error: 'Formato email non valido' });
+    }
 
     readJsonFile(usersFile, (err, users) => {
         if (err) return res.status(500).json({ error: 'Errore interno del server' });
-        const user = users.find(u => u.email === email && u.password === password);
+        const user = users.find(u => u.email && u.email.toLowerCase() === trimmedEmail && u.password === cleanPassword);
         if (!user) return res.status(401).json({ error: 'Credenziali non valide. Controlla email e password.' });
 
         const token = jwt.sign(

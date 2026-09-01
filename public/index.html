@@ -165,25 +165,44 @@
                 <i class="fa-solid fa-user-plus text-primary"></i> <span>Registrazione</span>
             </h2>
             <form id="register-form" novalidate class="space-y-3">
-                <div class="form-control">
-                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.name">Nome</span></label>
-                    <input type="text" id="reg-name" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="given-name" required>
-                </div>
-                <div class="form-control">
-                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.surname">Cognome</span></label>
-                    <input type="text" id="reg-surname" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="family-name" required>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.name">Nome</span></label>
+                        <input type="text" id="reg-name" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="given-name" placeholder="Mario" required>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.surname">Cognome</span></label>
+                        <input type="text" id="reg-surname" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="family-name" placeholder="Rossi" required>
+                    </div>
                 </div>
                 <div class="form-control">
                     <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs">Email</span></label>
-                    <input type="email" id="reg-email" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="email" required>
+                    <input type="email" id="reg-email" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="email" placeholder="mario.rossi@esempio.it" required>
                 </div>
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.password">Password</span></label>
-                    <input type="password" id="reg-password" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="new-password" required>
+                    <div class="flex justify-between items-center py-1">
+                        <label class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.password">Password</label>
+                        <span class="text-[11px] text-slate-400 font-medium" data-i18n="form.passwordHint">Min. 6 caratteri</span>
+                    </div>
+                    <div class="relative flex items-center">
+                        <input type="password" id="reg-password" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium w-full pr-10" autocomplete="new-password" placeholder="••••••••" required>
+                        <button type="button" class="btn-toggle-pwd absolute right-3 text-slate-400 hover:text-slate-700 cursor-pointer p-1" data-target="reg-password" aria-label="Mostra/Nascondi password">
+                            <i class="fa-solid fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.passwordConfirm">Conferma Password</span></label>
+                    <div class="relative flex items-center">
+                        <input type="password" id="reg-password-confirm" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium w-full pr-10" autocomplete="new-password" placeholder="••••••••" required>
+                        <button type="button" class="btn-toggle-pwd absolute right-3 text-slate-400 hover:text-slate-700 cursor-pointer p-1" data-target="reg-password-confirm" aria-label="Mostra/Nascondi password">
+                            <i class="fa-solid fa-eye text-sm"></i>
+                        </button>
+                    </div>
                 </div>
                 <div id="reg-error" class="error-msg text-xs text-error font-semibold mt-1" role="alert" aria-live="polite"></div>
                 <div id="reg-success" class="success-msg text-xs text-success font-semibold mt-1" role="status" aria-live="polite"></div>
-                <button type="submit" class="btn btn-primary btn-block rounded-xl font-bold shadow-md mt-4 text-white" data-i18n="nav.register">Registrati</button>
+                <button type="submit" id="btn-reg-submit" class="btn btn-primary btn-block rounded-xl font-bold shadow-md mt-4 text-white" data-i18n="nav.register">Registrati</button>
             </form>
         </div>
     </div>
@@ -198,14 +217,19 @@
             <form id="login-form" novalidate class="space-y-3">
                 <div class="form-control">
                     <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs">Email</span></label>
-                    <input type="email" id="login-email" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="email" required>
+                    <input type="email" id="login-email" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="email" placeholder="mario.rossi@esempio.it" required>
                 </div>
                 <div class="form-control">
                     <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.password">Password</span></label>
-                    <input type="password" id="login-password" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="current-password" required>
+                    <div class="relative flex items-center">
+                        <input type="password" id="login-password" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium w-full pr-10" autocomplete="current-password" placeholder="••••••••" required>
+                        <button type="button" class="btn-toggle-pwd absolute right-3 text-slate-400 hover:text-slate-700 cursor-pointer p-1" data-target="login-password" aria-label="Mostra/Nascondi password">
+                            <i class="fa-solid fa-eye text-sm"></i>
+                        </button>
+                    </div>
                 </div>
                 <div id="login-error" class="error-msg text-xs text-error font-semibold mt-1" role="alert" aria-live="polite"></div>
-                <button type="submit" class="btn btn-primary btn-block rounded-xl font-bold shadow-md mt-4 text-white" data-i18n="nav.login">Accedi</button>
+                <button type="submit" id="btn-login-submit" class="btn btn-primary btn-block rounded-xl font-bold shadow-md mt-4 text-white" data-i18n="nav.login">Accedi</button>
             </form>
             <div class="divider my-4 text-xs font-bold uppercase tracking-wider text-slate-400" data-i18n="modal.or">oppure</div>
             <div id="google-btn-container" class="flex justify-center min-h-[44px]"></div>

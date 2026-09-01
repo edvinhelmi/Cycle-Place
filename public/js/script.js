@@ -50,12 +50,21 @@ const TRANSLATIONS = {
         'modal.register.title': 'Registrazione',
         'modal.segnala.title':  'Segnala un problema',
         'modal.or':             'oppure',
-        'form.name':        'Nome',
-        'form.surname':     'Cognome',
-        'form.password':    'Password',
-        'form.tipoProblem': 'Tipo di problema',
-        'form.notes':       'Note aggiuntive',
-        'form.sendReport':  'Invia segnalazione',
+        'form.name':            'Nome',
+        'form.surname':         'Cognome',
+        'form.password':        'Password',
+        'form.passwordConfirm': 'Conferma Password',
+        'form.passwordHint':    'Min. 6 caratteri',
+        'form.tipoProblem':     'Tipo di problema',
+        'form.notes':           'Note aggiuntive',
+        'form.sendReport':      'Invia segnalazione',
+        'auth.errName':             'Il nome deve contenere almeno 2 caratteri',
+        'auth.errSurname':          'Il cognome deve contenere almeno 2 caratteri',
+        'auth.errEmail':            'Inserisci un indirizzo email valido',
+        'auth.errPasswordLength':   'La password deve contenere almeno 6 caratteri',
+        'auth.errPasswordMismatch': 'Le password non coincidono',
+        'auth.errEmptyFields':      'Compila tutti i campi obbligatori',
+        'auth.successRegister':     'Registrazione completata! Ora puoi effettuare il login.',
         'seg.bikeLeft':   'Bici abbandonata',
         'seg.damage':     'Danno strutturale',
         'seg.full':       'Rastrelliera piena',
@@ -125,12 +134,21 @@ const TRANSLATIONS = {
         'modal.register.title': 'Register',
         'modal.segnala.title':  'Report an issue',
         'modal.or':             'or',
-        'form.name':        'First Name',
-        'form.surname':     'Last Name',
-        'form.password':    'Password',
-        'form.tipoProblem': 'Issue type',
-        'form.notes':       'Additional notes',
-        'form.sendReport':  'Submit report',
+        'form.name':            'First Name',
+        'form.surname':         'Last Name',
+        'form.password':        'Password',
+        'form.passwordConfirm': 'Confirm Password',
+        'form.passwordHint':    'Min. 6 characters',
+        'form.tipoProblem':     'Issue type',
+        'form.notes':           'Additional notes',
+        'form.sendReport':      'Submit report',
+        'auth.errName':             'First name must contain at least 2 characters',
+        'auth.errSurname':          'Last name must contain at least 2 characters',
+        'auth.errEmail':            'Please enter a valid email address',
+        'auth.errPasswordLength':   'Password must be at least 6 characters',
+        'auth.errPasswordMismatch': 'Passwords do not match',
+        'auth.errEmptyFields':      'Please fill in all required fields',
+        'auth.successRegister':     'Registration successful! You can now log in.',
         'seg.bikeLeft':   'Abandoned bike',
         'seg.damage':     'Structural damage',
         'seg.full':       'Rack is full',
@@ -201,12 +219,21 @@ const TRANSLATIONS = {
         'modal.register.title': 'Registrierung',
         'modal.segnala.title':  'Problem melden',
         'modal.or':             'oder',
-        'form.name':        'Vorname',
-        'form.surname':     'Nachname',
-        'form.password':    'Passwort',
-        'form.tipoProblem': 'Problemart',
-        'form.notes':       'Zusätzliche Anmerkungen',
-        'form.sendReport':  'Meldung senden',
+        'form.name':            'Vorname',
+        'form.surname':         'Nachname',
+        'form.password':        'Passwort',
+        'form.passwordConfirm': 'Passwort bestätigen',
+        'form.passwordHint':    'Mind. 6 Zeichen',
+        'form.tipoProblem':     'Problemart',
+        'form.notes':           'Zusätzliche Anmerkungen',
+        'form.sendReport':      'Meldung senden',
+        'auth.errName':             'Vorname muss mindestens 2 Zeichen lang sein',
+        'auth.errSurname':          'Nachname muss mindestens 2 Zeichen lang sein',
+        'auth.errEmail':            'Bitte geben Sie eine gültige E-Mail-Adresse ein',
+        'auth.errPasswordLength':   'Das Passwort muss mindestens 6 Zeichen lang sein',
+        'auth.errPasswordMismatch': 'Passwörter stimmen nicht überein',
+        'auth.errEmptyFields':      'Bitte füllen Sie alle Pflichtfelder aus',
+        'auth.successRegister':     'Registrierung erfolgreich! Sie können sich jetzt anmelden.',
         'seg.bikeLeft':   'Verlassenes Fahrrad',
         'seg.damage':     'Strukturschaden',
         'seg.full':       'Ständer ist voll',
@@ -1463,51 +1490,193 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function clearForms() {
         ['register-form', 'login-form'].forEach(id => {
-            const f = document.getElementById(id); if (f) f.reset();
+            const f = document.getElementById(id); 
+            if (f) {
+                f.reset();
+                f.querySelectorAll('input').forEach(inp => {
+                    inp.classList.remove('input-error');
+                    if (inp.type === 'text' && (inp.id.includes('password') || inp.id.includes('pass'))) {
+                        inp.type = 'password';
+                    }
+                });
+            }
+        });
+        document.querySelectorAll('.btn-toggle-pwd').forEach(btn => {
+            btn.innerHTML = '<i class="fa-solid fa-eye text-sm"></i>';
         });
         ['reg-error', 'reg-success', 'login-error', 'google-error'].forEach(id => {
             const el = document.getElementById(id); if (el) el.textContent = '';
         });
     }
 
+    // Toggle visibilità password (eye icon)
+    document.querySelectorAll('.btn-toggle-pwd').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            btn.innerHTML = isPassword ? '<i class="fa-solid fa-eye-slash text-sm"></i>' : '<i class="fa-solid fa-eye text-sm"></i>';
+        });
+    });
+
+    // Rimuovi input-error in tempo reale alla digitazione
+    document.querySelectorAll('#register-form input, #login-form input').forEach(input => {
+        input.addEventListener('input', () => {
+            input.classList.remove('input-error');
+            const form = input.closest('form');
+            if (form) {
+                const errEl = form.querySelector('.error-msg');
+                if (errEl) errEl.textContent = '';
+            }
+        });
+    });
+
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     // =========================================================
-    // Auth locale
+    // Auth locale: Registrazione
     // =========================================================
     document.getElementById('register-form').addEventListener('submit', async e => {
         e.preventDefault();
         const errorEl   = document.getElementById('reg-error');
         const successEl = document.getElementById('reg-success');
+        const btnSubmit = document.getElementById('btn-reg-submit');
         errorEl.textContent = successEl.textContent = '';
+
+        const nameInput    = document.getElementById('reg-name');
+        const surnameInput = document.getElementById('reg-surname');
+        const emailInput   = document.getElementById('reg-email');
+        const passInput    = document.getElementById('reg-password');
+        const passConfInput= document.getElementById('reg-password-confirm');
+
+        const name     = nameInput ? nameInput.value.trim() : '';
+        const surname  = surnameInput ? surnameInput.value.trim() : '';
+        const email    = emailInput ? emailInput.value.trim().toLowerCase() : '';
+        const password = passInput ? passInput.value : '';
+        const passConf = passConfInput ? passConfInput.value : password;
+
+        // Reset visual error state
+        [nameInput, surnameInput, emailInput, passInput, passConfInput].forEach(inp => inp && inp.classList.remove('input-error'));
+
+        // Controlli di validazione approfonditi
+        if (!name || !surname || !email || !password || !passConf) {
+            errorEl.textContent = '❌ ' + tr('auth.errEmptyFields');
+            if (!name && nameInput) nameInput.classList.add('input-error');
+            if (!surname && surnameInput) surnameInput.classList.add('input-error');
+            if (!email && emailInput) emailInput.classList.add('input-error');
+            if (!password && passInput) passInput.classList.add('input-error');
+            if (!passConf && passConfInput) passConfInput.classList.add('input-error');
+            return;
+        }
+
+        if (name.length < 2) {
+            errorEl.textContent = '❌ ' + tr('auth.errName');
+            if (nameInput) { nameInput.classList.add('input-error'); nameInput.focus(); }
+            return;
+        }
+
+        if (surname.length < 2) {
+            errorEl.textContent = '❌ ' + tr('auth.errSurname');
+            if (surnameInput) { surnameInput.classList.add('input-error'); surnameInput.focus(); }
+            return;
+        }
+
+        if (!EMAIL_REGEX.test(email)) {
+            errorEl.textContent = '❌ ' + tr('auth.errEmail');
+            if (emailInput) { emailInput.classList.add('input-error'); emailInput.focus(); }
+            return;
+        }
+
+        if (password.length < 6) {
+            errorEl.textContent = '❌ ' + tr('auth.errPasswordLength');
+            if (passInput) { passInput.classList.add('input-error'); passInput.focus(); }
+            return;
+        }
+
+        if (password !== passConf) {
+            errorEl.textContent = '❌ ' + tr('auth.errPasswordMismatch');
+            if (passConfInput) { passConfInput.classList.add('input-error'); passConfInput.focus(); }
+            return;
+        }
+
+        // Stato di caricamento
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span class="loading loading-spinner loading-xs"></span> ' + tr('nav.register');
+        }
+
         try {
             const res  = await fetch('/api/v1/register', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name:     document.getElementById('reg-name').value.trim(),
-                    surname:  document.getElementById('reg-surname').value.trim(),
-                    email:    document.getElementById('reg-email').value.trim(),
-                    password: document.getElementById('reg-password').value
-                })
+                body: JSON.stringify({ name, surname, email, password })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
-            successEl.textContent = '✅ Registrazione completata! Puoi effettuare il login.';
+
+            successEl.textContent = '✅ ' + tr('auth.successRegister');
             document.getElementById('register-form').reset();
+            
+            // Dopo 1.6s chiude la registrazione e apre il login con l'email già compilata
+            setTimeout(() => {
+                closeModal(registerModal);
+                openModal(loginModal);
+                const loginEmailInput = document.getElementById('login-email');
+                if (loginEmailInput) {
+                    loginEmailInput.value = email;
+                    document.getElementById('login-password')?.focus();
+                }
+            }, 1600);
         } catch (err) {
             errorEl.textContent = '❌ ' + (err.message || 'Errore di registrazione');
+        } finally {
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = tr('nav.register');
+            }
         }
     });
 
+    // =========================================================
+    // Auth locale: Login
+    // =========================================================
     document.getElementById('login-form').addEventListener('submit', async e => {
         e.preventDefault();
-        const errorEl = document.getElementById('login-error');
+        const errorEl   = document.getElementById('login-error');
+        const btnSubmit = document.getElementById('btn-login-submit');
         errorEl.textContent = '';
+
+        const emailInput = document.getElementById('login-email');
+        const passInput  = document.getElementById('login-password');
+
+        const email    = emailInput ? emailInput.value.trim().toLowerCase() : '';
+        const password = passInput ? passInput.value : '';
+
+        [emailInput, passInput].forEach(inp => inp && inp.classList.remove('input-error'));
+
+        if (!email || !password) {
+            errorEl.textContent = '❌ ' + tr('auth.errEmptyFields');
+            if (!email && emailInput) emailInput.classList.add('input-error');
+            if (!password && passInput) passInput.classList.add('input-error');
+            return;
+        }
+
+        if (!EMAIL_REGEX.test(email)) {
+            errorEl.textContent = '❌ ' + tr('auth.errEmail');
+            if (emailInput) { emailInput.classList.add('input-error'); emailInput.focus(); }
+            return;
+        }
+
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span class="loading loading-spinner loading-xs"></span> ' + tr('nav.login');
+        }
+
         try {
             const res  = await fetch('/api/v1/login', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email:    document.getElementById('login-email').value.trim(),
-                    password: document.getElementById('login-password').value
-                })
+                body: JSON.stringify({ email, password })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
@@ -1516,7 +1685,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             loginSuccess(data.user);
             setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
         } catch (err) {
-            errorEl.textContent = '❌ Credenziali errate: ' + (err.message || 'email o password non validi');
+            errorEl.textContent = '❌ ' + (err.message || 'Credenziali non valide');
+            if (emailInput) emailInput.classList.add('input-error');
+            if (passInput) passInput.classList.add('input-error');
+        } finally {
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = tr('nav.login');
+            }
         }
     });
 
