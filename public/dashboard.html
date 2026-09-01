@@ -110,7 +110,6 @@
                 </div>
 
                 <!-- Sezione Cambio Password (RF 3.3) -->
-                <!-- Sezione Cambio Password (RF 3.3) -->
                 <div id="password-change-section" class="bg-base-100/80 border border-base-200/80 rounded-2xl p-3.5 space-y-3 shadow-xs">
                     <h4 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fa-solid fa-lock text-primary"></i> Modifica Password (opzionale)
@@ -118,31 +117,31 @@
                     
                     <div>
                         <label class="label text-[11px] font-bold text-slate-500 py-1">Password Attuale</label>
-                        <div class="relative w-full">
-                            <input type="password" id="edit-curr-pass" placeholder="Inserisci la password attuale" autocomplete="new-password" class="input input-bordered input-sm w-full rounded-xl text-xs pr-10" />
-                            <button type="button" class="toggle-pass-btn absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer z-10" data-target="edit-curr-pass">
+                        <div style="position: relative; width: 100%;">
+                            <input type="password" id="edit-curr-pass" placeholder="Inserisci la password attuale" autocomplete="new-password" class="input input-bordered input-sm w-full rounded-xl text-xs" style="padding-right: 2.5rem;" />
+                            <span class="toggle-pass-btn text-slate-400 hover:text-slate-600" data-target="edit-curr-pass" style="position: absolute; right: 10px; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; width: 24px; cursor: pointer; z-index: 20;">
                                 <i class="fa-regular fa-eye"></i>
-                            </button>
+                            </span>
                         </div>
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="w-full">
+                        <div>
                             <label class="label text-[11px] font-bold text-slate-500 py-1">Nuova Password</label>
-                            <div class="relative w-full">
-                                <input type="password" id="edit-new-pass" placeholder="Min. 8 car, 1 maiusc, 1 num, 1 spec" autocomplete="new-password" class="input input-bordered input-sm w-full rounded-xl text-xs pr-10" />
-                                <button type="button" class="toggle-pass-btn absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer z-10" data-target="edit-new-pass">
+                            <div style="position: relative; width: 100%;">
+                                <input type="password" id="edit-new-pass" placeholder="Min. 8 car, 1 maiusc, 1 num, 1 spec" autocomplete="new-password" class="input input-bordered input-sm w-full rounded-xl text-xs" style="padding-right: 2.5rem;" />
+                                <span class="toggle-pass-btn text-slate-400 hover:text-slate-600" data-target="edit-new-pass" style="position: absolute; right: 10px; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; width: 24px; cursor: pointer; z-index: 20;">
                                     <i class="fa-regular fa-eye"></i>
-                                </button>
+                                </span>
                             </div>
                         </div>
-                        <div class="w-full">
+                        <div>
                             <label class="label text-[11px] font-bold text-slate-500 py-1">Conferma Nuova Password</label>
-                            <div class="relative w-full">
-                                <input type="password" id="edit-conf-pass" placeholder="Ripeti nuova password" autocomplete="new-password" class="input input-bordered input-sm w-full rounded-xl text-xs pr-10" />
-                                <button type="button" class="toggle-pass-btn absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer z-10" data-target="edit-conf-pass">
+                            <div style="position: relative; width: 100%;">
+                                <input type="password" id="edit-conf-pass" placeholder="Ripeti nuova password" autocomplete="new-password" class="input input-bordered input-sm w-full rounded-xl text-xs" style="padding-right: 2.5rem;" />
+                                <span class="toggle-pass-btn text-slate-400 hover:text-slate-600" data-target="edit-conf-pass" style="position: absolute; right: 10px; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; width: 24px; cursor: pointer; z-index: 20;">
                                     <i class="fa-regular fa-eye"></i>
-                                </button>
+                                </span>
                             </div>
                         </div>
                     </div>
