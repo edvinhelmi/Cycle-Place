@@ -314,7 +314,6 @@ if (profileEditForm) {
         const name = document.getElementById('edit-name').value.trim();
         const surname = document.getElementById('edit-surname').value.trim();
         const notificheEmail = document.getElementById('edit-notif-email').checked;
-        const notificheGuasti = document.getElementById('edit-notif-guasti').checked;
 
         const currentPassword = document.getElementById('edit-curr-pass').value;
         const newPassword = document.getElementById('edit-new-pass').value;
@@ -347,7 +346,6 @@ if (profileEditForm) {
                     name,
                     surname,
                     notificheEmail,
-                    notificheGuasti,
                     currentPassword: currentPassword || undefined,
                     newPassword: newPassword || undefined
                 })
