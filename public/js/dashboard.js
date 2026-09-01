@@ -402,6 +402,56 @@ if (profileEditForm) {
     });
 }
 
+// =======================================================
+// CANCELLAZIONE ACCOUNT GDPR (RF 3.4)
+// =======================================================
+const modalDeleteAccount = document.getElementById('modal-delete-account');
+const btnOpenDeleteModal = document.getElementById('btn-open-delete-modal');
+const btnCancelDeleteAccount = document.getElementById('btn-cancel-delete-account');
+const btnConfirmDeleteAccount = document.getElementById('btn-confirm-delete-account');
+const deleteAccountError = document.getElementById('delete-account-error');
+
+if (btnOpenDeleteModal && modalDeleteAccount) {
+    btnOpenDeleteModal.addEventListener('click', () => {
+        if (deleteAccountError) deleteAccountError.textContent = '';
+        modalDeleteAccount.showModal();
+    });
+}
+
+if (btnCancelDeleteAccount && modalDeleteAccount) {
+    btnCancelDeleteAccount.addEventListener('click', () => {
+        modalDeleteAccount.close();
+    });
+}
+
+if (btnConfirmDeleteAccount) {
+    btnConfirmDeleteAccount.addEventListener('click', async () => {
+        btnConfirmDeleteAccount.disabled = true;
+        btnConfirmDeleteAccount.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Eliminazione...';
+
+        try {
+            const res = await fetch('/api/v1/user/account', {
+                method: 'DELETE',
+                headers: authHeaders()
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Errore durante la cancellazione');
+
+            // Rimuovi token locale e reindirizza alla home
+            removeToken();
+            window.location.href = '/?deleted=1';
+
+        } catch (err) {
+            btnConfirmDeleteAccount.disabled = false;
+            btnConfirmDeleteAccount.innerHTML = '<i class="fa-solid fa-trash-can"></i> Sì, Elimina Definitivamente';
+            if (deleteAccountError) {
+                deleteAccountError.textContent = '❌ ' + err.message;
+            }
+        }
+    });
+}
+
 // Avvio
 document.addEventListener('DOMContentLoaded', init);
 
