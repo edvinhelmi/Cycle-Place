@@ -135,6 +135,7 @@ window.toggleFavorito = async function(id, tipologia, stalli, zona, lat, lng) {
                 btn.className = "popup-btn btn btn-sm btn-outline btn-error rounded-xl font-bold flex-1 min-w-0 text-xs px-2 shadow-xs whitespace-normal text-center leading-tight py-1.5 h-auto min-h-[2.4rem] flex items-center justify-center gap-1.5";
             }
         }
+        applyFiltersAndSearch(false);
     } catch (e) { console.error('Errore toggle preferito:', e); }
 };
 
@@ -346,7 +347,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Stato utente — login / logout
-    function loginSuccess(user) {
+    async function loginSuccess(user) {
         if (btnLoginModal)    btnLoginModal.classList.add('hidden');
         if (btnRegisterModal) btnRegisterModal.classList.add('hidden');
         if (btnDashboard)     btnDashboard.classList.remove('hidden');
@@ -355,7 +356,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             userGreeting.classList.remove('hidden');
             userGreeting.innerHTML = `<i class="fa-solid fa-circle-user"></i> <span>Ciao, <strong>${user.name}</strong>!</span>`;
         }
-        loadUserPreferiti();
+        await loadUserPreferiti();
+        applyFiltersAndSearch(false);
     }
 
     function logoutUser() {
@@ -371,6 +373,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             userGreeting.textContent = '';
         }
         closeMobileMenu();
+        applyFiltersAndSearch(false);
     }
 
     // Ripristino sessione da localStorage
@@ -638,7 +641,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         tradizionale: { radius: 7,  fillColor: '#2980b9', color: '#1a5276', weight: 1.5, fillOpacity: 0.9  },
         bloccatelaio: { radius: 8,  fillColor: '#e67e22', color: '#a04000', weight: 1.5, fillOpacity: 0.9  },
         piena:        { radius: 7,  fillColor: '#c0392b', color: '#7b241c', weight: 1.5, fillOpacity: 0.9  },
-        parcheggio:   { radius: 10, fillColor: '#27ae60', color: '#1a7a40', weight: 2,   fillOpacity: 0.95 }
+        parcheggio:   { radius: 10, fillColor: '#27ae60', color: '#1a7a40', weight: 2,   fillOpacity: 0.95 },
+        preferito:    { radius: 9,  fillColor: '#e11d48', color: '#ffffff', weight: 2.5, fillOpacity: 1.0  }
     };
 
     const mapErrorBanner = document.getElementById('map-error-banner');
@@ -776,7 +780,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const pienaVisible = hidePiene ? !isPiena : true;
                 if (!typeVisible || !pienaVisible) return;
 
-                const stile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
+                const isFav = userFavoritiIds.has(props.id);
+                const baseStile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
+                const stile = isFav ? STILI.preferito : baseStile;
                 const layer = L.circleMarker(latlng, stile);
                 layer.bindPopup(() => buildRastrellieraPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
@@ -805,7 +811,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (dist > 200) return;
                 if (!showPark) return;
 
-                const layer = L.circleMarker(latlng, STILI.parcheggio);
+                const parkId = feature.properties.id || 10001;
+                const isFav = userFavoritiIds.has(parkId);
+                const stile = isFav ? STILI.preferito : STILI.parcheggio;
+                const layer = L.circleMarker(latlng, stile);
                 layer.bindPopup(() => buildParcheggioPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
                     minWidth: 260,
@@ -904,7 +913,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // - Bloccatelaio piena (0 posti) -> STILI.piena (ROSSO)
                 // - Bloccatelaio con posti liberi -> STILI.bloccatelaio (ARANCIONE)
                 // - Tradizionale -> SEMPRE STILI.tradizionale (BLU)
-                const stile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
+                const isFav = userFavoritiIds.has(props.id);
+                const baseStile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
+                const stile = isFav ? STILI.preferito : baseStile;
                 const layer = L.circleMarker(latlng, stile);
                 layer.bindPopup(() => buildRastrellieraPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
@@ -933,7 +944,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!featureMatchesSearch(props, currentSearchQuery)) return;
                 if (!showPark) return;
 
-                const layer = L.circleMarker(latlng, STILI.parcheggio);
+                const parkId = props.id || 10001;
+                const isFav = userFavoritiIds.has(parkId);
+                const stile = isFav ? STILI.preferito : STILI.parcheggio;
+                const layer = L.circleMarker(latlng, stile);
                 layer.bindPopup(() => buildParcheggioPopup(props, coords[1], coords[0]), {
                     maxWidth: 320,
                     minWidth: 260,
