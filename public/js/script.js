@@ -645,6 +645,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         preferito:    { radius: 9,  fillColor: '#e11d48', color: '#ffffff', weight: 2.5, fillOpacity: 1.0  }
     };
 
+    const favMarkerIcon = L.divIcon({
+        className: 'custom-fav-pin-wrapper',
+        html: `<div class="w-7 h-7 rounded-full bg-rose-600 text-white flex items-center justify-center border-2 border-white text-xs shadow-md" style="box-shadow: 0 2px 6px rgba(0,0,0,0.3);"><i class="fa-solid fa-heart"></i></div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+    });
+
     const mapErrorBanner = document.getElementById('map-error-banner');
     function showMapError(msg) {
         if (mapErrorBanner) { mapErrorBanner.textContent = '⚠️ ' + msg; mapErrorBanner.classList.remove('hidden'); }
