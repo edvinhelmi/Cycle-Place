@@ -690,11 +690,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const favMarkerIcon = L.divIcon({
         className: 'custom-fav-heart-icon',
-        html: `<div class="w-6 h-6 rounded-full bg-[#e11d48] text-white flex items-center justify-center shadow-md border-2 border-white text-[11px] leading-none transition-transform hover:scale-110">
-                 <i class="fa-solid fa-heart"></i>
-               </div>`,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
+        html: `<div class="custom-fav-heart-pin"><i class="fa-solid fa-heart"></i></div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -14]
     });
 
     const mapErrorBanner = document.getElementById('map-error-banner');
@@ -1249,6 +1248,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 5. FETCH DATI DAL BACKEND (Salvataggio nel Model)
     // =========================================================
     async function loadMapData() {
+        if (isTokenValid(getToken())) {
+            await loadUserPreferiti();
+        }
         try {
             const res = await fetch('/api/v1/rastrelliere');
             if (!res.ok) throw new Error(`HTTP ${res.status}`);

@@ -415,10 +415,11 @@ app.post('/api/v1/user/preferiti', tokenChecker, (req, res) => {
         if (err) data = {};
         const uid = req.user.sub;
         if (!data[uid]) data[uid] = [];
-        if (data[uid].find(f => f.id === rastrellieraId))
+        const numId = Number(rastrellieraId);
+        if (data[uid].find(f => Number(f.id) === numId || f.id === rastrellieraId))
             return res.status(409).json({ error: 'Già nei preferiti' });
 
-        data[uid].push({ id: rastrellieraId, tipologia, stalli, zona, lat, lng, savedAt: new Date().toISOString() });
+        data[uid].push({ id: numId, tipologia, stalli, zona, lat, lng, savedAt: new Date().toISOString() });
         writeJsonFile(preferitiFile, data, werr => {
             if (werr) return res.status(500).json({ error: 'Errore salvataggio preferiti' });
             res.status(201).json({ message: 'Aggiunto ai preferiti' });
@@ -427,12 +428,12 @@ app.post('/api/v1/user/preferiti', tokenChecker, (req, res) => {
 });
 
 app.delete('/api/v1/user/preferiti/:id', tokenChecker, (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     readJsonFile(preferitiFile, (err, data) => {
         if (err) return res.status(500).json({ error: 'Errore lettura preferiti' });
         const uid = req.user.sub;
         if (!data[uid]) return res.status(404).json({ error: 'Nessun preferito trovato' });
-        data[uid] = data[uid].filter(f => f.id !== id);
+        data[uid] = data[uid].filter(f => Number(f.id) !== id && f.id !== req.params.id);
         writeJsonFile(preferitiFile, data, werr => {
             if (werr) return res.status(500).json({ error: 'Errore salvataggio' });
             res.status(200).json({ message: 'Rimosso dai preferiti' });
