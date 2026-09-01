@@ -4,114 +4,6 @@
  */
 
 const TOKEN_KEY = 'tbp_jwt';
-const LANG_KEY  = 'tbp_lang';
-
-// =======================================================
-// i18n — Dizionario multilingua completo (IT / EN / DE)
-// =======================================================
-const TRANSLATIONS = {
-    it: {
-        'nav.backToMap':      'Torna alla Mappa',
-        'nav.logout':         'Logout',
-        'dash.profile':       'Profilo',
-        'dash.name':          'Nome',
-        'dash.surname':       'Cognome',
-        'dash.provider':      'Accesso via',
-        'dash.favourites':    'Rastrelliere Preferite',
-        'dash.noFavourites':  'Nessuna rastrelliera salvata ancora.',
-        'dash.reports':       'Le Mie Segnalazioni',
-        'dash.noReports':     'Nessuna segnalazione inviata.',
-        'dash.remove':        'Rimuovi',
-        'dash.stalli':        'stalli',
-        'dash.zone':          'Zona',
-        'dash.savedOn':       'Salvata il',
-        'dash.rack':          'Rastrelliera',
-        'dash.localAccount':  'Account locale',
-        'dash.googleAccount': 'Google SSO',
-        'tipo.bici_abbandonata':   'Bici abbandonata',
-        'tipo.danno_strutturale':  'Danno strutturale',
-        'tipo.rastrelliera_piena': 'Rastrelliera piena',
-        'tipo.vandalismo':         'Vandalismo',
-        'tipo.altro':              'Altro',
-    },
-    en: {
-        'nav.backToMap':      'Back to Map',
-        'nav.logout':         'Logout',
-        'dash.profile':       'Profile',
-        'dash.name':          'First Name',
-        'dash.surname':       'Last Name',
-        'dash.provider':      'Signed in via',
-        'dash.favourites':    'Favourite Racks',
-        'dash.noFavourites':  'No saved racks yet.',
-        'dash.reports':       'My Reports',
-        'dash.noReports':     'No reports submitted yet.',
-        'dash.remove':        'Remove',
-        'dash.stalli':        'slots',
-        'dash.zone':          'Zone',
-        'dash.savedOn':       'Saved on',
-        'dash.rack':          'Rack',
-        'dash.localAccount':  'Local Account',
-        'dash.googleAccount': 'Google SSO',
-        'tipo.bici_abbandonata':   'Abandoned bike',
-        'tipo.danno_strutturale':  'Structural damage',
-        'tipo.rastrelliera_piena': 'Rack is full',
-        'tipo.vandalismo':         'Vandalism',
-        'tipo.altro':              'Other',
-    },
-    de: {
-        'nav.backToMap':      'Zurück zur Karte',
-        'nav.logout':         'Abmelden',
-        'dash.profile':       'Profil',
-        'dash.name':          'Vorname',
-        'dash.surname':       'Nachname',
-        'dash.provider':      'Angemeldet über',
-        'dash.favourites':    'Gespeicherte Fahrradständer',
-        'dash.noFavourites':  'Noch keine gespeicherten Ständer.',
-        'dash.reports':       'Meine Meldungen',
-        'dash.noReports':     'Noch keine Meldungen gesendet.',
-        'dash.remove':        'Entfernen',
-        'dash.stalli':        'Plätze',
-        'dash.zone':          'Zone',
-        'dash.savedOn':       'Gespeichert am',
-        'dash.rack':          'Fahrradständer',
-        'dash.localAccount':  'Lokales Konto',
-        'dash.googleAccount': 'Google SSO',
-        'tipo.bici_abbandonata':   'Verlassenes Fahrrad',
-        'tipo.danno_strutturale':  'Strukturschaden',
-        'tipo.rastrelliera_piena': 'Ständer ist voll',
-        'tipo.vandalismo':         'Vandalismus',
-        'tipo.altro':              'Sonstiges',
-    }
-};
-
-let currentLang = localStorage.getItem(LANG_KEY) || 'it';
-
-function tr(key) {
-    return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || key;
-}
-
-function applyTranslations() {
-    document.documentElement.lang = currentLang;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        const val = tr(key);
-        // Se l'elemento ha un elemento figlio span o testo, preserviamo eventuali icone
-        const textSpan = el.querySelector('span');
-        if (textSpan) {
-            textSpan.textContent = val;
-        } else {
-            el.textContent = val;
-        }
-    });
-    const langSelect = document.getElementById('lang-select');
-    if (langSelect) langSelect.value = currentLang;
-
-    // Sincronizza bandiera SVG
-    const flagIcon = document.getElementById('lang-flag-icon');
-    if (flagIcon) {
-        flagIcon.className = currentLang === 'en' ? 'fi fi-gb' : (currentLang === 'de' ? 'fi fi-de' : 'fi fi-it');
-    }
-}
 
 // =======================================================
 // JWT Helpers
@@ -136,7 +28,8 @@ function authHeaders() {
 
 function formatDate(iso) {
     if (!iso) return '—';
-    const loc = currentLang === 'de' ? 'de-DE' : (currentLang === 'en' ? 'en-US' : 'it-IT');
+    const lang = I18n.getLanguage();
+    const loc = lang === 'de' ? 'de-DE' : (lang === 'en' ? 'en-US' : 'it-IT');
     return new Date(iso).toLocaleString(loc, {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
@@ -151,7 +44,7 @@ let cachedSegnalazioni = [];
 // Inizializzazione Dashboard
 // =======================================================
 async function init() {
-    applyTranslations();
+    await I18n.init();
 
     const token = getToken();
     if (!isTokenValid(token)) {
@@ -161,6 +54,15 @@ async function init() {
 
     const user = decodeToken(token);
 
+    function updateProfileProvider() {
+        const pProvider = document.getElementById('p-provider');
+        if (pProvider) {
+            pProvider.innerHTML = user.provider === 'google' 
+                ? '<i class="fa-brands fa-google text-primary"></i> <span>' + tr('dash.googleAccount') + '</span>'
+                : '<i class="fa-solid fa-house-user"></i> <span>' + tr('dash.localAccount') + '</span>';
+        }
+    }
+
     // Navbar & Saluto utente
     const userNameSpan = document.getElementById('dash-user-name');
     if (userNameSpan) userNameSpan.textContent = user.name || 'Utente';
@@ -169,37 +71,21 @@ async function init() {
     const pName     = document.getElementById('p-name');
     const pSurname  = document.getElementById('p-surname');
     const pEmail    = document.getElementById('p-email');
-    const pProvider = document.getElementById('p-provider');
 
     if (pName)     pName.textContent     = user.name    || '—';
     if (pSurname)  pSurname.textContent  = user.surname || '—';
     if (pEmail)    pEmail.textContent    = user.email   || '—';
-    if (pProvider) {
-        pProvider.innerHTML = user.provider === 'google' 
-            ? '<i class="fa-brands fa-google text-primary"></i> <span>' + tr('dash.googleAccount') + '</span>'
-            : '<i class="fa-solid fa-house-user"></i> <span>' + tr('dash.localAccount') + '</span>';
-    }
+    updateProfileProvider();
 
     // Setup Mobile Hamburger Menu (RNF1, RNF6)
     setupMobileMenu();
 
-    // Listener Selettore Lingua
-    const langSelect = document.getElementById('lang-select');
-    if (langSelect) {
-        langSelect.value = currentLang;
-        langSelect.addEventListener('change', () => {
-            currentLang = langSelect.value;
-            localStorage.setItem(LANG_KEY, currentLang);
-            applyTranslations();
-            if (pProvider) {
-                pProvider.innerHTML = user.provider === 'google' 
-                    ? '<i class="fa-brands fa-google text-primary"></i> <span>' + tr('dash.googleAccount') + '</span>'
-                    : '<i class="fa-solid fa-house-user"></i> <span>' + tr('dash.localAccount') + '</span>';
-            }
-            renderPreferiti(cachedPreferiti);
-            renderSegnalazioni(cachedSegnalazioni);
-        });
-    }
+    // Sottoscrizione al cambio lingua I18n
+    I18n.onLanguageChange(() => {
+        updateProfileProvider();
+        renderPreferiti(cachedPreferiti);
+        renderSegnalazioni(cachedSegnalazioni);
+    });
 
     // Carica Preferiti e Segnalazioni
     await Promise.all([loadPreferiti(), loadSegnalazioni()]);

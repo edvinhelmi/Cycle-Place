@@ -9,300 +9,8 @@
  */
 
 // =======================================================
-// TASK 4 — i18n: dizionario multilingua (IT / EN / DE)
+// TASK 4 — JWT Helpers (i18n gestito da /js/i18n.js)
 // =======================================================
-const TRANSLATIONS = {
-    it: {
-        'nav.login':     'Login',
-        'nav.register':  'Registrati',
-        'nav.logout':    'Logout',
-        'nav.dashboard': 'Dashboard',
-        'filter.title':        'Filtri',
-        'filter.tradizionali': 'Rastrelliere Tradizionali',
-        'filter.bloccatelaio': 'Rastrelliere Bloccatelaio',
-        'filter.parcheggi':    'Parcheggi Protetti',
-        'filter.nascondiPiene':'Nascondi rastrelliere piene',
-        'legend.title':        'Legenda',
-        'legend.button':       'Legenda',
-        'legend.tradizionale': 'Rastrelliera tradizionale',
-        'legend.bloccatelaio': 'Rastrelliera bloccatelaio',
-        'legend.piena':        'Bloccatelaio piena (0 posti)',
-        'legend.parcheggio':   'Parcheggio protetto',
-
-        'search.placeholder':  'Cerca via o parcheggio...',
-        'search.button':       'Cerca',
-        'search.noResults':    'Nessun parcheggio trovato in questa zona',
-        'search.found':        'Trovati {n} risultati',
-        'search.locationNotFound': 'Luogo non trovato',
-        'search.noResultsRadius':  'Nessun parcheggio a 200 metri da "{place}"',
-        'search.radiusFound':      'Nessun parcheggio in "{place}". Mostro {n} risultati entro 200m',
-        'search.searching':        'Ricerca in corso...',
-        'geo.title':           'La mia posizione',
-        'geo.button':          'La mia posizione',
-        'geo.locating':        'Rilevamento in corso...',
-        'geo.youAreHere':      'Ti trovi qui',
-        'geo.accuracy':        'Precisione segnale',
-        'geo.errorPermission': 'Impossibile rilevare la posizione: autorizzazione negata nel browser.',
-        'geo.errorUnavailable':'Segnale GPS non disponibile al momento.',
-        'geo.errorTimeout':    'Tempo scaduto per il rilevamento della posizione.',
-        'geo.notSupported':    'La geolocalizzazione non è supportata dal tuo browser.',
-        'modal.login.title':    'Login',
-        'modal.register.title': 'Registrazione',
-        'modal.segnala.title':  'Segnala un problema',
-        'modal.or':             'oppure',
-        'form.name':            'Nome',
-        'form.surname':         'Cognome',
-        'form.password':        'Password',
-        'form.passwordConfirm': 'Conferma Password',
-        'form.passwordHint':    'Min. 6 caratteri',
-        'form.tipoProblem':     'Tipo di problema',
-        'form.notes':           'Note aggiuntive',
-        'form.sendReport':      'Invia segnalazione',
-        'auth.errName':             'Il nome deve contenere almeno 2 caratteri',
-        'auth.errSurname':          'Il cognome deve contenere almeno 2 caratteri',
-        'auth.errEmail':            'Inserisci un indirizzo email valido',
-        'auth.errPasswordLength':   'La password deve contenere almeno 6 caratteri',
-        'auth.errPasswordMismatch': 'Le password non coincidono',
-        'auth.errEmptyFields':      'Compila tutti i campi obbligatori',
-        'auth.successRegister':     'Registrazione completata! Ora puoi effettuare il login.',
-        'seg.bikeLeft':   'Bici abbandonata',
-        'seg.damage':     'Danno strutturale',
-        'seg.full':       'Rastrelliera piena',
-        'seg.vandalism':  'Vandalismo',
-        'seg.other':      'Altro',
-        'popup.fav.add':    'Salva nei preferiti',
-        'popup.fav.remove': 'Salvato',
-        'popup.report':     'Segnala problema',
-        'popup.loginToFav': 'Accedi per salvare nei preferiti',
-        'popup.loginToReport': 'Accedi per segnalare un problema.',
-        'popup.directions': 'Indicazioni stradali',
-
-        'popup.gisInfo':    'Info GIS',
-        'popup.gisLink':    'Sito Comune ↗',
-        'popup.smartLive':  'Disponibilità in tempo reale',
-        'popup.freeSlots':  'Posti liberi',
-        'popup.occupiedSlots': 'Occupati',
-        'popup.type':       'Tipologia',
-        'popup.model':      'Modello',
-        'popup.slots':      'Posti bici',
-        'popup.zone':       'Zona',
-        'popup.building':   'Edificio',
-        'popup.address':    'Indirizzo',
-        'popup.capacity':   'Capienza',
-        'popup.surveillance':'Sorveglianza',
-        'popup.present':    'Presente',
-        'popup.access':     'Accesso',
-        'popup.mittLink':   'Sito MITT ↗',
-        'stats.racks':      'Rastrelliere',
-        'stats.protected':  'Parcheggi protetti',
-        'stats.slots':      'Stalli totali',
-    },
-    en: {
-        'nav.login':     'Login',
-        'nav.register':  'Register',
-        'nav.logout':    'Logout',
-        'nav.dashboard': 'Dashboard',
-        'filter.title':        'Filters',
-        'filter.tradizionali': 'Traditional Racks',
-        'filter.bloccatelaio': 'Frame-Lock Racks',
-        'filter.parcheggi':    'Protected Parking',
-        'filter.nascondiPiene':'Hide full racks',
-        'legend.title':        'Legend',
-        'legend.button':       'Legend',
-        'legend.tradizionale': 'Traditional rack',
-        'legend.bloccatelaio': 'Frame-lock rack',
-        'legend.piena':        'Full frame-lock rack (0 slots)',
-        'legend.parcheggio':   'Protected parking',
-        'search.placeholder':  'Search street or parking...',
-        'search.button':       'Search',
-        'search.noResults':    'No parking found in this area',
-        'search.found':        'Found {n} results',
-        'search.locationNotFound': 'Location not found',
-        'search.noResultsRadius':  'No parking spots within 200m of "{place}"',
-        'search.radiusFound':      'No parking in "{place}". Showing {n} spots within 200m',
-        'search.searching':        'Searching...',
-        'geo.title':           'My location',
-        'geo.button':          'My location',
-        'geo.locating':        'Locating...',
-        'geo.youAreHere':      'You are here',
-        'geo.accuracy':        'Accuracy',
-        'geo.errorPermission': 'Unable to detect location: permission denied in browser.',
-        'geo.errorUnavailable':'GPS position unavailable at this time.',
-        'geo.errorTimeout':    'Location request timed out.',
-        'geo.notSupported':    'Geolocation is not supported by your browser.',
-        'modal.login.title':    'Login',
-        'modal.register.title': 'Register',
-        'modal.segnala.title':  'Report an issue',
-        'modal.or':             'or',
-        'form.name':            'First Name',
-        'form.surname':         'Last Name',
-        'form.password':        'Password',
-        'form.passwordConfirm': 'Confirm Password',
-        'form.passwordHint':    'Min. 6 characters',
-        'form.tipoProblem':     'Issue type',
-        'form.notes':           'Additional notes',
-        'form.sendReport':      'Submit report',
-        'auth.errName':             'First name must contain at least 2 characters',
-        'auth.errSurname':          'Last name must contain at least 2 characters',
-        'auth.errEmail':            'Please enter a valid email address',
-        'auth.errPasswordLength':   'Password must be at least 6 characters',
-        'auth.errPasswordMismatch': 'Passwords do not match',
-        'auth.errEmptyFields':      'Please fill in all required fields',
-        'auth.successRegister':     'Registration successful! You can now log in.',
-        'seg.bikeLeft':   'Abandoned bike',
-        'seg.damage':     'Structural damage',
-        'seg.full':       'Rack is full',
-        'seg.vandalism':  'Vandalism',
-        'seg.other':      'Other',
-        'popup.fav.add':    'Save to favourites',
-        'popup.fav.remove': 'Saved',
-        'popup.report':     'Report issue',
-        'popup.check':      'Check real-time availability',
-        'popup.loginToFav': 'Log in to save favourites',
-        'popup.loginToReport': 'Log in to submit a report.',
-        'popup.directions': 'Get directions',
-        'popup.gisInfo':    'GIS Info',
-        'popup.gisLink':    'Municipality Site ↗',
-        'popup.smartLive':  'Real-time availability',
-        'popup.freeSlots':  'Available slots',
-        'popup.occupiedSlots': 'Occupied',
-        'popup.type':       'Type',
-        'popup.model':      'Model',
-        'popup.slots':      'Bike slots',
-        'popup.zone':       'Zone',
-        'popup.building':   'Building',
-        'popup.address':    'Address',
-        'popup.capacity':   'Capacity',
-        'popup.surveillance':'Surveillance',
-        'popup.present':    'Present',
-        'popup.access':     'Access',
-        'popup.mittLink':   'MITT Website ↗',
-        'stats.racks':      'Bike racks',
-        'stats.protected':  'Protected parking',
-        'stats.slots':      'Total slots',
-    },
-    de: {
-        'nav.login':     'Anmelden',
-        'nav.register':  'Registrieren',
-        'nav.logout':    'Abmelden',
-        'nav.dashboard': 'Dashboard',
-        'filter.title':        'Filter',
-        'filter.tradizionali': 'Traditionelle Fahrradständer',
-        'filter.bloccatelaio': 'Rahmensichere Ständer',
-        'filter.parcheggi':    'Geschützte Parkplätze',
-        'filter.nascondiPiene':'Volle Ständer ausblenden',
-        'legend.title':        'Legende',
-        'legend.button':       'Legende',
-        'legend.tradizionale': 'Traditioneller Ständer',
-        'legend.bloccatelaio': 'Rahmensicherer Ständer',
-        'legend.piena':        'Voller Rahmensicherer Ständer (0 Plätze)',
-        'legend.parcheggio':   'Geschützter Parkplatz',
-
-        'search.placeholder':  'Straße oder Parkplatz suchen...',
-        'search.button':       'Suchen',
-        'search.noResults':    'Kein Parkplatz in diesem Bereich gefunden',
-        'search.found':        '{n} Ergebnisse gefunden',
-        'search.locationNotFound': 'Ort nicht gefunden',
-        'search.noResultsRadius':  'Kein Parkplatz im Umkreis von 200m um "{place}"',
-        'search.radiusFound':      'Kein Parkplatz in "{place}". Zeige {n} Plätze im Umkreis von 200m',
-        'search.searching':        'Suche läuft...',
-        'geo.title':           'Mein Standort',
-        'geo.button':          'Mein Standort',
-        'geo.locating':        'Standort wird ermittelt...',
-        'geo.youAreHere':      'Sie befinden sich hier',
-        'geo.accuracy':        'Genauigkeit',
-        'geo.errorPermission': 'Standort konnte nicht ermittelt werden: Berechtigung verweigert.',
-        'geo.errorUnavailable':'GPS-Position derzeit nicht verfügbar.',
-        'geo.errorTimeout':    'Zeitüberschreitung bei der Standortabfrage.',
-        'geo.notSupported':    'Geolokalisierung wird von Ihrem Browser nicht unterstützt.',
-        'modal.login.title':    'Anmelden',
-        'modal.register.title': 'Registrierung',
-        'modal.segnala.title':  'Problem melden',
-        'modal.or':             'oder',
-        'form.name':            'Vorname',
-        'form.surname':         'Nachname',
-        'form.password':        'Passwort',
-        'form.passwordConfirm': 'Passwort bestätigen',
-        'form.passwordHint':    'Mind. 6 Zeichen',
-        'form.tipoProblem':     'Problemart',
-        'form.notes':           'Zusätzliche Anmerkungen',
-        'form.sendReport':      'Meldung senden',
-        'auth.errName':             'Vorname muss mindestens 2 Zeichen lang sein',
-        'auth.errSurname':          'Nachname muss mindestens 2 Zeichen lang sein',
-        'auth.errEmail':            'Bitte geben Sie eine gültige E-Mail-Adresse ein',
-        'auth.errPasswordLength':   'Das Passwort muss mindestens 6 Zeichen lang sein',
-        'auth.errPasswordMismatch': 'Passwörter stimmen nicht überein',
-        'auth.errEmptyFields':      'Bitte füllen Sie alle Pflichtfelder aus',
-        'auth.successRegister':     'Registrierung erfolgreich! Sie können sich jetzt anmelden.',
-        'seg.bikeLeft':   'Verlassenes Fahrrad',
-        'seg.damage':     'Strukturschaden',
-        'seg.full':       'Ständer ist voll',
-        'seg.vandalism':  'Vandalismus',
-        'seg.other':      'Sonstiges',
-        'popup.fav.add':    'Zu Favoriten',
-        'popup.fav.remove': 'Gespeichert',
-        'popup.report':     'Problem melden',
-        'popup.check':      'Echtzeit-Verfügbarkeit prüfen',
-        'popup.loginToFav': 'Anmelden um Favoriten zu speichern',
-        'popup.loginToReport': 'Melden Sie sich an, um ein Problem zu melden.',
-        'popup.directions': 'Route berechnen',
-        'popup.gisInfo':    'GIS-Info',
-        'popup.gisLink':    'Gemeinde-Portal ↗',
-        'popup.smartLive':  'Echtzeit-Verfügbarkeit',
-        'popup.freeSlots':  'Freie Plätze',
-        'popup.occupiedSlots': 'Belegt',
-        'popup.type':       'Typ',
-        'popup.model':      'Modell',
-        'popup.slots':      'Fahrradplätze',
-        'popup.zone':       'Zone',
-        'popup.building':   'Gebäude',
-        'popup.address':    'Adresse',
-        'popup.capacity':   'Kapazität',
-        'popup.surveillance':'Überwachung',
-        'popup.present':    'Vorhanden',
-        'popup.access':     'Zugang',
-        'popup.mittLink':   'MITT-Website ↗',
-        'stats.racks':      'Fahrradständer',
-        'stats.protected':  'Geschützte Parkplätze',
-        'stats.slots':      'Stellplätze gesamt',
-    }
-};
-
-
-const LANG_KEY  = 'tbp_lang';
-const TOKEN_KEY = 'tbp_jwt';
-
-let currentLang = localStorage.getItem(LANG_KEY) || 'it';
-
-function tr(key) {
-    return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || key;
-}
-
-function applyTranslations() {
-    document.documentElement.lang = currentLang;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        const val = tr(key);
-        el.textContent = val;
-    });
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const key = el.getAttribute('data-i18n-placeholder');
-        el.placeholder = tr(key);
-    });
-    document.querySelectorAll('[data-i18n-title]').forEach(el => {
-        const key = el.getAttribute('data-i18n-title');
-        el.title = tr(key);
-    });
-    // Sincronizza il <select> con la lingua corrente
-    const sel = document.getElementById('lang-select');
-    if (sel) sel.value = currentLang;
-
-    // Sincronizza la bandiera SVG (flag-icons)
-    const flagIcon = document.getElementById('lang-flag-icon');
-    if (flagIcon) {
-        flagIcon.className = currentLang === 'en' ? 'fi fi-gb' : (currentLang === 'de' ? 'fi fi-de' : 'fi fi-it');
-    }
-}
 
 
 // =======================================================
@@ -439,18 +147,10 @@ function featureMatchesSearch(props, query) {
 // =======================================================
 document.addEventListener('DOMContentLoaded', async () => {
 
-    applyTranslations();
-
-    // --- TASK 4: Selettore lingua (select IT/EN/DE) ---
-    const langSelect = document.getElementById('lang-select');
-    if (langSelect) {
-        langSelect.value = currentLang;
-        langSelect.addEventListener('change', () => {
-            currentLang = langSelect.value;
-            localStorage.setItem(LANG_KEY, currentLang);
-            applyTranslations();
-        });
-    }
+    await I18n.init();
+    I18n.onLanguageChange(() => {
+        applyFiltersAndSearch(false);
+    });
 
     // =========================================================
     // 1. MAPPA — inizializzazione
@@ -808,7 +508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 try {
                     const geoRes = await fetch(url, {
-                        headers: { 'Accept-Language': currentLang || 'it' }
+                        headers: { 'Accept-Language': I18n.getLanguage() || 'it' }
                     });
                     const geoData = await geoRes.json();
 
@@ -1735,7 +1435,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             google.accounts.id.renderButton(container, {
                 type: 'standard', shape: 'rectangular', theme: 'outline',
                 text: 'signin_with', size: 'large', width: 340,
-                locale: currentLang === 'de' ? 'de' : (currentLang === 'en' ? 'en' : 'it')
+                locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
             });
         } catch (err) { console.error('Errore Google SSO:', err); }
     }

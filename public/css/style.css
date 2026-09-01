@@ -422,3 +422,13 @@
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* Selettore Lingua Hitbox Fix */
+.lang-selector-wrapper {
+    cursor: pointer;
+    user-select: none;
+}
+
+.lang-selector-wrapper select {
+    cursor: pointer;
+}
+

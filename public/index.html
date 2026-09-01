@@ -42,15 +42,15 @@
             <button id="btn-logout" class="btn btn-outline btn-error btn-sm rounded-xl font-semibold hidden" data-i18n="nav.logout">
                 <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
             </button>
-            <!-- Selettore lingua con flag-icons SVG -->
-            <div class="lang-selector-wrapper flex items-center gap-2 bg-base-100/90 border border-base-300 rounded-xl px-2.5 py-1 shadow-xs">
-                <span id="lang-flag-icon" class="fi fi-it text-base rounded-xs shadow-xs"></span>
-                <select id="lang-select" class="lang-select select select-ghost select-xs font-bold text-slate-700 focus:outline-none p-0 h-auto min-h-0" aria-label="Seleziona lingua">
+            <!-- Selettore lingua con flag-icons SVG e hitbox completa -->
+            <label for="lang-select" class="lang-selector-wrapper flex items-center gap-2 bg-base-100/90 hover:bg-base-200/80 border border-base-300 rounded-xl px-2.5 py-1.5 shadow-xs cursor-pointer transition-colors select-none">
+                <span id="lang-flag-icon" class="fi fi-it text-base rounded-xs shadow-xs pointer-events-none"></span>
+                <select id="lang-select" class="lang-select select select-ghost select-xs font-bold text-slate-700 focus:outline-none p-0 h-auto min-h-0 cursor-pointer" aria-label="Seleziona lingua">
                     <option value="it">IT</option>
                     <option value="en">EN</option>
                     <option value="de">DE</option>
                 </select>
-            </div>
+            </label>
         </div>
     </header>
 
@@ -270,6 +270,7 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="js/i18n.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>
