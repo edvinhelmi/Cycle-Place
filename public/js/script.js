@@ -1093,8 +1093,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     function handleGeolocation() {
         const btnGeo = document.getElementById('btn-geolocation');
 
+        // Se la navigazione live è attiva e abbiamo già le coordinate dell'utente, recentra all'istante!
+        if (isLiveNavigating && lastUserCoords) {
+            isFollowMode = true;
+            map.flyTo([lastUserCoords.lat, lastUserCoords.lng], 18, { animate: true, duration: 0.8 });
+            updateTurnBanner(lastUserCoords.lat, lastUserCoords.lng);
+            return;
+        }
+
         if (!navigator.geolocation) {
-            showSearchFeedback(tr('geo.notSupported'), true);
+            showSearchFeedback(tr('geo.notSupported') || 'Geolocalizzazione non supportata', true);
             return;
         }
 
@@ -1102,74 +1110,93 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (btnGeo) {
             btnGeo.classList.add('locating');
             const textEl = btnGeo.querySelector('.geo-text');
-            if (textEl) textEl.textContent = tr('geo.locating');
+            if (textEl) textEl.textContent = tr('geo.locating') || 'Rilevamento...';
         }
 
         const restoreButton = () => {
             if (btnGeo) {
                 btnGeo.classList.remove('locating');
                 const textEl = btnGeo.querySelector('.geo-text');
-                if (textEl) textEl.textContent = tr('geo.button');
+                if (textEl) textEl.textContent = tr('geo.button') || 'La mia posizione';
             }
         };
 
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                restoreButton();
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                const accuracy = position.coords.accuracy || 30; // raggio in metri
-                lastUserCoords = { lat, lng };
+        const onGeoSuccess = (position) => {
+            restoreButton();
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const accuracy = position.coords.accuracy || 30; // raggio in metri
+            lastUserCoords = { lat, lng };
 
-                // Rimuovi eventuali indicatori precedenti
-                if (userLocationMarker) map.removeLayer(userLocationMarker);
-                if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
+            // Rimuovi eventuali indicatori precedenti
+            if (userLocationMarker) map.removeLayer(userLocationMarker);
+            if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
 
-                // Cerchio di precisione GPS
-                userAccuracyCircle = L.circle([lat, lng], {
-                    radius: Math.min(accuracy, 400),
-                    color: '#1a73e8',
-                    fillColor: '#1a73e8',
-                    fillOpacity: 0.15,
-                    weight: 1.5,
-                    interactive: false
-                }).addTo(map);
+            // Cerchio di precisione GPS
+            userAccuracyCircle = L.circle([lat, lng], {
+                radius: Math.min(accuracy, 400),
+                color: '#1a73e8',
+                fillColor: '#1a73e8',
+                fillOpacity: 0.15,
+                weight: 1.5,
+                interactive: false
+            }).addTo(map);
 
-                // Marker utente dedicato (cerchio blu brillante con bordo bianco)
-                userLocationMarker = L.circleMarker([lat, lng], {
-                    radius: 9,
-                    fillColor: '#1a73e8',
-                    color: '#ffffff',
-                    weight: 3,
-                    opacity: 1,
-                    fillOpacity: 1
-                }).addTo(map);
+            // Marker utente dedicato
+            userLocationMarker = L.circleMarker([lat, lng], {
+                radius: 9,
+                fillColor: '#1a73e8',
+                color: '#ffffff',
+                weight: 3,
+                opacity: 1,
+                fillOpacity: 1
+            }).addTo(map);
 
+            if (!isLiveNavigating) {
                 userLocationMarker.bindPopup(`
                     <div class="popup-content" style="text-align:center;">
-                        <h3 class="popup-title">📍 ${tr('geo.youAreHere')}</h3>
-                        <p><small>${tr('geo.accuracy')}: ±${Math.round(accuracy)}m</small></p>
+                        <h3 class="popup-title">📍 ${tr('geo.youAreHere') || 'La tua posizione'}</h3>
+                        <p><small>${tr('geo.accuracy') || 'Precisione'}: ±${Math.round(accuracy)}m</small></p>
                     </div>
                 `).openPopup();
 
                 // Spostamento fluido verso la posizione dell'utente
-                map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
-            },
-            (error) => {
-                restoreButton();
-                let errorMsg = tr('geo.errorUnavailable');
-                if (error.code === error.PERMISSION_DENIED) {
-                    errorMsg = tr('geo.errorPermission');
-                } else if (error.code === error.TIMEOUT) {
-                    errorMsg = tr('geo.errorTimeout');
-                }
-                showSearchFeedback(errorMsg, true);
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
+                map.flyTo([lat, lng], 16, { animate: true, duration: 1.2 });
+            } else {
+                isFollowMode = true;
+                map.flyTo([lat, lng], 18, { animate: true, duration: 0.8 });
+                updateTurnBanner(lat, lng);
             }
+        };
+
+        const onGeoError = (error) => {
+            // Se fallisce per timeout con alta precisione (comune su desktop/laptop senza GPS dedicato), ritenta a precisione standard
+            if (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE) {
+                navigator.geolocation.getCurrentPosition(
+                    onGeoSuccess,
+                    (err2) => {
+                        restoreButton();
+                        let errorMsg = tr('geo.errorUnavailable') || 'Posizione non disponibile';
+                        if (err2.code === err2.PERMISSION_DENIED) errorMsg = tr('geo.errorPermission') || 'Permesso di localizzazione negato';
+                        showSearchFeedback(errorMsg, true);
+                    },
+                    { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+                );
+                return;
+            }
+
+            restoreButton();
+            let errorMsg = tr('geo.errorUnavailable') || 'Posizione non disponibile';
+            if (error.code === error.PERMISSION_DENIED) {
+                errorMsg = tr('geo.errorPermission') || 'Permesso di localizzazione negato';
+            }
+            showSearchFeedback(errorMsg, true);
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            onGeoSuccess,
+            onGeoError,
+            { enableHighAccuracy: true, timeout: 6000, maximumAge: 30000 }
         );
     }
 

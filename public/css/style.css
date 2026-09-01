@@ -166,7 +166,8 @@
     position: absolute;
     bottom: 2rem;
     left: 1.25rem;
-    z-index: 500;
+    z-index: 1000;
+    pointer-events: auto;
     padding: 0.65rem 1.15rem;
     transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
@@ -569,21 +570,7 @@
 }
 
 .btn-recenter-nav {
-    position: absolute;
-    bottom: 19rem;
-    right: 1.5rem;
-    left: auto;
-    z-index: 1060;
-    pointer-events: auto;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.btn-recenter-nav:hover {
-    transform: translateY(-2px) scale(1.04);
+    display: none !important; /* Su desktop non è visibile, si usa il pulsante GPS principale */
 }
 
 @media (max-width: 768px) {
@@ -594,11 +581,23 @@
     }
 
     .btn-recenter-nav {
-        bottom: 17rem;
+        display: flex !important;
+        position: absolute;
+        bottom: 14.5rem;
         left: 0.85rem;
         right: auto;
         transform: none;
         z-index: 1060;
+        pointer-events: auto;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-recenter-nav.hidden {
+        display: none !important;
     }
 
     .btn-recenter-nav:hover {
