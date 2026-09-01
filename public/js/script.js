@@ -16,10 +16,19 @@
 // =======================================================
 // JWT Helpers
 // =======================================================
-const TOKEN_KEY   = 'tbp_jwt';
-const saveToken   = t  => localStorage.setItem(TOKEN_KEY, t);
-const getToken    = () => localStorage.getItem(TOKEN_KEY);
-const removeToken = () => localStorage.removeItem(TOKEN_KEY);
+const TOKEN_KEY         = 'tbp_jwt';
+const REFRESH_TOKEN_KEY = 'tbp_refresh_jwt';
+
+const saveToken = (accessToken, refreshToken) => {
+    if (accessToken) localStorage.setItem(TOKEN_KEY, accessToken);
+    if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+};
+const getToken        = () => localStorage.getItem(TOKEN_KEY);
+const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
+const removeToken     = () => {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+};
 
 function decodeToken(token) {
     try { return JSON.parse(atob(token.split('.')[1])); }
@@ -27,65 +36,75 @@ function decodeToken(token) {
 }
 
 function isTokenValid(token) {
+    const refreshToken = getRefreshToken();
+    // Se c'è un refresh token non scaduto, la sessione è ancora valida fino a 30 giorni
+    if (refreshToken) {
+        const dRefresh = decodeToken(refreshToken);
+        if (dRefresh && dRefresh.exp && dRefresh.exp * 1000 > Date.now()) {
+            return true;
+        }
+    }
+    // Fallback: controllo dell'access token
     if (!token) return false;
     const d = decodeToken(token);
     return d && d.exp && d.exp * 1000 > Date.now();
 }
 
 function authHeaders() {
-    return { 'Authorization': 'Bearer ' + getToken(), 'Content-Type': 'application/json' };
+    const t = getToken();
+    return t ? { 'Authorization': 'Bearer ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 }
 
-// =======================================================
-// CUSTOM ALERTS (Toasts)
-// =======================================================
-window.alert = function(message, type = 'warning') {
-    let container = document.getElementById('toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'toast-container';
-        container.className = 'toast-container-custom';
-        document.body.appendChild(container);
-    }
-    
-    const toast = document.createElement('div');
-    let alertClass = 'alert-warning';
-    let iconClass = 'fa-triangle-exclamation';
-    let bgClass = 'bg-amber-500 text-slate-950 border-amber-400';
-    
-    if (type === 'error') {
-        alertClass = 'alert-error';
-        iconClass = 'fa-circle-xmark';
-        bgClass = 'bg-red-500 text-white border-red-400';
-    } else if (type === 'success') {
-        alertClass = 'alert-success';
-        iconClass = 'fa-circle-check';
-        bgClass = 'bg-emerald-500 text-white border-emerald-400';
-    } else if (type === 'info') {
-        alertClass = 'alert-info';
-        iconClass = 'fa-circle-info';
-        bgClass = 'bg-sky-500 text-white border-sky-400';
+// Wrapper automatico: rinnova l'access token scaduto con il refresh token (RF 1.6)
+async function authFetch(url, options = {}) {
+    let token = getToken();
+    const refreshToken = getRefreshToken();
+
+    options.headers = {
+        ...options.headers,
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+    };
+
+    let response = await fetch(url, options);
+
+    if (response.status === 401 || response.status === 403) {
+        if (!refreshToken) {
+            removeToken();
+            return response;
+        }
+
+        try {
+            const refreshRes = await fetch('/api/v1/refresh-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken })
+            });
+
+            if (refreshRes.ok) {
+                const data = await refreshRes.json();
+                const newAccessToken = data.accessToken || data.token;
+                saveToken(newAccessToken);
+                options.headers = {
+                    ...options.headers,
+                    'Authorization': 'Bearer ' + newAccessToken
+                };
+                return fetch(url, options);
+            
+            } else {
+                removeToken();
+                userFavoritiIds.clear();
+                return response;
+            }
+        } catch (e) {
+            console.error('[authFetch] Errore:', e);
+            removeToken();
+            return response;
+        }
     }
 
-    toast.className = `custom-toast alert ${alertClass} ${bgClass} font-bold flex flex-row items-center gap-3 px-4 py-3 rounded-2xl border`;
-    toast.innerHTML = `
-        <i class="fa-solid ${iconClass} text-xl shrink-0"></i>
-        <span class="text-xs sm:text-sm font-bold leading-tight">${message}</span>
-    `;
-    
-    container.appendChild(toast);
-    
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            toast.classList.add('show');
-        });
-    });
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 350);
-    }, 3800);
-};
+    return response;
+}
 
 // =======================================================
 // TASK 1: Preferiti in memoria durante la sessione
@@ -95,7 +114,7 @@ let userFavoritiIds = new Set();
 async function loadUserPreferiti() {
     if (!isTokenValid(getToken())) return;
     try {
-        const res  = await fetch('/api/v1/user/preferiti', { headers: authHeaders() });
+        const res  = await authFetch('/api/v1/user/preferiti');
         const data = await res.json();
         userFavoritiIds = new Set((data.preferiti || []).map(f => Number(f.id)));
     } catch (e) { console.error('Errore caricamento preferiti:', e); }
@@ -342,9 +361,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Ripristino sessione da localStorage
     const storedToken = getToken();
+    const storedRefresh = getRefreshToken();
     if (isTokenValid(storedToken)) {
-        const d = decodeToken(storedToken);
-        loginSuccess({ name: d.name, surname: d.surname, email: d.email });
+        const d = decodeToken(storedToken) || decodeToken(storedRefresh);
+        if (d) {
+        loginSuccess({ name: d.name || 'Utente', surname: d.surname || '', email: d.email || '' });
+        }
     }
 
     if (btnLogout) btnLogout.addEventListener('click', logoutUser);
@@ -496,7 +518,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error);
-                saveToken(data.token);
+                saveToken(data.accessToken || data.token, data.refreshToken);
                 closeModal(loginModal);
                 loginSuccess(data.user);
                 setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
@@ -524,7 +546,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
-            saveToken(data.token);
+            saveToken(data.accessToken || data.token, data.refreshToken);
             closeModal(loginModal);
             loginSuccess(data.user);
             setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
@@ -574,8 +596,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const note = document.getElementById('seg-note')?.value?.trim();
 
             try {
-                const res  = await fetch('/api/v1/segnalazioni', {
-                    method: 'POST', headers: authHeaders(),
+                const res = await authFetch('/api/v1/segnalazioni', {
+                    method: 'POST',
                     body: JSON.stringify({ rastrellieraId: parseInt(id), tipo, note, lat, lng })
                 });
                 const data = await res.json();
@@ -1077,11 +1099,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 2. Chiamata API asincrona al backend per persistere nel database del profilo
         try {
             if (isFav) {
-                await fetch(`/api/v1/user/preferiti/${numId}`, { method: 'DELETE', headers: authHeaders() });
+                await authFetch(`/api/v1/user/preferiti/${numId}`, { method: 'DELETE' });
             } else {
-                await fetch('/api/v1/user/preferiti', {
+                await authFetch('/api/v1/user/preferiti', {
                     method: 'POST',
-                    headers: authHeaders(),
                     body: JSON.stringify({
                         rastrellieraId: numId,
                         tipologia: tipologia || 'Rastrelliera',
