@@ -50,6 +50,7 @@ const segnalazioniLimiter = rateLimit({
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET       = process.env.SUPER_SECRET || 'segreto_universitario_cycle_place';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '455956234516-62c55ghdcsl2tffohcancm7is467jgda.apps.googleusercontent.com';
+const ORS_API_KEY      = (process.env.ORS_API_KEY ? process.env.ORS_API_KEY.trim() : '') || 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjBkZmY3MGY1NjJiYTQ0OTE5NWQwNWNmOTQ3ODU3NmE2IiwiaCI6Im11cm11cjY0In0=';
 
 // --- Proiezione EPSG:25832 → WGS84 ---
 proj4.defs('EPSG:25832', '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
@@ -581,7 +582,7 @@ app.get('/api/v1/routing', async (req, res) => {
     const validProfiles = ['cycling-regular', 'foot-walking', 'driving-car'];
     const chosenProfile = validProfiles.includes(profile) ? profile : 'cycling-regular';
 
-    const apiKey = process.env.ORS_API_KEY ? process.env.ORS_API_KEY.trim() : '';
+    const apiKey = (process.env.ORS_API_KEY ? process.env.ORS_API_KEY.trim() : '') || ORS_API_KEY;
     if (!apiKey) {
         return res.status(503).json({
             error: 'OpenRouteService API key non configurata sul server. Aggiungere ORS_API_KEY nel file .env.'
