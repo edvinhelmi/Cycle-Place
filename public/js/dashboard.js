@@ -168,8 +168,9 @@ function renderPreferiti(items) {
         <div class="list-item card bg-base-100/90 border border-base-300 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-shadow flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5" id="fav-${f.id}">
             <div class="list-item-info space-y-1">
                 <div class="font-bold text-slate-800 text-sm sm:text-base flex flex-wrap items-center gap-2">
-                    <span><i class="fa-solid fa-bicycle text-primary"></i> ${tr('dash.rack')} #${f.id}</span>
-                    ${f.tipologia ? `<span class="text-slate-500 font-normal">— ${f.tipologia}</span>` : ''}
+                    ${f.tipologia === 'Parcheggio_protetto' 
+                        ? `<span><i class="fa-solid fa-shield-halved text-secondary"></i> ${f.zona || 'Parcheggio Protetto'}</span><span class="badge badge-sm badge-secondary text-white font-bold">Bici Box</span>` 
+                        : `<span><i class="fa-solid fa-bicycle text-primary"></i> ${tr('dash.rack')} #${f.id}</span>`}
                     ${f.stalli ? `<span class="badge badge-sm badge-ghost font-bold text-slate-600">(${f.stalli} ${tr('dash.stalli')})</span>` : ''}
                     ${f.tipologia === 'Rastr_bloccatelaio' ? '<span class="badge badge-sm badge-accent text-white font-bold">bloccatelaio</span>' : ''}
                 </div>
