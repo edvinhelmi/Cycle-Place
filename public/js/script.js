@@ -1639,6 +1639,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function formatInstructionText(instruction, lang = 'it') {
+        if (!instruction) return '';
+        if (lang === 'it') {
+            let text = instruction;
+            text = text.replace(/^Head north on /i, 'Avanti Nord su ');
+            text = text.replace(/^Head south on /i, 'Avanti Sud su ');
+            text = text.replace(/^Head east on /i, 'Avanti Est su ');
+            text = text.replace(/^Head west on /i, 'Avanti Ovest su ');
+            text = text.replace(/^Head north/i, 'Avanti verso Nord');
+            text = text.replace(/^Head south/i, 'Avanti verso Sud');
+            text = text.replace(/^Head east/i, 'Avanti verso Est');
+            text = text.replace(/^Head west/i, 'Avanti verso Ovest');
+            text = text.replace(/^Turn right onto /i, 'Gira a destra su ');
+            text = text.replace(/^Turn left onto /i, 'Gira a sinistra su ');
+            text = text.replace(/^Turn right/i, 'Gira a destra');
+            text = text.replace(/^Turn left/i, 'Gira a sinistra');
+            text = text.replace(/^Continue straight onto /i, 'Continua dritto su ');
+            text = text.replace(/^Continue straight/i, 'Continua dritto');
+            text = text.replace(/^Arrive at your destination/i, 'Arrivo a destinazione');
+            return text;
+        } else if (lang === 'de') {
+            let text = instruction;
+            text = text.replace(/^Head north on /i, 'Weiter nördlich auf ');
+            text = text.replace(/^Head south on /i, 'Weiter südlich auf ');
+            text = text.replace(/^Head east on /i, 'Weiter östlich auf ');
+            text = text.replace(/^Head west on /i, 'Weiter westlich auf ');
+            text = text.replace(/^Head north/i, 'Weiter nach Norden');
+            text = text.replace(/^Head south/i, 'Weiter nach Süden');
+            text = text.replace(/^Head east/i, 'Weiter nach Osten');
+            text = text.replace(/^Head west/i, 'Weiter nach Westen');
+            text = text.replace(/^Turn right onto /i, 'Biegen Sie rechts auf ');
+            text = text.replace(/^Turn left onto /i, 'Biegen Sie links auf ');
+            text = text.replace(/^Turn right/i, 'Biegen Sie rechts ab');
+            text = text.replace(/^Turn left/i, 'Biegen Sie links ab');
+            text = text.replace(/^Continue straight onto /i, 'Weiter geradeaus auf ');
+            text = text.replace(/^Continue straight/i, 'Weiter geradeaus');
+            text = text.replace(/^Arrive at your destination/i, 'Ziel erreicht');
+            return text;
+        }
+        return instruction;
+    }
+
     function speakInstruction(text) {
         if (!voiceEnabled || !window.speechSynthesis || !text) return;
         if (text === lastSpokenInstruction) return;
@@ -1737,12 +1779,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
+        const activeLang = I18n.getLanguage() || 'it';
+        const formattedInstruction = formatInstructionText(step.instruction || step.name || '', activeLang);
+
         if (iconEl) iconEl.className = getManeuverIcon(step.type);
         if (distEl) distEl.textContent = distanceText;
-        if (instEl) instEl.textContent = step.instruction || step.name || '';
+        if (instEl) instEl.textContent = formattedInstruction;
 
-        if (step.instruction) {
-            speakInstruction(step.instruction);
+        if (formattedInstruction) {
+            speakInstruction(formattedInstruction);
         }
     }
 
