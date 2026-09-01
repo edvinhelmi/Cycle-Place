@@ -604,10 +604,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let userLocationMarker = null;
     let userAccuracyCircle = null;
 
+    const groupSearchRadius = L.layerGroup().addTo(map);
     const groupTradizionale = L.layerGroup().addTo(map);
     const groupBloccatelaio = L.layerGroup().addTo(map);
     const groupParcheggi    = L.layerGroup().addTo(map);
-    const groupSearchRadius = L.layerGroup().addTo(map);
 
     // =========================================================
     // CRUSCOTTO STATISTICHE (Pitch / Demo Video)
@@ -785,7 +785,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             fillColor: '#ef4444',
             fillOpacity: 0.12,
             weight: 2,
-            dashArray: '6, 6'
+            dashArray: '6, 6',
+            interactive: false
         });
 
         groupSearchRadius.addLayer(searchCircle);
@@ -1020,7 +1021,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     color: '#1a73e8',
                     fillColor: '#1a73e8',
                     fillOpacity: 0.15,
-                    weight: 1.5
+                    weight: 1.5,
+                    interactive: false
                 }).addTo(map);
 
                 // Marker utente dedicato (cerchio blu brillante con bordo bianco)
