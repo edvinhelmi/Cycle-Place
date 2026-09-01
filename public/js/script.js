@@ -1952,7 +1952,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (lblToggle) lblToggle.textContent = tr('routing.stopLive') || 'Termina Navigazione';
         if (iconToggle) iconToggle.className = 'fa-solid fa-stop';
-        if (btnRecenter) btnRecenter.classList.remove('hidden');
+        if (btnRecenter) btnRecenter.classList.add('hidden'); // Parte già centrato e in follow mode, appare solo se l'utente sposta la mappa
 
         if (lastUserCoords) {
             map.setView([lastUserCoords.lat, lastUserCoords.lng], 18, { animate: true });
@@ -2124,6 +2124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const panel = document.getElementById('routing-panel');
         if (panel) panel.classList.add('hidden');
+        const btnRecenter = document.getElementById('btn-recenter-nav');
+        if (btnRecenter) btnRecenter.classList.add('hidden');
     }
 
     window.startNavigation = function(destLat, destLng, destName) {
@@ -2132,6 +2134,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const titleEl = document.getElementById('nav-destination-title');
         const distEl  = document.getElementById('nav-stat-distance');
         const durEl   = document.getElementById('nav-stat-duration');
+        const btnRecenter = document.getElementById('btn-recenter-nav');
+        if (btnRecenter) btnRecenter.classList.add('hidden');
 
         if (titleEl) titleEl.textContent = destName || tr('routing.title');
         if (distEl)  distEl.textContent = '--';

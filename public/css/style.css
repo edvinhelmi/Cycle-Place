@@ -581,7 +581,7 @@
     }
 
     .btn-recenter-nav {
-        display: flex !important;
+        display: flex;
         position: absolute;
         bottom: 15.3rem;
         left: 0.85rem;
