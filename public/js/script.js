@@ -101,84 +101,7 @@ async function loadUserPreferiti() {
     } catch (e) { console.error('Errore caricamento preferiti:', e); }
 }
 
-// Funzione globale — chiamata da onclick nel popup
-window.toggleFavorito = async function(id, tipologia, stalli, zona, lat, lng) {
-    if (!isTokenValid(getToken())) {
-        alert(tr('popup.loginToFav') || 'Accedi per salvare i tuoi preferiti.');
-        const loginModal = document.getElementById('login-modal');
-        if (loginModal) {
-            loginModal.classList.remove('hidden');
-            loginModal.classList.add('modal-open');
-        }
-        return;
-    }
-    const numId = Number(id);
-    const isFav = userFavoritiIds.has(numId);
-    
-    // 1. Aggiornamento ottimistico dello stato locale
-    if (isFav) {
-        userFavoritiIds.delete(numId);
-    } else {
-        userFavoritiIds.add(numId);
-    }
 
-    // 2. Chiamata API al backend per persistere nel database del profilo
-    try {
-        if (isFav) {
-            await fetch(`/api/v1/user/preferiti/${numId}`, { method: 'DELETE', headers: authHeaders() });
-        } else {
-            await fetch('/api/v1/user/preferiti', {
-                method: 'POST',
-                headers: authHeaders(),
-                body: JSON.stringify({
-                    rastrellieraId: numId,
-                    tipologia: tipologia || 'Rastrelliera',
-                    stalli: Number(stalli) || 6,
-                    zona: zona || 'Trento',
-                    lat: Number(lat),
-                    lng: Number(lng)
-                })
-            });
-        }
-    } catch (e) {
-        console.error('Errore sincronizzazione preferito backend:', e);
-    }
-
-    // 3. Salva la posizione del popup attualmente aperto
-    const openPopup = map._popup;
-    let openLatLng = null;
-    if (openPopup && openPopup.isOpen()) {
-        openLatLng = openPopup.getLatLng();
-    }
-
-    // 4. Ridisegna istantaneamente tutti i marker sulla mappa per trasformare il cerchio in icona cuore
-    if (currentSearchLocation && currentSearchLocation.query === currentSearchQuery) {
-        const showTrad      = document.getElementById('filter-tradizionali')?.checked ?? true;
-        const showBlocca    = document.getElementById('filter-bloccatelaio')?.checked ?? true;
-        const showPark      = document.getElementById('filter-parcheggi')?.checked ?? true;
-        const hidePiene     = document.getElementById('filter-piene')?.checked ?? false;
-        const soloPreferiti = document.getElementById('filter-preferiti')?.checked ?? false;
-        renderRadialSearch(currentSearchLocation.latLng, currentSearchLocation.displayName, showTrad, showBlocca, showPark, hidePiene, soloPreferiti);
-    } else {
-        await applyFiltersAndSearch(false);
-    }
-
-    // 5. Se il popup era aperto, riaprilo sul nuovo marker (con l'icona cuore e pulsante aggiornato)
-    if (openLatLng) {
-        let targetLayer = null;
-        [groupTradizionale, groupBloccatelaio, groupParcheggi].forEach(group => {
-            group.eachLayer(layer => {
-                const lLatLng = layer.getLatLng ? layer.getLatLng() : null;
-                if (lLatLng && Math.abs(lLatLng.lat - openLatLng.lat) < 0.00005 && Math.abs(lLatLng.lng - openLatLng.lng) < 0.00005) {
-                    targetLayer = layer;
-                }
-            });
-        });
-        if (targetLayer) {
-            targetLayer.openPopup();
-        }
-    }
-};
 
 // =======================================================
 // TASK 3: Apri modal segnalazione (da onclick popup)
@@ -1127,6 +1050,87 @@ document.addEventListener('DOMContentLoaded', async () => {
             badge.classList.toggle('hidden', !isCustomized);
         }
     }
+
+    // =========================================================
+    // TASK 1: Toggle Preferiti in tempo reale sulla mappa
+    // =========================================================
+    window.toggleFavorito = async function(id, tipologia, stalli, zona, lat, lng) {
+        if (!isTokenValid(getToken())) {
+            alert(tr('popup.loginToFav') || 'Accedi per salvare i tuoi preferiti.');
+            const loginModal = document.getElementById('login-modal');
+            if (loginModal) {
+                loginModal.classList.remove('hidden');
+                loginModal.classList.add('modal-open');
+            }
+            return;
+        }
+        const numId = Number(id);
+        const isFav = userFavoritiIds.has(numId);
+        
+        // 1. Aggiornamento ottimistico dello stato locale
+        if (isFav) {
+            userFavoritiIds.delete(numId);
+        } else {
+            userFavoritiIds.add(numId);
+        }
+
+        // 2. Chiamata API asincrona al backend per persistere nel database del profilo
+        try {
+            if (isFav) {
+                await fetch(`/api/v1/user/preferiti/${numId}`, { method: 'DELETE', headers: authHeaders() });
+            } else {
+                await fetch('/api/v1/user/preferiti', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        rastrellieraId: numId,
+                        tipologia: tipologia || 'Rastrelliera',
+                        stalli: Number(stalli) || 6,
+                        zona: zona || 'Trento',
+                        lat: Number(lat),
+                        lng: Number(lng)
+                    })
+                });
+            }
+        } catch (e) {
+            console.error('Errore sincronizzazione preferito backend:', e);
+        }
+
+        // 3. Salva la posizione del popup attualmente aperto
+        const openPopup = map._popup;
+        let openLatLng = null;
+        if (openPopup && openPopup.isOpen()) {
+            openLatLng = openPopup.getLatLng();
+        }
+
+        // 4. Ridisegna istantaneamente tutti i marker sulla mappa per trasformare il cerchio in icona cuore
+        if (currentSearchLocation && currentSearchLocation.query === currentSearchQuery) {
+            const showTrad      = document.getElementById('filter-tradizionali')?.checked ?? true;
+            const showBlocca    = document.getElementById('filter-bloccatelaio')?.checked ?? true;
+            const showPark      = document.getElementById('filter-parcheggi')?.checked ?? true;
+            const hidePiene     = document.getElementById('filter-piene')?.checked ?? false;
+            const soloPreferiti = document.getElementById('filter-preferiti')?.checked ?? false;
+            renderRadialSearch(currentSearchLocation.latLng, currentSearchLocation.displayName, showTrad, showBlocca, showPark, hidePiene, soloPreferiti);
+        } else {
+            await applyFiltersAndSearch(false);
+        }
+
+        // 5. Se il popup era aperto, riaprilo fluidamente sul nuovo marker corrispondente
+        if (openLatLng) {
+            let targetLayer = null;
+            [groupTradizionale, groupBloccatelaio, groupParcheggi].forEach(group => {
+                group.eachLayer(layer => {
+                    const lLatLng = layer.getLatLng ? layer.getLatLng() : null;
+                    if (lLatLng && Math.abs(lLatLng.lat - openLatLng.lat) < 0.00005 && Math.abs(lLatLng.lng - openLatLng.lng) < 0.00005) {
+                        targetLayer = layer;
+                    }
+                });
+            });
+            if (targetLayer) {
+                targetLayer.openPopup();
+            }
+        }
+    };
 
     // =========================================================
     // 4. USER STORY 1: Geolocalizzazione GPS ("La mia posizione")
