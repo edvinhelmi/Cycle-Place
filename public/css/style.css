@@ -105,26 +105,32 @@
 .search-feedback {
     position: absolute;
     top: 4.5rem;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    width: fit-content;
-    background: rgba(15, 23, 42, 0.90);
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: min(520px, calc(100vw - 2rem));
+    background: rgba(15, 23, 42, 0.92);
     backdrop-filter: blur(16px);
     color: white;
-    padding: 0.4rem 1.1rem;
+    padding: 0.45rem 1.25rem;
     border-radius: 9999px;
     font-size: 0.82rem;
     font-weight: 600;
     z-index: 1050;
     pointer-events: none;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
     transition: opacity 0.3s;
-    white-space: nowrap;
+    text-align: center;
+    line-height: 1.35;
 }
 
 .search-feedback.error {
     background: rgba(220, 38, 38, 0.95);
+}
+
+.custom-search-pin-wrapper {
+    background: transparent !important;
+    border: none !important;
 }
 
 /* =====================

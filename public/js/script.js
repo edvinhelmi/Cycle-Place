@@ -33,6 +33,10 @@ const TRANSLATIONS = {
         'search.button':       'Cerca',
         'search.noResults':    'Nessun parcheggio trovato in questa zona',
         'search.found':        'Trovati {n} risultati',
+        'search.locationNotFound': 'Luogo non trovato',
+        'search.noResultsRadius':  'Nessun parcheggio a 200 metri da "{place}"',
+        'search.radiusFound':      'Nessun parcheggio in "{place}". Mostro {n} risultati entro 200m',
+        'search.searching':        'Ricerca in corso...',
         'geo.title':           'La mia posizione',
         'geo.button':          'La mia posizione',
         'geo.locating':        'Rilevamento in corso...',
@@ -104,6 +108,10 @@ const TRANSLATIONS = {
         'search.button':       'Search',
         'search.noResults':    'No parking found in this area',
         'search.found':        'Found {n} results',
+        'search.locationNotFound': 'Location not found',
+        'search.noResultsRadius':  'No parking spots within 200m of "{place}"',
+        'search.radiusFound':      'No parking in "{place}". Showing {n} spots within 200m',
+        'search.searching':        'Searching...',
         'geo.title':           'My location',
         'geo.button':          'My location',
         'geo.locating':        'Locating...',
@@ -176,6 +184,10 @@ const TRANSLATIONS = {
         'search.button':       'Suchen',
         'search.noResults':    'Kein Parkplatz in diesem Bereich gefunden',
         'search.found':        '{n} Ergebnisse gefunden',
+        'search.locationNotFound': 'Ort nicht gefunden',
+        'search.noResultsRadius':  'Kein Parkplatz im Umkreis von 200m um "{place}"',
+        'search.radiusFound':      'Kein Parkplatz in "{place}". Zeige {n} Plätze im Umkreis von 200m',
+        'search.searching':        'Suche läuft...',
         'geo.title':           'Mein Standort',
         'geo.button':          'Mein Standort',
         'geo.locating':        'Standort wird ermittelt...',
@@ -442,8 +454,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================
     let tutteRastrelliere = null;
     let tuttiParcheggi    = null;
-    let currentSearchQuery = '';
-    let feedbackTimeout   = null;
+    let currentSearchQuery    = '';
+    let currentSearchLocation = null;
+    let feedbackTimeout       = null;
 
     // Layer per la posizione GPS dell'utente (User Story 1)
     let userLocationMarker = null;
@@ -452,6 +465,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const groupTradizionale = L.layerGroup().addTo(map);
     const groupBloccatelaio = L.layerGroup().addTo(map);
     const groupParcheggi    = L.layerGroup().addTo(map);
+    const groupSearchRadius = L.layerGroup().addTo(map);
 
     // =========================================================
     // CRUSCOTTO STATISTICHE (Pitch / Demo Video)
@@ -519,7 +533,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 3. CONTROLLER: Rendering, Filtri & Ricerca Spaziale (RF3)
 
     // =========================================================
-    function showSearchFeedback(msg, isError = false) {
+    function showSearchFeedback(msg, isError = false, duration = 4000) {
         const el = document.getElementById('search-feedback');
         if (!el) return;
         el.textContent = msg;
@@ -529,7 +543,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (feedbackTimeout) clearTimeout(feedbackTimeout);
         feedbackTimeout = setTimeout(() => {
             el.classList.add('hidden');
-        }, 4000);
+        }, duration);
     }
 
     function hideSearchFeedback() {
@@ -538,7 +552,118 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (feedbackTimeout) clearTimeout(feedbackTimeout);
     }
 
-    function applyFiltersAndSearch(isExplicitSearch = false) {
+    function renderRadialSearch(searchLatLng, placeName, showTrad, showBlocca, showPark, hidePiene) {
+        groupTradizionale.clearLayers();
+        groupBloccatelaio.clearLayers();
+        groupParcheggi.clearLayers();
+        groupSearchRadius.clearLayers();
+
+        const radialBounds = L.latLngBounds([searchLatLng]);
+        let radialCount = 0;
+        const visibleRastrelliere = { type: 'FeatureCollection', features: [] };
+        const visibleParcheggi    = { type: 'FeatureCollection', features: [] };
+
+        // 1. Rastrelliere entro 200m
+        if (tutteRastrelliere && tutteRastrelliere.features) {
+            tutteRastrelliere.features.forEach(feature => {
+                const props = feature.properties;
+                const coords = feature.geometry.coordinates;
+                const latlng = L.latLng(coords[1], coords[0]);
+                const dist = latlng.distanceTo(searchLatLng);
+                if (dist > 200) return;
+
+                const isBlocca = props.Tipo_generale === 'Rastr_bloccatelaio';
+                const isPiena = isBlocca && ((props.posti_liberi === 0) || (props.piena === true));
+                const typeVisible = isBlocca ? showBlocca : showTrad;
+                const pienaVisible = hidePiene ? !isPiena : true;
+                if (!typeVisible || !pienaVisible) return;
+
+                const stile = isBlocca ? (isPiena ? STILI.piena : STILI.bloccatelaio) : STILI.tradizionale;
+                const layer = L.circleMarker(latlng, stile);
+                layer.bindPopup(() => buildRastrellieraPopup(props, coords[1], coords[0]), {
+                    maxWidth: 320,
+                    minWidth: 260,
+                    autoPan: true,
+                    autoPanPaddingTopLeft: [20, 85],
+                    autoPanPaddingBottomRight: [20, 65],
+                    className: 'custom-tbp-popup'
+                });
+                layer.on('click', () => centerOnMarker(latlng, isBlocca));
+
+                (isBlocca ? groupBloccatelaio : groupTradizionale).addLayer(layer);
+                visibleRastrelliere.features.push(feature);
+                radialBounds.extend(latlng);
+                radialCount++;
+            });
+        }
+
+        // 2. Parcheggi Protetti entro 200m
+        if (tuttiParcheggi && tuttiParcheggi.features) {
+            tuttiParcheggi.features.forEach(feature => {
+                const props = feature.properties;
+                const coords = feature.geometry.coordinates;
+                const latlng = L.latLng(coords[1], coords[0]);
+                const dist = latlng.distanceTo(searchLatLng);
+                if (dist > 200) return;
+                if (!showPark) return;
+
+                const layer = L.circleMarker(latlng, STILI.parcheggio);
+                layer.bindPopup(() => buildParcheggioPopup(props, coords[1], coords[0]), {
+                    maxWidth: 320,
+                    minWidth: 260,
+                    autoPan: true,
+                    autoPanPaddingTopLeft: [20, 85],
+                    autoPanPaddingBottomRight: [20, 65],
+                    className: 'custom-tbp-popup'
+                });
+                layer.on('click', () => centerOnMarker(latlng, false));
+
+                groupParcheggi.addLayer(layer);
+                visibleParcheggi.features.push(feature);
+                radialBounds.extend(latlng);
+                radialCount++;
+            });
+        }
+
+        // 3. Aggiungi Pin e Cerchio di raggio 200m
+        const searchPin = L.marker(searchLatLng, {
+            icon: L.divIcon({
+                className: 'custom-search-pin-wrapper',
+                html: `<div class="w-8 h-8 rounded-full bg-error text-white flex items-center justify-center shadow-xl border-2 border-white text-base"><i class="fa-solid fa-location-dot"></i></div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32]
+            })
+        }).bindPopup(`<div class="font-bold text-slate-800 text-sm mb-1">${placeName}</div><div class="text-xs text-slate-500 font-medium">Punto cercato (raggio 200m)</div>`, {
+            className: 'custom-tbp-popup'
+        });
+
+        const searchCircle = L.circle(searchLatLng, {
+            radius: 200,
+            color: '#ef4444',
+            fillColor: '#ef4444',
+            fillOpacity: 0.12,
+            weight: 2,
+            dashArray: '6, 6'
+        });
+
+        groupSearchRadius.addLayer(searchCircle);
+        groupSearchRadius.addLayer(searchPin);
+
+        // 4. Centratura e Messaggio Feedback
+        if (radialCount === 0) {
+            map.setView(searchLatLng, 16);
+            showSearchFeedback(tr('search.noResultsRadius').replace('{place}', placeName), true, 5000);
+        } else {
+            radialBounds.extend(searchCircle.getBounds());
+            map.fitBounds(radialBounds, { padding: [50, 50], maxZoom: 17 });
+            showSearchFeedback(tr('search.radiusFound').replace('{place}', placeName).replace('{n}', radialCount), false, 5500);
+        }
+
+        updateFilterBadge();
+        aggiornaStatistiche(visibleRastrelliere, visibleParcheggi);
+    }
+
+    async function applyFiltersAndSearch(isExplicitSearch = false) {
         const showTrad   = document.getElementById('filter-tradizionali')?.checked ?? true;
         const showBlocca = document.getElementById('filter-bloccatelaio')?.checked ?? true;
         const showPark   = document.getElementById('filter-parcheggi')?.checked ?? true;
@@ -548,6 +673,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         groupTradizionale.clearLayers();
         groupBloccatelaio.clearLayers();
         groupParcheggi.clearLayers();
+        groupSearchRadius.clearLayers();
 
         const bounds = L.latLngBounds([]);
         let renderedCount = 0;
@@ -555,6 +681,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Feature visibili (per cruscotto statistiche)
         const visibleRastrelliere = { type: 'FeatureCollection', features: [] };
         const visibleParcheggi    = { type: 'FeatureCollection', features: [] };
+
+        const trimmedQuery = currentSearchQuery.trim();
 
         // 1. Elabora Rastrelliere
         if (tutteRastrelliere && tutteRastrelliere.features) {
@@ -588,8 +716,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     className: 'custom-tbp-popup'
                 });
                 layer.on('click', () => centerOnMarker(latlng, isBlocca));
-
-
 
                 (isBlocca ? groupBloccatelaio : groupTradizionale).addLayer(layer);
                 visibleRastrelliere.features.push(feature);
@@ -626,31 +752,73 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-
-        // 3. Gestione feedback utente e zoom automatico (fitBounds)
+        // 3. Gestione feedback utente e zoom automatico (fitBounds) / Fallback Geocoding
         const clearBtn = document.getElementById('btn-clear-search');
-        if (clearBtn) clearBtn.classList.toggle('hidden', !currentSearchQuery);
+        if (clearBtn) clearBtn.classList.toggle('hidden', !trimmedQuery);
 
-        if (isExplicitSearch && currentSearchQuery.trim()) {
+        if (trimmedQuery) {
             if (renderedCount > 0) {
-                if (renderedCount === 1) {
-                    map.setView(bounds.getCenter(), 17);
-                } else if (bounds.isValid()) {
-                    map.fitBounds(bounds, { padding: [60, 60], maxZoom: 17 });
+                currentSearchLocation = null;
+                if (isExplicitSearch) {
+                    if (renderedCount === 1) {
+                        map.setView(bounds.getCenter(), 17);
+                    } else if (bounds.isValid()) {
+                        map.fitBounds(bounds, { padding: [60, 60], maxZoom: 17 });
+                    }
+                    showSearchFeedback(tr('search.found').replace('{n}', renderedCount), false);
                 }
-                showSearchFeedback(tr('search.found').replace('{n}', renderedCount), false);
+                updateFilterBadge();
+                aggiornaStatistiche(visibleRastrelliere, visibleParcheggi);
+            } else if (isExplicitSearch) {
+                // Nessun parcheggio trovato nel testo -> Tenta geocoding e ricerca nel raggio di 200m
+                showSearchFeedback(tr('search.searching'), false, 6000);
+
+                let queryForGeo = trimmedQuery;
+                if (!/trento/i.test(queryForGeo)) {
+                    queryForGeo += ', Trento, Italia';
+                }
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryForGeo)}&limit=1`;
+
+                try {
+                    const geoRes = await fetch(url, {
+                        headers: { 'Accept-Language': currentLang || 'it' }
+                    });
+                    const geoData = await geoRes.json();
+
+                    if (!geoData || geoData.length === 0) {
+                        currentSearchLocation = null;
+                        showSearchFeedback(tr('search.locationNotFound'), true, 4500);
+                        updateFilterBadge();
+                        aggiornaStatistiche(visibleRastrelliere, visibleParcheggi);
+                        return;
+                    }
+
+                    const searchLat = parseFloat(geoData[0].lat);
+                    const searchLon = parseFloat(geoData[0].lon);
+                    const searchLatLng = L.latLng(searchLat, searchLon);
+                    const placeName = geoData[0].display_name ? geoData[0].display_name.split(',')[0].trim() : trimmedQuery;
+
+                    currentSearchLocation = { latLng: searchLatLng, displayName: placeName, query: currentSearchQuery };
+
+                    renderRadialSearch(searchLatLng, placeName, showTrad, showBlocca, showPark, hidePiene);
+                } catch (err) {
+                    console.error('[Nominatim error]', err);
+                    showSearchFeedback(tr('search.noResults'), true);
+                    updateFilterBadge();
+                    aggiornaStatistiche(visibleRastrelliere, visibleParcheggi);
+                }
+            } else if (currentSearchLocation && currentSearchLocation.query === currentSearchQuery) {
+                renderRadialSearch(currentSearchLocation.latLng, currentSearchLocation.displayName, showTrad, showBlocca, showPark, hidePiene);
             } else {
-                showSearchFeedback(tr('search.noResults'), true);
+                updateFilterBadge();
+                aggiornaStatistiche(visibleRastrelliere, visibleParcheggi);
             }
-        } else if (!currentSearchQuery.trim()) {
+        } else {
+            currentSearchLocation = null;
             hideSearchFeedback();
+            updateFilterBadge();
+            aggiornaStatistiche(visibleRastrelliere, visibleParcheggi);
         }
-
-        // 4. Aggiorna indicatore badge filtri su mobile
-        updateFilterBadge();
-
-        // 5. Aggiorna cruscotto statistiche
-        aggiornaStatistiche(visibleRastrelliere, visibleParcheggi);
     }
 
 
