@@ -282,14 +282,24 @@ function toggleEditProfile(show) {
         profileEditForm.classList.remove('hidden');
         if (editBtnText) editBtnText.textContent = 'Chiudi Modifica';
         
-        // Pre-popola i campi con i dati correnti
+        // Svuota i campi password per evitare l'autocompilazione del browser
+        document.getElementById('edit-curr-pass').value = '';
+        document.getElementById('edit-new-pass').value = '';
+        document.getElementById('edit-conf-pass').value = '';
+
+        // Ripristina tutte le icone a tipo "password"
+        document.querySelectorAll('.toggle-pass-btn').forEach(btn => {
+            const target = document.getElementById(btn.dataset.target);
+            if (target) target.type = 'password';
+            btn.innerHTML = '<i class="fa-regular fa-eye"></i>';
+        });
+
         const decoded = decodeToken(getToken());
         if (decoded) {
             document.getElementById('edit-name').value = decoded.name || '';
             document.getElementById('edit-surname').value = decoded.surname || '';
         }
 
-        // Se l'accesso è avvenuto tramite Google SSO, nascondi il cambio password
         const pwdSection = document.getElementById('password-change-section');
         if (pwdSection && decoded?.provider === 'google') {
             pwdSection.classList.add('hidden');
@@ -302,6 +312,19 @@ function toggleEditProfile(show) {
         if (editMsg) editMsg.textContent = '';
     }
 }
+
+// Gestione click sugli occhietti
+document.querySelectorAll('.toggle-pass-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const inputId = btn.dataset.target;
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.innerHTML = isPassword ? '<i class="fa-regular fa-eye-slash text-primary"></i>' : '<i class="fa-regular fa-eye"></i>';
+    });
+});
 
 if (btnToggleEdit) btnToggleEdit.addEventListener('click', () => toggleEditProfile());
 if (btnCancelEdit) btnCancelEdit.addEventListener('click', () => toggleEditProfile(false));
