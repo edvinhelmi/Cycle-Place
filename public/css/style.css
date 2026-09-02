@@ -582,6 +582,7 @@
 /* =====================
    Custom Toast Notifications
    ===================== */
+#toast-container,
 .toast-container-custom {
     position: fixed;
     top: 4.75rem;
@@ -596,6 +597,7 @@
 }
 
 @media (max-width: 640px) {
+    #toast-container,
     .toast-container-custom {
         top: 4.25rem;
         left: 50%;
@@ -607,11 +609,16 @@
 }
 
 .custom-toast {
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(8.5px) !important;
+    border-radius: 16px !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12) !important;
     pointer-events: auto;
     opacity: 0;
     transform: translateY(-16px) scale(0.95);
     transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
 }
 
 .custom-toast.show {

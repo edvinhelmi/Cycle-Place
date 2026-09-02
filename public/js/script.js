@@ -107,6 +107,56 @@ async function authFetch(url, options = {}) {
 }
 
 // =======================================================
+// CUSTOM ALERTS (Glassmorphism Toasts)
+// =======================================================
+window.alert = function(message, type = 'warning') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+    
+    const toast = document.createElement('div');
+    let iconClass = 'fa-triangle-exclamation';
+    let iconColor = 'text-amber-500';
+    let borderColor = 'border-amber-400/60';
+    
+    if (type === 'error') { 
+        iconClass = 'fa-circle-xmark'; 
+        iconColor = 'text-rose-500';
+        borderColor = 'border-rose-400/60';
+    } else if (type === 'success') { 
+        iconClass = 'fa-circle-check'; 
+        iconColor = 'text-emerald-500';
+        borderColor = 'border-emerald-400/60';
+    } else if (type === 'info') { 
+        iconClass = 'fa-circle-info'; 
+        iconColor = 'text-sky-500';
+        borderColor = 'border-sky-400/60';
+    }
+
+    toast.className = `custom-toast font-bold flex flex-row items-center gap-3 px-4 py-3 text-xs sm:text-sm text-slate-800 ${borderColor}`;
+    toast.innerHTML = `
+        <i class="fa-solid ${iconClass} ${iconColor} text-lg shrink-0"></i>
+        <span class="font-bold leading-snug">${message}</span>
+    `;
+    
+    container.appendChild(toast);
+    
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+    });
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 350);
+    }, 3800);
+};
+
+// =======================================================
 // TASK 1: Preferiti in memoria durante la sessione
 // =======================================================
 let userFavoritiIds = new Set();
