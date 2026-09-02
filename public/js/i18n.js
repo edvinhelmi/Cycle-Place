@@ -126,6 +126,8 @@ const I18n = (function() {
         await Promise.all([loadLanguage(DEFAULT_LANG), loadLanguage(currentLang)]);
         updateDOM();
 
+        document.documentElement.classList.add('i18n-loaded');
+
         // Listener unificato sul selettore lingua
         const langSelect = document.getElementById('lang-select');
         if (langSelect) {
