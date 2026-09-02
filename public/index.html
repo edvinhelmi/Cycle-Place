@@ -435,14 +435,35 @@
             <input type="hidden" id="seg-lat">
             <input type="hidden" id="seg-lng">
             <div class="form-control mb-3">
-                <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.tipoProblem">Tipo di problema</span></label>
-                <select id="seg-tipo" class="select select-bordered select-sm sm:select-md bg-base-100/90 rounded-xl focus:select-primary text-slate-800 font-medium">
-                    <option value="bici_abbandonata"   data-i18n="seg.bikeLeft">Bici abbandonata</option>
-                    <option value="danno_strutturale"  data-i18n="seg.damage">Danno strutturale</option>
-                    <option value="rastrelliera_piena" data-i18n="seg.full">Rastrelliera piena</option>
-                    <option value="vandalismo"         data-i18n="seg.vandalism">Vandalismo</option>
-                    <option value="altro"              data-i18n="seg.other">Altro</option>
-                </select>
+                <label class="label py-1">
+                    <span class="label-text font-semibold text-slate-700 text-xs">Seleziona i problemi riscontrati:</span>
+                </label>
+                <div class="space-y-1.5 bg-base-100/60 p-2.5 rounded-xl border border-base-300">
+                    <label class="label cursor-pointer justify-start gap-2.5 py-1">
+                        <input type="checkbox" name="seg-opzioni" value="luogo_non_sicuro" class="checkbox checkbox-sm checkbox-error rounded-md" />
+                        <span class="text-xs font-semibold text-slate-700">⚠️ Luogo poco illuminato / non sicuro</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2.5 py-1">
+                        <input type="checkbox" name="seg-opzioni" value="danno_strutturale" class="checkbox checkbox-sm checkbox-error rounded-md" />
+                        <span class="text-xs font-semibold text-slate-700">🔧 Danno strutturale alla rastrelliera</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2.5 py-1">
+                        <input type="checkbox" name="seg-opzioni" value="bici_abbandonata" class="checkbox checkbox-sm checkbox-error rounded-md" />
+                        <span class="text-xs font-semibold text-slate-700">🚲 Bici abbandonata / rottame</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2.5 py-1">
+                        <input type="checkbox" name="seg-opzioni" value="vandalismo" class="checkbox checkbox-sm checkbox-error rounded-md" />
+                        <span class="text-xs font-semibold text-slate-700">🚨 Vandalismo o tentato furto</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2.5 py-1">
+                        <input type="checkbox" name="seg-opzioni" value="rastrelliera_piena" class="checkbox checkbox-sm checkbox-error rounded-md" />
+                        <span class="text-xs font-semibold text-slate-700">🚫 Rastrelliera completamente piena</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-2.5 py-1">
+                        <input type="checkbox" name="seg-opzioni" value="accesso_ostruito" class="checkbox checkbox-sm checkbox-error rounded-md" />
+                        <span class="text-xs font-semibold text-slate-700">🛑 Accesso bloccato o rifiuti</span>
+                    </label>
+                </div>
             </div>
             <div class="form-control mb-3">
                 <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="form.notes">Note aggiuntive</span></label>
