@@ -4,12 +4,17 @@
  */
 
 const TOKEN_KEY = 'tbp_jwt';
+const REFRESH_TOKEN_KEY = 'tbp_refresh_jwt';
 
 // =======================================================
 // JWT Helpers
 // =======================================================
 function getToken() { return localStorage.getItem(TOKEN_KEY); }
-function removeToken() { localStorage.removeItem(TOKEN_KEY); }
+function getRefreshToken() { return localStorage.getItem(REFRESH_TOKEN_KEY); }
+function removeToken() {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
 
 function decodeToken(token) {
     try { return JSON.parse(atob(token.split('.')[1])); }
@@ -17,6 +22,13 @@ function decodeToken(token) {
 }
 
 function isTokenValid(token) {
+    const refreshToken = getRefreshToken();
+    if (refreshToken) {
+        const dRefresh = decodeToken(refreshToken);
+        if (dRefresh && dRefresh.exp && dRefresh.exp * 1000 > Date.now()) {
+            return true;
+        }
+    }
     if (!token) return false;
     const d = decodeToken(token);
     return d && d.exp && d.exp * 1000 > Date.now();
