@@ -1274,5 +1274,23 @@
     box-shadow: none !important;
 }
 
+html.is-logged-in #btn-login-modal,
+html.is-logged-in #btn-register-modal {
+    display: none !important;
+}
 
+html.is-logged-in #btn-dashboard,
+html.is-logged-in #btn-logout {
+    display: inline-flex !important;
+}
+
+html.is-logged-out #btn-login-modal,
+html.is-logged-out #btn-register-modal {
+    display: inline-flex !important;
+}
+
+html.is-logged-out #btn-dashboard,
+html.is-logged-out #btn-logout {
+    display: none !important;
+}
 
