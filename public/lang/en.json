@@ -58,7 +58,7 @@
   "tipo.luogo_non_sicuro": "Poorly lit / unsafe location",
   "tipo.danno_strutturale": "Structural damage to the rack",
   "tipo.vandalismo": "Vandalism / attempted theft",
-  "tipo.altro": "Other (specify in notes)"
+  "tipo.altro": "Other (specify in notes)",
 
   "auth.errName": "First name must contain at least 2 characters",
   "auth.errSurname": "Last name must contain at least 2 characters",
