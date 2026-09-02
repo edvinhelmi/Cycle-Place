@@ -1,5 +1,5 @@
 /* =====================================================
-   Trento Bike Parking — style.css
+   Cycle place — style.css
    Complementare a Tailwind CSS + DaisyUI
    ===================================================== */
 
@@ -1305,11 +1305,19 @@ html.is-logged-out #btn-logout {
     display: none !important;
 }
 
-.theme-toggle-container, 
-#theme-toggle-checkbox + label,
-.swap {
-    padding-left: 0.25rem !important;
-    padding-right: 0.25rem !important;
-    min-height: unset !important;
+.theme-toggle-switch {
+    gap: 0.2rem !important;
+    padding-left: 0.15rem !important;
+    padding-right: 0.15rem !important;
+    width: auto !important;
+    max-width: fit-content !important;
+}
+
+.theme-switch-track {
+    width: 32px !important; /* Ridotto da 38px a 32px per stringerlo orizzontalmente */
+}
+
+.theme-switch-input:checked + .theme-switch-track .theme-switch-thumb {
+    transform: translateX(10px) !important; /* Adatta lo spostamento del pallino alla nuova larghezza ridotta */
 }
 
