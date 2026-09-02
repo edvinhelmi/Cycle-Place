@@ -197,6 +197,7 @@ window.openSegnalazioneModal = function(id, lat, lng) {
     if (err) err.textContent = '';
     if (succ) succ.textContent = '';
     if (note) note.value = '';
+    document.querySelectorAll('input[name="seg-opzioni"]').forEach(cb => cb.checked = false);
     const modal = document.getElementById('segnalazione-modal');
     if (modal) {
         modal.classList.remove('hidden');
@@ -866,8 +867,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const id   = document.getElementById('seg-rastrelliera-id')?.value;
             const lat  = parseFloat(document.getElementById('seg-lat')?.value);
             const lng  = parseFloat(document.getElementById('seg-lng')?.value);
-            const tipo = document.getElementById('seg-tipo')?.value;
             const note = document.getElementById('seg-note')?.value?.trim();
+
+            // Legge tutte le caselle spuntate (checkbox)
+            const checkedBoxes = Array.from(document.querySelectorAll('input[name="seg-opzioni"]:checked')).map(cb => cb.value);
+            if (checkedBoxes.length === 0) {
+                if (errorEl) errorEl.textContent = '❌ Seleziona almeno una problematica.';
+                return;
+            }
+            const tipo = checkedBoxes.join(', ');
 
             try {
                 const res = await authFetch('/api/v1/segnalazioni', {
@@ -877,8 +885,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error);
                 if (successEl) successEl.textContent = '✅ Segnalazione inviata! Grazie per il tuo contributo.';
+                
+                // Pulisce note e caselle
                 const noteEl = document.getElementById('seg-note');
                 if (noteEl) noteEl.value = '';
+                document.querySelectorAll('input[name="seg-opzioni"]').forEach(cb => cb.checked = false);
+
+                // Ricarica subito la cache delle segnalazioni per aggiornare i popup all'istante
+                await loadSegnalazioniRecenti();
+
                 setTimeout(() => closeModal(segnalazioneModal), 2000);
             } catch (err) {
                 if (errorEl) errorEl.textContent = '❌ ' + (err.message || 'Errore invio segnalazione');
@@ -1887,6 +1902,43 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <i class="fa-solid fa-route text-white"></i> <span class="text-white">${tr('routing.directions') || tr('popup.directions')}</span>
             </button>`;
 
+        // Calcolo avviso segnalazioni recenti per rastrelliere
+        const numId = Number(props.id);
+        const segList = segnalazioniRecentiMap.get(numId) || [];
+        let alertSegnalazioneHTML = '';
+
+        if (segList.length > 0) {
+            const labelsMap = {
+                luogo_non_sicuro: 'luogo poco sicuro',
+                danno_strutturale: 'danni strutturali',
+                bici_abbandonata: 'bici abbandonate',
+                vandalismo: 'atti di vandalismo/tentato furto',
+                rastrelliera_piena: 'rastrelliera satura',
+                accesso_ostruito: 'accesso ostruito'
+            };
+
+            const allTipi = [];
+            segList.forEach(s => {
+                if (s.tipo) {
+                    s.tipo.split(', ').forEach(t => {
+                        const label = labelsMap[t] || t.replace(/_/g, ' ');
+                        if (!allTipi.includes(label)) allTipi.push(label);
+                    });
+                }
+            });
+
+            const motiviStr = allTipi.slice(0, 2).join(' e ');
+
+            alertSegnalazioneHTML = `
+                <div class="alert alert-warning bg-amber-500/15 border border-amber-500/30 text-amber-900 rounded-2xl p-2.5 text-xs flex items-start gap-2 shadow-xs">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm mt-0.5 shrink-0"></i>
+                    <div class="leading-tight">
+                        <strong class="font-bold block text-amber-900">Segnalazioni recenti:</strong>
+                        <span class="text-slate-700">Nelle ultime ore sono state inviate segnalazioni per <em>${motiviStr || 'problemi vari'}</em>.</span>
+                    </div>
+                </div>`;
+        }
+        
         return `
             <div class="popup-content card glass-popup rounded-2xl p-4 text-slate-800 space-y-3">
                 <div class="popup-header flex items-center justify-between border-b border-base-200/80 pb-2 pr-7">
@@ -1895,6 +1947,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </h3>
                     ${badgeHTML}
                 </div>
+                ${alertSegnalazioneHTML}
                 ${isBlocca ? `
                 <div class="popup-iot-card ${themeClass} rounded-2xl p-3 shadow-xs space-y-2.5">
                     <div class="popup-iot-header flex items-center justify-between text-xs">
@@ -1992,6 +2045,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <i class="fa-solid fa-route text-white"></i> <span class="text-white">${tr('routing.directions') || tr('popup.directions')}</span>
             </button>`;
 
+        // Calcolo avviso segnalazioni recenti per parcheggi protetti
+        const segListPark = segnalazioniRecentiMap.get(parkId) || [];
+        let alertParkHTML = '';
+
+        if (segListPark.length > 0) {
+            const labelsMap = {
+                luogo_non_sicuro: 'luogo poco sicuro',
+                danno_strutturale: 'danni strutturali',
+                bici_abbandonata: 'bici abbandonate',
+                vandalismo: 'atti di vandalismo/tentato furto',
+                rastrelliera_piena: 'rastrelliera satura',
+                accesso_ostruito: 'accesso ostruito'
+            };
+
+            const allTipi = [];
+            segListPark.forEach(s => {
+                if (s.tipo) {
+                    s.tipo.split(', ').forEach(t => {
+                        const label = labelsMap[t] || t.replace(/_/g, ' ');
+                        if (!allTipi.includes(label)) allTipi.push(label);
+                    });
+                }
+            });
+
+            const motiviStr = allTipi.slice(0, 2).join(' e ');
+
+            alertParkHTML = `
+                <div class="alert alert-warning bg-amber-500/15 border border-amber-500/30 text-amber-900 rounded-2xl p-2.5 text-xs flex items-start gap-2 shadow-xs">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm mt-0.5 shrink-0"></i>
+                    <div class="leading-tight">
+                        <strong class="font-bold block text-amber-900">Segnalazioni recenti:</strong>
+                        <span class="text-slate-700">Nelle ultime ore sono state inviate segnalazioni per <em>${motiviStr || 'problemi vari'}</em>.</span>
+                    </div>
+                </div>`;
+        }
+
         return `
             <div class="popup-content card glass-popup rounded-2xl p-4 text-slate-800 space-y-3">
                 <div class="popup-header border-b border-base-200/80 pb-2 pr-7">
@@ -1999,6 +2088,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <i class="fa-solid fa-shield-halved text-secondary"></i> <span>${props.park || tr('stats.protected')}</span>
                     </h3>
                 </div>
+                ${alertParkHTML}
                 <div class="popup-body bg-base-100/80 border border-base-200/80 rounded-2xl p-3 space-y-1.5 text-xs">
                     <div class="popup-row flex items-center justify-between py-1 border-b border-base-200/60">
                         <span class="popup-label text-slate-500 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> ${tr('popup.address')}</span>
