@@ -2778,7 +2778,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     I18n.onLanguageChange(() => {
         applyFiltersAndSearch(false);
         updateThemeUI(currentTheme);
-        initWeather();
+        updateWeatherUI();
         // Se c'è un percorso aperto o navigazione attiva, ricarica le istruzioni nella nuova lingua
         if (currentNavDestination && lastUserCoords) {
             calculateAndRenderRoute(lastUserCoords.lat, lastUserCoords.lng, currentNavDestination.lat, currentNavDestination.lng, currentNavMode, isLiveNavigating);
@@ -2786,52 +2786,83 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // =========================================================
-    // METEO LIVE (Open-Meteo API — Trento)
+    // METEO LIVE (Open-Meteo API — Trento con supporto Multilingua)
     // =========================================================
-    async function initWeather() {
+    let cachedWeatherCode = null;
+    let cachedWeatherTemp = null;
+
+    function getWeatherDetails(code, lang = 'it') {
+        const descriptions = {
+            0:  { it: 'Sereno',         en: 'Clear sky',     de: 'Klarer Himmel' },
+            1:  { it: 'Quasi sereno',   en: 'Mainly clear',  de: 'Überwiegend klar' },
+            2:  { it: 'Poco nuvoloso',  en: 'Partly cloudy', de: 'Teilweise bewölkt' },
+            3:  { it: 'Coperto',        en: 'Overcast',      de: 'Bedeckt' },
+            45: { it: 'Nebbia',         en: 'Foggy',         de: 'Nebel' },
+            48: { it: 'Nebbia brinata', en: 'Rime fog',      de: 'Raureifnebel' },
+            51: { it: 'Pioviggine',     en: 'Light drizzle', de: 'Leichter Niesel' },
+            53: { it: 'Pioviggine',     en: 'Drizzle',       de: 'Nieselregen' },
+            55: { it: 'Pioggia fitta',  en: 'Heavy drizzle', de: 'Dichter Niesel' },
+            61: { it: 'Pioggia debole', en: 'Slight rain',   de: 'Leichter Regen' },
+            63: { it: 'Pioggia',        en: 'Moderate rain', de: 'Regen' },
+            65: { it: 'Forte pioggia',  en: 'Heavy rain',    de: 'Starker Regen' },
+            71: { it: 'Neve debole',    en: 'Slight snow',   de: 'Leichter Schnee' },
+            73: { it: 'Neve',           en: 'Snow',          de: 'Schnee' },
+            75: { it: 'Forte nevicata', en: 'Heavy snow',    de: 'Starker Schnee' },
+            80: { it: 'Rovesci',        en: 'Rain showers',  de: 'Regenschauer' },
+            81: { it: 'Forti rovesci',  en: 'Heavy showers', de: 'Starke Schauer' },
+            82: { it: 'Temporale',      en: 'Violent shower',de: 'Wolkenbruch' },
+            95: { it: 'Temporale',      en: 'Thunderstorm',  de: 'Gewitter' }
+        };
+
+        const icons = {
+            0: 'fa-sun text-amber-500',
+            1: 'fa-cloud-sun text-amber-400',
+            2: 'fa-cloud-sun text-amber-400',
+            3: 'fa-cloud text-slate-400',
+            45: 'fa-smog text-slate-400',
+            48: 'fa-smog text-slate-400',
+            51: 'fa-cloud-rain text-sky-500',
+            53: 'fa-cloud-rain text-sky-500',
+            55: 'fa-cloud-showers-heavy text-sky-600',
+            61: 'fa-cloud-showers-heavy text-sky-500',
+            63: 'fa-cloud-showers-heavy text-sky-600',
+            65: 'fa-cloud-showers-heavy text-sky-700',
+            71: 'fa-snowflake text-sky-300',
+            73: 'fa-snowflake text-sky-300',
+            75: 'fa-snowflake text-sky-400',
+            80: 'fa-cloud-rain text-sky-600',
+            81: 'fa-cloud-rain text-sky-700',
+            82: 'fa-bolt text-amber-500',
+            95: 'fa-bolt text-amber-500'
+        };
+
+        const langKey = ['it', 'en', 'de'].includes(lang) ? lang : 'it';
+        const desc = descriptions[code]?.[langKey] || (langKey === 'en' ? 'Variable' : (langKey === 'de' ? 'Wechselhaft' : 'Variabile'));
+        const icon = icons[code] || 'fa-cloud-sun text-primary';
+
+        return { icon, desc };
+    }
+
+    function updateWeatherUI() {
+        if (cachedWeatherTemp === null || cachedWeatherCode === null) return;
         const tempEl = document.getElementById('weather-temp');
         const descEl = document.getElementById('weather-desc');
         const iconEl = document.getElementById('weather-icon');
         if (!tempEl || !descEl || !iconEl) return;
 
-        function getWeatherDetails(code) {
-            switch (code) {
-                case 0:
-                    return { icon: 'fa-sun text-amber-500', desc: 'Sereno' };
-                case 1:
-                case 2:
-                    return { icon: 'fa-cloud-sun text-amber-400', desc: 'Poco nuvoloso' };
-                case 3:
-                    return { icon: 'fa-cloud text-slate-400', desc: 'Coperto' };
-                case 45:
-                case 48:
-                    return { icon: 'fa-smog text-slate-400', desc: 'Nebbia' };
-                case 51:
-                case 53:
-                case 55:
-                case 61:
-                case 63:
-                case 65:
-                    return { icon: 'fa-cloud-showers-heavy text-sky-500', desc: 'Pioggia' };
-                case 71:
-                case 73:
-                case 75:
-                case 77:
-                case 85:
-                case 86:
-                    return { icon: 'fa-snowflake text-sky-300', desc: 'Neve' };
-                case 80:
-                case 81:
-                case 82:
-                    return { icon: 'fa-cloud-rain text-sky-600', desc: 'Rovesci' };
-                case 95:
-                case 96:
-                case 99:
-                    return { icon: 'fa-bolt text-amber-500', desc: 'Temporale' };
-                default:
-                    return { icon: 'fa-cloud-sun text-primary', desc: 'Variabile' };
-            }
-        }
+        const lang = (window.I18n ? window.I18n.getLanguage() : 'it') || 'it';
+        const details = getWeatherDetails(cachedWeatherCode, lang);
+
+        tempEl.textContent = `${cachedWeatherTemp}°C`;
+        descEl.textContent = details.desc;
+        iconEl.className = `fa-solid ${details.icon} text-sm`;
+    }
+
+    async function initWeather() {
+        const tempEl = document.getElementById('weather-temp');
+        const descEl = document.getElementById('weather-desc');
+        const iconEl = document.getElementById('weather-icon');
+        if (!tempEl || !descEl || !iconEl) return;
 
         try {
             const url = 'https://api.open-meteo.com/v1/forecast?latitude=46.0697&longitude=11.1211&current=temperature_2m,weather_code';
@@ -2842,16 +2873,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const current = data.current;
             if (!current) return;
 
-            const temp = Math.round(current.temperature_2m);
-            const details = getWeatherDetails(current.weather_code);
+            cachedWeatherTemp = Math.round(current.temperature_2m);
+            cachedWeatherCode = current.weather_code;
 
-            tempEl.textContent = `${temp}°C`;
-            descEl.textContent = details.desc;
-            iconEl.className = `fa-solid ${details.icon} text-base`;
+            updateWeatherUI();
         } catch (err) {
             console.warn('[Meteo] Impossibile recuperare i dati meteo:', err);
             tempEl.textContent = '--°C';
-            descEl.textContent = 'Non disp.';
+            descEl.textContent = '--';
         }
     }
 
