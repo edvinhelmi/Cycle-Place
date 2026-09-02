@@ -217,7 +217,7 @@ function renderPreferiti(items) {
                 </div>
             </div>
             <div class="list-item-actions w-full sm:w-auto">
-                <button class="btn btn-sm btn-outline btn-error rounded-xl w-full sm:w-auto font-semibold gap-1.5" onclick="rimuoviPreferito(${f.id})">
+                <button class="btn btn-sm btn-outline btn-error rounded-xl w-full sm:w-auto font-semibold gap-1.5 mt-2" onclick="rimuoviPreferito(${f.id})">
                     <i class="fa-solid fa-trash-can"></i> <span>${tr('dash.remove')}</span>
                 </button>
             </div>
