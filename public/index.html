@@ -15,6 +15,15 @@
     <link rel="stylesheet" href="css/tailwind.css">
     <!-- App Custom CSS (Leaflet & Animation Overrides) -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- Anti-Flicker Theme Initialization -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('tbp_theme');
+            const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme ? savedTheme : (systemDark ? 'dark' : 'trento');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 <body class="bg-base-200 text-slate-800 antialiased overflow-hidden select-none">
     <!-- Navbar con Glassmorphism & DaisyUI Component (RNF1, RNF6) -->
@@ -42,18 +51,33 @@
             <button id="btn-logout" class="btn btn-outline btn-error btn-sm rounded-xl font-semibold hidden" data-i18n="nav.logout">
                 <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
             </button>
-            <!-- Selettore lingua con hitbox a tutta ampiezza (100% cliccabile) -->
-            <div class="lang-selector-wrapper relative flex items-center justify-between gap-1.5 bg-base-100/90 hover:bg-base-200/80 border border-base-300 rounded-xl px-2.5 py-1.5 shadow-xs transition-colors select-none cursor-pointer">
-                <div class="flex items-center gap-1.5 pointer-events-none">
-                    <span id="lang-flag-icon" class="fi fi-it text-base rounded-xs shadow-xs"></span>
-                    <span id="lang-selected-code" class="text-xs font-bold text-slate-700 uppercase">IT</span>
-                    <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+            <!-- Contenitore riga inferiore per Mobile: Tema a sinistra (50%) e Lingua a destra (50%) -->
+            <div class="theme-lang-row flex items-center gap-2.5 w-full md:w-auto mt-1 md:mt-0">
+                <!-- Switcher Tema Chiaro/Scuro (50% su mobile, compatto su desktop) -->
+                <div class="theme-switch-container flex-1 md:flex-none flex items-center justify-center bg-base-100/90 hover:bg-base-200/80 border border-base-300 rounded-xl px-2.5 py-1.5 h-10 shadow-xs transition-colors">
+                    <label class="theme-toggle-switch flex items-center justify-center gap-2 cursor-pointer select-none w-full" title="Cambia tema chiaro/scuro">
+                        <i id="theme-sun-icon" class="fa-solid fa-sun text-amber-500 text-xs"></i>
+                        <input type="checkbox" id="theme-toggle-checkbox" class="theme-switch-input sr-only" aria-label="Cambia tema chiaro/scuro" />
+                        <span class="theme-switch-track relative inline-block w-[38px] h-[22px] bg-slate-300 rounded-full transition-colors duration-250">
+                            <span class="theme-switch-thumb absolute top-[3px] left-[3px] w-[16px] h-[16px] bg-white rounded-full transition-transform duration-250 shadow-sm"></span>
+                        </span>
+                        <i id="theme-moon-icon" class="fa-solid fa-moon text-slate-400 text-xs"></i>
+                    </label>
                 </div>
-                <select id="lang-select" class="lang-select absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" aria-label="Seleziona lingua">
-                    <option value="it">Italiano (IT)</option>
-                    <option value="en">English (EN)</option>
-                    <option value="de">Deutsch (DE)</option>
-                </select>
+
+                <!-- Selettore lingua (50% su mobile, compatto su desktop) -->
+                <div class="lang-selector-wrapper flex-1 md:flex-none relative flex items-center justify-between gap-1.5 bg-base-100/90 hover:bg-base-200/80 border border-base-300 rounded-xl px-2.5 py-1.5 h-10 shadow-xs transition-colors select-none cursor-pointer">
+                    <div class="flex items-center justify-center gap-1.5 pointer-events-none w-full">
+                        <span id="lang-flag-icon" class="fi fi-it text-base rounded-xs shadow-xs"></span>
+                        <span id="lang-selected-code" class="text-xs font-bold text-slate-700 uppercase">IT</span>
+                        <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+                    </div>
+                    <select id="lang-select" class="lang-select absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" aria-label="Seleziona lingua">
+                        <option value="it">Italiano (IT)</option>
+                        <option value="en">English (EN)</option>
+                        <option value="de">Deutsch (DE)</option>
+                    </select>
+                </div>
             </div>
         </div>
     </header>
@@ -63,13 +87,13 @@
 
         <!-- Barra di Ricerca Spaziale (RF3) come componente Join DaisyUI -->
         <div class="search-panel join glass-box rounded-full shadow-2xl p-0 z-[1000] h-10 sm:h-11" id="search-panel">
-            <label class="input input-ghost join-item rounded-s-full flex items-center gap-2 bg-transparent pl-4 pr-3 border-none flex-1 focus-within:bg-white/30 h-full min-h-0 py-0">
+            <label class="search-input-wrapper join-item rounded-s-full flex items-center gap-2 bg-transparent pl-4 pr-2 border-none flex-1 h-full min-h-0 py-0 cursor-text">
                 <span class="label p-0 text-slate-500 text-sm"><i class="fa-solid fa-magnifying-glass"></i></span>
                 <input type="text" id="search-input" class="grow bg-transparent text-slate-800 text-xs sm:text-sm font-semibold placeholder:text-slate-400 focus:outline-none" placeholder="Cerca via o parcheggio..." data-i18n-placeholder="search.placeholder" autocomplete="off">
                 <button id="btn-clear-search" class="search-clear-btn hidden btn btn-ghost btn-xs btn-circle text-slate-400 hover:text-slate-700 p-0 min-h-0 h-6 w-6" title="Cancella" aria-label="Cancella ricerca">&times;</button>
             </label>
             <!-- Pulsante Toggle Filtri per Mobile (join-item, visibile solo su mobile) -->
-            <button id="btn-filter-toggle" class="btn btn-ghost join-item border-l border-r border-white/40 bg-transparent px-3.5 relative h-full min-h-0 rounded-none md:hidden flex items-center justify-center py-0" title="Filtri" aria-label="Filtri">
+            <button id="btn-filter-toggle" class="btn btn-ghost join-item border-none bg-transparent px-3 relative h-full min-h-0 rounded-none md:hidden flex items-center justify-center py-0 shadow-none focus:outline-none" title="Filtri" aria-label="Filtri">
                 <span class="filter-toggle-icon text-slate-700"><i class="fa-solid fa-sliders"></i></span>
                 <span id="filter-badge" class="filter-badge badge badge-xs badge-accent absolute -top-1 -right-1 hidden"></span>
             </button>
@@ -200,22 +224,22 @@
 
             <!-- Stats: Distanza & Durata -->
             <div class="grid grid-cols-2 gap-2 mb-2.5">
-                <div class="bg-base-200/60 rounded-xl p-2 text-center border border-base-200/80">
-                    <span class="text-[10px] uppercase font-bold text-slate-500 block leading-tight mb-0.5" data-i18n="routing.distance">Distanza</span>
-                    <span id="nav-stat-distance" class="text-sm sm:text-base font-black text-primary">--</span>
+                <div class="nav-stat-card rounded-xl p-2.5 text-center shadow-xs">
+                    <span class="nav-stat-label text-[11px] uppercase font-extrabold block leading-tight mb-1" data-i18n="routing.distance">Distanza</span>
+                    <span id="nav-stat-distance" class="text-base sm:text-lg font-black text-primary">--</span>
                 </div>
-                <div class="bg-base-200/60 rounded-xl p-2 text-center border border-base-200/80">
-                    <span class="text-[10px] uppercase font-bold text-slate-500 block leading-tight mb-0.5" data-i18n="routing.duration">Tempo stimato</span>
-                    <span id="nav-stat-duration" class="text-sm sm:text-base font-black text-slate-800">--</span>
+                <div class="nav-stat-card rounded-xl p-2.5 text-center shadow-xs">
+                    <span class="nav-stat-label text-[11px] uppercase font-extrabold block leading-tight mb-1" data-i18n="routing.duration">Tempo stimato</span>
+                    <span id="nav-stat-duration" class="nav-stat-duration-val text-base sm:text-lg font-black">--</span>
                 </div>
             </div>
 
             <!-- Switch Modalità: Bici / A piedi -->
-            <div class="flex items-center justify-center gap-1 bg-base-200/80 p-1 rounded-xl border border-base-200/80 mb-2.5">
+            <div class="nav-mode-selector-box flex items-center justify-center gap-1.5 p-1 rounded-xl mb-2.5">
                 <button id="btn-nav-mode-bike" class="btn btn-xs flex-1 rounded-lg font-bold border-none bg-primary text-white shadow-xs gap-1.5 transition-all">
                     <i class="fa-solid fa-bicycle text-xs"></i> <span data-i18n="routing.modeBike">In bici</span>
                 </button>
-                <button id="btn-nav-mode-walk" class="btn btn-xs flex-1 rounded-lg font-bold border-none btn-ghost text-slate-600 hover:text-slate-900 gap-1.5 transition-all">
+                <button id="btn-nav-mode-walk" class="btn btn-xs flex-1 rounded-lg font-bold border-none btn-ghost btn-nav-mode-inactive gap-1.5 transition-all">
                     <i class="fa-solid fa-person-walking text-xs"></i> <span data-i18n="routing.modeWalk">A piedi</span>
                 </button>
             </div>
@@ -229,9 +253,9 @@
             </div>
 
             <!-- Overlay di Caricamento Percorso -->
-            <div id="nav-loading-overlay" class="hidden absolute inset-0 bg-white/90 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center gap-1.5 text-xs font-bold text-slate-800 z-20">
+            <div id="nav-loading-overlay" class="hidden absolute inset-0 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center gap-2 text-xs font-bold z-20 transition-colors">
                 <span class="loading loading-spinner loading-md text-primary"></span>
-                <span data-i18n="routing.calculating">Calcolo percorso...</span>
+                <span id="nav-loading-text" class="font-bold text-xs" data-i18n="routing.calculating">Calcolo percorso...</span>
             </div>
         </div>
 
@@ -329,12 +353,74 @@
                         </button>
                     </div>
                 </div>
+                <div class="flex justify-end pt-1">
+                    <button type="button" id="btn-open-forgot-modal" class="text-xs text-primary hover:underline font-semibold cursor-pointer" data-i18n="auth.forgotPassword">Password dimenticata?</button>
+                </div>
                 <div id="login-error" class="error-msg text-xs text-error font-semibold mt-1" role="alert" aria-live="polite"></div>
                 <button type="submit" id="btn-login-submit" class="btn btn-primary btn-block rounded-xl font-bold shadow-md mt-4 text-white" data-i18n="nav.login">Accedi</button>
             </form>
             <div class="divider my-4 text-xs font-bold uppercase tracking-wider text-slate-400" data-i18n="modal.or">oppure</div>
             <div id="google-btn-container" class="flex justify-center min-h-[44px]"></div>
             <div id="google-error" class="error-msg text-xs text-error font-semibold mt-2 text-center" role="alert" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <!-- Modale Recupero Password (RF 1.4 / US 3) -->
+    <div id="forgot-password-modal" class="modal hidden fixed inset-0 z-[3000] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
+        <div class="modal-content glass-modal rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl">
+            <button class="close btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-slate-500 hover:text-slate-800" data-modal="forgot-password-modal" aria-label="Chiudi">&times;</button>
+            <h2 class="text-xl font-bold text-slate-800 mb-2 flex items-center gap-2" data-i18n="auth.forgotPasswordTitle">
+                <i class="fa-solid fa-key text-primary"></i> <span>Recupero Password</span>
+            </h2>
+            <p class="text-xs text-slate-600 mb-4" data-i18n="auth.forgotPasswordDesc">Inserisci l'indirizzo email associato al tuo account. Ti invieremo un link per reimpostare la tua password.</p>
+            <form id="forgot-password-form" novalidate class="space-y-3">
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs">Email</span></label>
+                    <input type="email" id="forgot-email" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium" autocomplete="email" placeholder="mario.rossi@esempio.it" required>
+                </div>
+                <div id="forgot-error" class="error-msg text-xs text-error font-semibold mt-1" role="alert" aria-live="polite"></div>
+                <div id="forgot-success" class="success-msg text-xs text-success font-semibold mt-1" role="status" aria-live="polite"></div>
+                <div id="forgot-ethereal-preview" class="hidden text-xs bg-sky-50 border border-sky-200 text-sky-800 p-2.5 rounded-xl mt-2 font-medium"></div>
+                <button type="submit" id="btn-forgot-submit" class="btn btn-primary btn-block rounded-xl font-bold shadow-md mt-4 text-white" data-i18n="auth.sendRecoveryLink">Invia link di recupero</button>
+            </form>
+            <div class="mt-4 text-center">
+                <button type="button" id="btn-back-to-login" class="text-xs text-slate-500 hover:text-slate-800 font-semibold cursor-pointer" data-i18n="auth.backToLogin">Torna al Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Imposta Nuova Password (RF 1.4 / US 3) -->
+    <div id="reset-password-modal" class="modal hidden fixed inset-0 z-[3000] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
+        <div class="modal-content glass-modal rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl">
+            <button class="close btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-slate-500 hover:text-slate-800" data-modal="reset-password-modal" aria-label="Chiudi">&times;</button>
+            <h2 class="text-xl font-bold text-slate-800 mb-2 flex items-center gap-2" data-i18n="auth.resetPasswordTitle">
+                <i class="fa-solid fa-lock-open text-primary"></i> <span>Nuova Password</span>
+            </h2>
+            <p class="text-xs text-slate-600 mb-4" data-i18n="auth.resetPasswordDesc">Scegli una nuova password per il tuo account.</p>
+            <form id="reset-password-form" novalidate class="space-y-3">
+                <input type="hidden" id="reset-token">
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="auth.newPassword">Nuova Password</span></label>
+                    <div class="relative flex items-center">
+                        <input type="password" id="reset-new-password" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium w-full pr-10" autocomplete="new-password" placeholder="Minimo 4 caratteri" required>
+                        <button type="button" class="btn-toggle-pwd absolute right-3 text-slate-400 hover:text-slate-700 cursor-pointer p-1" data-target="reset-new-password" aria-label="Mostra/Nascondi password">
+                            <i class="fa-solid fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-semibold text-slate-700 text-xs" data-i18n="auth.confirmNewPassword">Conferma Nuova Password</span></label>
+                    <div class="relative flex items-center">
+                        <input type="password" id="reset-confirm-password" class="input input-bordered input-sm sm:input-md bg-base-100/90 rounded-xl focus:input-primary text-slate-800 font-medium w-full pr-10" autocomplete="new-password" placeholder="Ripeti la password" required>
+                        <button type="button" class="btn-toggle-pwd absolute right-3 text-slate-400 hover:text-slate-700 cursor-pointer p-1" data-target="reset-confirm-password" aria-label="Mostra/Nascondi password">
+                            <i class="fa-solid fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="reset-error" class="error-msg text-xs text-error font-semibold mt-1" role="alert" aria-live="polite"></div>
+                <div id="reset-success" class="success-msg text-xs text-success font-semibold mt-1" role="status" aria-live="polite"></div>
+                <button type="submit" id="btn-reset-submit" class="btn btn-primary btn-block rounded-xl font-bold shadow-md mt-4 text-white" data-i18n="auth.updatePassword">Aggiorna Password</button>
+            </form>
         </div>
     </div>
 

@@ -12,6 +12,15 @@
     <!-- Tailwind CSS + DaisyUI (Locale) -->
     <link rel="stylesheet" href="css/tailwind.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <!-- Anti-Flicker Theme Initialization -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('tbp_theme');
+            const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme ? savedTheme : (systemDark ? 'dark' : 'trento');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 <body class="bg-base-200 text-slate-800 antialiased min-h-screen flex flex-col">
     <!-- Navbar coerente con la pagina principale (RNF1, RNF6) -->
@@ -35,18 +44,33 @@
             <button id="dash-logout" class="btn btn-outline btn-error btn-sm rounded-xl font-semibold" data-i18n="nav.logout">
                 <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
             </button>
-            <!-- Selettore lingua con hitbox a tutta ampiezza (100% cliccabile) -->
-            <div class="lang-selector-wrapper relative flex items-center justify-between gap-1.5 bg-base-100/90 hover:bg-base-200/80 border border-base-300 rounded-xl px-2.5 py-1.5 shadow-xs transition-colors select-none cursor-pointer">
-                <div class="flex items-center gap-1.5 pointer-events-none">
-                    <span id="lang-flag-icon" class="fi fi-it text-base rounded-xs shadow-xs"></span>
-                    <span id="lang-selected-code" class="text-xs font-bold text-slate-700 uppercase">IT</span>
-                    <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+            <!-- Contenitore riga inferiore per Mobile: Tema a sinistra (50%) e Lingua a destra (50%) -->
+            <div class="theme-lang-row flex items-center gap-2.5 w-full md:w-auto mt-1 md:mt-0">
+                <!-- Switcher Tema Chiaro/Scuro (50% su mobile, compatto su desktop) -->
+                <div class="theme-switch-container flex-1 md:flex-none flex items-center justify-center bg-base-100/90 hover:bg-base-200/80 border border-base-300 rounded-xl px-2.5 py-1.5 h-10 shadow-xs transition-colors">
+                    <label class="theme-toggle-switch flex items-center justify-center gap-2 cursor-pointer select-none w-full" title="Cambia tema chiaro/scuro">
+                        <i id="theme-sun-icon" class="fa-solid fa-sun text-amber-500 text-xs"></i>
+                        <input type="checkbox" id="theme-toggle-checkbox" class="theme-switch-input sr-only" aria-label="Cambia tema chiaro/scuro" />
+                        <span class="theme-switch-track relative inline-block w-[38px] h-[22px] bg-slate-300 rounded-full transition-colors duration-250">
+                            <span class="theme-switch-thumb absolute top-[3px] left-[3px] w-[16px] h-[16px] bg-white rounded-full transition-transform duration-250 shadow-sm"></span>
+                        </span>
+                        <i id="theme-moon-icon" class="fa-solid fa-moon text-slate-400 text-xs"></i>
+                    </label>
                 </div>
-                <select id="lang-select" class="lang-select absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" aria-label="Seleziona lingua">
-                    <option value="it">Italiano (IT)</option>
-                    <option value="en">English (EN)</option>
-                    <option value="de">Deutsch (DE)</option>
-                </select>
+
+                <!-- Selettore lingua (50% su mobile, compatto su desktop) -->
+                <div class="lang-selector-wrapper flex-1 md:flex-none relative flex items-center justify-between gap-1.5 bg-base-100/90 hover:bg-base-200/80 border border-base-300 rounded-xl px-2.5 py-1.5 h-10 shadow-xs transition-colors select-none cursor-pointer">
+                    <div class="flex items-center justify-center gap-1.5 pointer-events-none w-full">
+                        <span id="lang-flag-icon" class="fi fi-it text-base rounded-xs shadow-xs"></span>
+                        <span id="lang-selected-code" class="text-xs font-bold text-slate-700 uppercase">IT</span>
+                        <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+                    </div>
+                    <select id="lang-select" class="lang-select absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" aria-label="Seleziona lingua">
+                        <option value="it">Italiano (IT)</option>
+                        <option value="en">English (EN)</option>
+                        <option value="de">Deutsch (DE)</option>
+                    </select>
+                </div>
             </div>
         </div>
     </header>

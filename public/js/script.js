@@ -241,16 +241,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================
     // UI — Riferimenti DOM & Modali (Inizializzazione Immediata)
     // =========================================================
-    const btnLoginModal    = document.getElementById('btn-login-modal');
-    const btnRegisterModal = document.getElementById('btn-register-modal');
-    const btnDashboard     = document.getElementById('btn-dashboard');
-    const btnLogout        = document.getElementById('btn-logout');
-    const userGreeting     = document.getElementById('user-greeting');
-    const loginModal       = document.getElementById('login-modal');
-    const registerModal    = document.getElementById('register-modal');
-    const segnalazioneModal= document.getElementById('segnalazione-modal');
-    const btnHamburger     = document.getElementById('btn-hamburger');
-    const userControls     = document.getElementById('user-controls');
+    const btnLoginModal       = document.getElementById('btn-login-modal');
+    const btnRegisterModal    = document.getElementById('btn-register-modal');
+    const btnDashboard        = document.getElementById('btn-dashboard');
+    const btnLogout           = document.getElementById('btn-logout');
+    const userGreeting        = document.getElementById('user-greeting');
+    const loginModal          = document.getElementById('login-modal');
+    const registerModal       = document.getElementById('register-modal');
+    const forgotPasswordModal = document.getElementById('forgot-password-modal');
+    const resetPasswordModal  = document.getElementById('reset-password-modal');
+    const btnOpenForgotModal  = document.getElementById('btn-open-forgot-modal');
+    const btnBackToLogin      = document.getElementById('btn-back-to-login');
+    const segnalazioneModal   = document.getElementById('segnalazione-modal');
+    const btnHamburger        = document.getElementById('btn-hamburger');
+    const userControls        = document.getElementById('user-controls');
 
     const openModal = m => {
         if (!m) return;
@@ -265,7 +269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     function clearForms() {
-        ['register-form', 'login-form'].forEach(id => {
+        ['register-form', 'login-form', 'forgot-password-form', 'reset-password-form'].forEach(id => {
             const f = document.getElementById(id); 
             if (f) {
                 f.reset();
@@ -280,9 +284,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelectorAll('.btn-toggle-pwd').forEach(btn => {
             btn.innerHTML = '<i class="fa-solid fa-eye text-sm"></i>';
         });
-        ['reg-error', 'reg-success', 'login-error', 'google-error'].forEach(id => {
+        ['reg-error', 'reg-success', 'login-error', 'google-error', 'forgot-error', 'forgot-success', 'reset-error', 'reset-success'].forEach(id => {
             const el = document.getElementById(id); if (el) el.textContent = '';
         });
+        const etherealPreview = document.getElementById('forgot-ethereal-preview');
+        if (etherealPreview) {
+            etherealPreview.classList.add('hidden');
+            etherealPreview.innerHTML = '';
+        }
     }
 
     // Toggle visibilità password (eye icon)
@@ -312,6 +321,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnLoginModal)    btnLoginModal.addEventListener('click',    () => openModal(loginModal));
     if (btnRegisterModal) btnRegisterModal.addEventListener('click', () => openModal(registerModal));
 
+    if (btnOpenForgotModal) {
+        btnOpenForgotModal.addEventListener('click', () => {
+            closeModal(loginModal);
+            openModal(forgotPasswordModal);
+        });
+    }
+
+    if (btnBackToLogin) {
+        btnBackToLogin.addEventListener('click', () => {
+            closeModal(forgotPasswordModal);
+            openModal(loginModal);
+        });
+    }
+
     document.querySelectorAll('.close').forEach(btn => {
         btn.addEventListener('click', e => {
             const id = e.currentTarget.getAttribute('data-modal');
@@ -319,7 +342,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    [loginModal, registerModal, segnalazioneModal].forEach(m => {
+    [loginModal, registerModal, segnalazioneModal, forgotPasswordModal, resetPasswordModal].forEach(m => {
         if (m) {
             m.addEventListener('click', e => {
                 if (e.target === m) closeModal(m);
@@ -585,6 +608,207 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // =========================================================
+    // Recupero Password — Richiesta Link (RF 1.4 / US 3)
+    // =========================================================
+    const forgotForm = document.getElementById('forgot-password-form');
+    if (forgotForm) {
+        forgotForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const errorEl   = document.getElementById('forgot-error');
+            const successEl = document.getElementById('forgot-success');
+            const previewEl = document.getElementById('forgot-ethereal-preview');
+            const btnSubmit = document.getElementById('btn-forgot-submit');
+            const emailInput= document.getElementById('forgot-email');
+
+            if (errorEl) errorEl.textContent = '';
+            if (successEl) successEl.textContent = '';
+            if (previewEl) { previewEl.classList.add('hidden'); previewEl.innerHTML = ''; }
+            if (emailInput) emailInput.classList.remove('input-error');
+
+            const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+
+            if (!email) {
+                if (errorEl) errorEl.textContent = '❌ ' + (tr('auth.errEmptyFields') || 'Inserisci un indirizzo email');
+                if (emailInput) emailInput.classList.add('input-error');
+                return;
+            }
+
+            if (!EMAIL_REGEX.test(email)) {
+                if (errorEl) errorEl.textContent = '❌ ' + (tr('auth.errEmail') || 'Formato email non valido');
+                if (emailInput) emailInput.classList.add('input-error');
+                return;
+            }
+
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = `<span class="loading loading-spinner loading-xs"></span> ${tr('auth.sending') || 'Invio in corso...'}`;
+            }
+
+            const currentLang = (window.I18n ? window.I18n.getLanguage() : localStorage.getItem('tbp_lang')) || 'it';
+
+            try {
+                const res = await fetch('/api/v1/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, lang: currentLang })
+                });
+                let data;
+                try {
+                    data = await res.json();
+                } catch {
+                    throw new Error(`Endpoint non attivo (HTTP ${res.status}). Riavvia il server nel terminale (Ctrl+C e node app.js) per caricare i nuovi endpoint`);
+                }
+                if (!res.ok) throw new Error(data.error || `Errore del server (HTTP ${res.status})`);
+
+                const successMessage = tr('auth.recoveryEmailSent') || data.message;
+                if (successEl) {
+                    successEl.textContent = '✅ ' + successMessage;
+                }
+                window.alert(successMessage, 'success');
+
+                if (data.previewUrl && previewEl) {
+                    previewEl.classList.remove('hidden');
+                    previewEl.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-envelope-open-text text-sky-600 text-base"></i>
+                            <div>
+                                <span class="font-bold">Test Email (Ethereal):</span> 
+                                <a href="${data.previewUrl}" target="_blank" rel="noopener noreferrer" class="underline text-sky-700 hover:text-sky-900 font-semibold block mt-0.5">Apri email ricevuta &rarr;</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                if (errorEl) errorEl.textContent = '❌ ' + (err.message || 'Errore durante la richiesta di recupero');
+                if (emailInput) emailInput.classList.add('input-error');
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = tr('auth.sendRecoveryLink') || 'Invia link di recupero';
+                }
+            }
+        });
+    }
+
+    // =========================================================
+    // Recupero Password — Imposta Nuova Password (RF 1.4 / US 3)
+    // =========================================================
+    const resetForm = document.getElementById('reset-password-form');
+    if (resetForm) {
+        resetForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const errorEl       = document.getElementById('reset-error');
+            const successEl     = document.getElementById('reset-success');
+            const btnSubmit     = document.getElementById('btn-reset-submit');
+            const tokenInput    = document.getElementById('reset-token');
+            const newPassInput  = document.getElementById('reset-new-password');
+            const confirmPassInput = document.getElementById('reset-confirm-password');
+
+            if (errorEl) errorEl.textContent = '';
+            if (successEl) successEl.textContent = '';
+            [newPassInput, confirmPassInput].forEach(inp => inp && inp.classList.remove('input-error'));
+
+            const token = tokenInput ? tokenInput.value.trim() : '';
+            const newPassword = newPassInput ? newPassInput.value : '';
+            const confirmPassword = confirmPassInput ? confirmPassInput.value : '';
+
+            if (!newPassword || !confirmPassword) {
+                if (errorEl) errorEl.textContent = '❌ ' + (tr('auth.errEmptyFields') || 'Compila tutti i campi obbligatori');
+                if (!newPassword && newPassInput) newPassInput.classList.add('input-error');
+                if (!confirmPassword && confirmPassInput) confirmPassInput.classList.add('input-error');
+                return;
+            }
+
+            if (newPassword.length < 4) {
+                if (errorEl) errorEl.textContent = '❌ ' + (tr('auth.errPasswordShort') || 'La password deve contenere almeno 4 caratteri');
+                if (newPassInput) newPassInput.classList.add('input-error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                if (errorEl) errorEl.textContent = '❌ ' + (tr('auth.errPasswordMismatch') || 'Le password non coincidono');
+                if (confirmPassInput) confirmPassInput.classList.add('input-error');
+                return;
+            }
+
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = `<span class="loading loading-spinner loading-xs"></span> ${tr('auth.updating') || 'Aggiornamento...'}`;
+            }
+
+            const currentLang = (window.I18n ? window.I18n.getLanguage() : localStorage.getItem('tbp_lang')) || 'it';
+
+            try {
+                const res = await fetch('/api/v1/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, newPassword, lang: currentLang })
+                });
+                let data;
+                try {
+                    data = await res.json();
+                } catch {
+                    throw new Error(`Endpoint non attivo (HTTP ${res.status}). Riavvia il server nel terminale (Ctrl+C e node app.js) per caricare i nuovi endpoint`);
+                }
+                if (!res.ok) throw new Error(data.error || `Errore del server (HTTP ${res.status})`);
+
+                const successMsg = tr('auth.resetSuccess') || data.message;
+                if (successEl) successEl.textContent = '✅ ' + successMsg;
+                window.alert(successMsg, 'success');
+
+                // Pulisce l'URL rimuovendo action e token
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+                setTimeout(() => {
+                    closeModal(resetPasswordModal);
+                    openModal(loginModal);
+                }, 1400);
+            } catch (err) {
+                if (errorEl) errorEl.textContent = '❌ ' + (err.message || 'Errore durante il reset della password');
+                if (newPassInput) newPassInput.classList.add('input-error');
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = tr('auth.updatePassword') || 'Aggiorna Password';
+                }
+            }
+        });
+    }
+
+    // Controlla se la pagina è aperta con ?action=reset-password&token=XYZ
+    async function checkResetPasswordFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+        const token = urlParams.get('token');
+        const langParam = urlParams.get('lang');
+
+        if (langParam && ['it', 'en', 'de'].includes(langParam) && window.I18n) {
+            window.I18n.setLanguage(langParam);
+        }
+
+        if (action === 'reset-password' && token) {
+            const tokenInput = document.getElementById('reset-token');
+            if (tokenInput) tokenInput.value = token;
+            openModal(resetPasswordModal);
+
+            try {
+                const res = await fetch(`/api/v1/verify-reset-token?token=${encodeURIComponent(token)}`);
+                let data;
+                try { data = await res.json(); } catch { data = { error: 'Server non aggiornato' }; }
+                if (!res.ok) {
+                    const errorEl = document.getElementById('reset-error');
+                    if (errorEl) errorEl.textContent = '⚠️ ' + (tr('auth.resetTokenInvalid') || data.error || 'Questo link di recupero è scaduto o non è più valido.');
+                    const btnSubmit = document.getElementById('btn-reset-submit');
+                    if (btnSubmit) btnSubmit.disabled = true;
+                }
+            } catch (e) {
+                console.warn('[Reset Password] Verifica token non riuscita:', e);
+            }
+        }
+    }
+    checkResetPasswordFromUrl();
+
     // Google SSO
     async function handleGoogleCredential(response) {
         const googleErrorEl = document.getElementById('google-error');
@@ -674,10 +898,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     map.on('movestart', () => mapContainer.classList.add('map-moving'));
     map.on('moveend',   () => mapContainer.classList.remove('map-moving'));
 
+    // Tile Layer: OpenStreetMap Standard (100% gratuito, affidabile e senza alcuna API key)
+    // In Dark Mode viene convertito istantaneamente e senza watermark tramite filtro CSS hardware-accelerated
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19
     }).addTo(map);
+
+    let currentTheme = document.documentElement.getAttribute('data-theme') || 'trento';
+
+    // =========================================================
+    // THEME SWITCHER (Toggle Switch)
+    // =========================================================
+    const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
+    const themeSunIcon        = document.getElementById('theme-sun-icon');
+    const themeMoonIcon       = document.getElementById('theme-moon-icon');
+
+    function updateThemeUI(theme) {
+        const isDark = (theme === 'dark');
+        if (themeToggleCheckbox) {
+            themeToggleCheckbox.checked = isDark;
+        }
+        if (themeSunIcon) {
+            themeSunIcon.className = isDark ? 'fa-solid fa-sun text-slate-500 text-xs transition-colors' : 'fa-solid fa-sun text-amber-500 text-xs transition-colors';
+        }
+        if (themeMoonIcon) {
+            themeMoonIcon.className = isDark ? 'fa-solid fa-moon text-indigo-400 text-xs transition-colors' : 'fa-solid fa-moon text-slate-400 text-xs transition-colors';
+        }
+    }
+
+    function applyTheme(newTheme) {
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('tbp_theme', newTheme);
+        currentTheme = newTheme;
+        updateThemeUI(newTheme);
+    }
+
+    if (themeToggleCheckbox) {
+        themeToggleCheckbox.addEventListener('change', () => {
+            applyTheme(themeToggleCheckbox.checked ? 'dark' : 'trento');
+        });
+    }
+
+    updateThemeUI(currentTheme);
 
 
 
@@ -1613,26 +1876,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${badgeHTML}
                 </div>
                 ${isBlocca ? `
-                <div class="popup-iot-card ${themeClass} bg-base-100/90 border border-base-200/90 rounded-2xl p-3 shadow-xs space-y-2">
+                <div class="popup-iot-card ${themeClass} rounded-2xl p-3 shadow-xs space-y-2.5">
                     <div class="popup-iot-header flex items-center justify-between text-xs">
                         <div class="flex items-center gap-2">
                             <span class="iot-pulse-dot"></span>
                             <strong class="iot-title font-bold">${tr('popup.smartLive')}</strong>
                         </div>
-                        <span class="iot-chip badge badge-sm font-extrabold">${occPerc ?? 0}%</span>
+                        <span class="iot-chip badge badge-sm font-black">${occPerc ?? 0}%</span>
                     </div>
                     <div class="iot-progress-bar w-full">
                         <progress class="progress ${progressColor} w-full h-2.5 rounded-full" value="${occPerc ?? 0}" max="100"></progress>
                     </div>
-                    <div class="iot-stats-row flex items-center justify-around rounded-xl p-2 bg-base-200/50">
+                    <div class="iot-stats-row flex items-center justify-around rounded-xl p-2.5 shadow-xs">
                         <div class="iot-stat-item free text-center flex-1">
-                            <span class="iot-stat-num font-extrabold text-base text-success">${freeSlots ?? 0}</span>
-                            <div class="iot-stat-lbl text-[10px] font-bold text-slate-500 uppercase">${tr('popup.freeSlots')}</div>
+                            <span class="iot-stat-num font-black text-lg text-emerald-600 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-circle-check text-xs"></i> <span>${freeSlots ?? 0}</span>
+                            </span>
+                            <div class="iot-stat-lbl text-[11px] font-extrabold uppercase mt-0.5 tracking-wide">${tr('popup.freeSlots')}</div>
                         </div>
-                        <div class="iot-stat-divider w-[1px] h-6 bg-base-300"></div>
+                        <div class="iot-stat-divider w-[1px] h-7"></div>
                         <div class="iot-stat-item occupied text-center flex-1">
-                            <span class="iot-stat-num font-extrabold text-base text-error">${occSlots ?? 0}</span>
-                            <div class="iot-stat-lbl text-[10px] font-bold text-slate-500 uppercase">${tr('popup.occupiedSlots')}</div>
+                            <span class="iot-stat-num font-black text-lg text-rose-600 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-lock text-xs"></i> <span>${occSlots ?? 0}</span>
+                            </span>
+                            <div class="iot-stat-lbl text-[11px] font-extrabold uppercase mt-0.5 tracking-wide">${tr('popup.occupiedSlots')}</div>
                         </div>
                     </div>
                 </div>` : ''}
@@ -1942,7 +2209,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btnBike.className = 'btn btn-xs flex-1 rounded-lg font-bold border-none bg-primary text-white shadow-xs gap-1.5 transition-all';
             }
             if (btnWalk) {
-                btnWalk.className = 'btn btn-xs flex-1 rounded-lg font-bold border-none btn-ghost text-slate-600 hover:text-slate-900 gap-1.5 transition-all';
+                btnWalk.className = 'btn btn-xs flex-1 rounded-lg font-bold border-none btn-ghost btn-nav-mode-inactive gap-1.5 transition-all';
             }
             if (iconEl) iconEl.className = 'fa-solid fa-bicycle';
             if (avatarEl) avatarEl.className = 'w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-sm';
@@ -1951,7 +2218,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btnWalk.className = 'btn btn-xs flex-1 rounded-lg font-bold border-none bg-emerald-600 text-white shadow-xs gap-1.5 transition-all';
             }
             if (btnBike) {
-                btnBike.className = 'btn btn-xs flex-1 rounded-lg font-bold border-none btn-ghost text-slate-600 hover:text-slate-900 gap-1.5 transition-all';
+                btnBike.className = 'btn btn-xs flex-1 rounded-lg font-bold border-none btn-ghost btn-nav-mode-inactive gap-1.5 transition-all';
             }
             if (iconEl) iconEl.className = 'fa-solid fa-person-walking';
             if (avatarEl) avatarEl.className = 'w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 text-sm';
@@ -2399,6 +2666,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadMapData();
     I18n.onLanguageChange(() => {
         applyFiltersAndSearch(false);
+        updateThemeUI(currentTheme);
         // Se c'è un percorso aperto o navigazione attiva, ricarica le istruzioni nella nuova lingua
         if (currentNavDestination && lastUserCoords) {
             calculateAndRenderRoute(lastUserCoords.lat, lastUserCoords.lng, currentNavDestination.lat, currentNavDestination.lng, currentNavMode, isLiveNavigating);

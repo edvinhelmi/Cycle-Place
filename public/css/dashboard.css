@@ -28,9 +28,27 @@
         animation: navbarSlideDown 0.22s ease-out;
     }
 
-    .user-controls .btn,
-    .user-controls .lang-selector-wrapper {
+    .user-controls .btn {
         width: 100%;
+        justify-content: center;
+    }
+
+    .user-controls .theme-lang-row {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.65rem;
+    }
+
+    .user-controls .theme-lang-row .theme-switch-container,
+    .user-controls .theme-lang-row .lang-selector-wrapper {
+        flex: 1 1 0%;
+        width: 50%;
+        margin: 0;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
         justify-content: center;
     }
 
@@ -44,3 +62,126 @@
     from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+
+/* =====================================================
+   Dark Mode Support per Dashboard
+   ===================================================== */
+[data-theme="dark"] body {
+    background-color: #0b1120 !important;
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .glass-box,
+[data-theme="dark"] .dash-card,
+[data-theme="dark"] .stat-box {
+    background: rgba(15, 23, 42, 0.72) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45) !important;
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .glass-navbar {
+    background: rgba(15, 23, 42, 0.80) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .text-slate-900,
+[data-theme="dark"] .text-slate-800,
+[data-theme="dark"] .text-slate-700 {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .text-slate-600 {
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .profile-item,
+[data-theme="dark"] .bg-base-100\/80,
+[data-theme="dark"] .bg-base-100\/90 {
+    background-color: rgba(30, 41, 59, 0.75) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .input,
+[data-theme="dark"] .select,
+[data-theme="dark"] .textarea {
+    background-color: rgba(30, 41, 59, 0.75) !important;
+    color: #f8fafc !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="dark"] .lang-selector-wrapper,
+[data-theme="dark"] .theme-switch-container {
+    background: rgba(30, 41, 59, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="dark"] .lang-select option {
+    background-color: #1e293b;
+    color: #f8fafc;
+}
+
+@media (max-width: 768px) {
+    [data-theme="dark"] .user-controls {
+        background: rgba(15, 23, 42, 0.96) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5) !important;
+    }
+}
+
+/* =====================================================
+   Theme Toggle Switch (Switch Pulito & Accessibile)
+   ===================================================== */
+.theme-toggle-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    user-select: none;
+    padding: 0.25rem 0.4rem;
+    border-radius: 9999px;
+}
+
+.theme-switch-track {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 22px;
+    background-color: #cbd5e1;
+    border-radius: 9999px;
+    transition: background-color 0.25s ease;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.12);
+}
+
+.theme-switch-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+.theme-switch-input:checked + .theme-switch-track {
+    background-color: #0284c7;
+}
+
+.theme-switch-input:checked + .theme-switch-track .theme-switch-thumb {
+    transform: translateX(16px);
+}
+
+.theme-switch-input:focus-visible + .theme-switch-track {
+    outline: 2px solid #0284c7;
+    outline-offset: 2px;
+}
+
+
+

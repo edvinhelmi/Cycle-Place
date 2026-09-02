@@ -80,11 +80,47 @@ async function init() {
     // Setup Mobile Hamburger Menu (RNF1, RNF6)
     setupMobileMenu();
 
+    // =========================================================
+    // THEME SWITCHER (Toggle Switch)
+    // =========================================================
+    const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
+    const themeSunIcon        = document.getElementById('theme-sun-icon');
+    const themeMoonIcon       = document.getElementById('theme-moon-icon');
+
+    function updateThemeUI(theme) {
+        const isDark = (theme === 'dark');
+        if (themeToggleCheckbox) {
+            themeToggleCheckbox.checked = isDark;
+        }
+        if (themeSunIcon) {
+            themeSunIcon.className = isDark ? 'fa-solid fa-sun text-slate-500 text-xs transition-colors' : 'fa-solid fa-sun text-amber-500 text-xs transition-colors';
+        }
+        if (themeMoonIcon) {
+            themeMoonIcon.className = isDark ? 'fa-solid fa-moon text-indigo-400 text-xs transition-colors' : 'fa-solid fa-moon text-slate-400 text-xs transition-colors';
+        }
+    }
+
+    function applyTheme(newTheme) {
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('tbp_theme', newTheme);
+        updateThemeUI(newTheme);
+    }
+
+    if (themeToggleCheckbox) {
+        themeToggleCheckbox.addEventListener('change', () => {
+            applyTheme(themeToggleCheckbox.checked ? 'dark' : 'trento');
+        });
+    }
+
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'trento';
+    updateThemeUI(currentTheme);
+
     // Sottoscrizione al cambio lingua I18n
     I18n.onLanguageChange(() => {
         updateProfileProvider();
         renderPreferiti(cachedPreferiti);
         renderSegnalazioni(cachedSegnalazioni);
+        updateThemeUI(document.documentElement.getAttribute('data-theme') || 'trento');
     });
 
     // Carica Preferiti e Segnalazioni

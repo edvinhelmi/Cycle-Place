@@ -12,6 +12,8 @@ const { OAuth2Client } = require('google-auth-library');
 const jwt        = require('jsonwebtoken');
 const tokenChecker = require('./middleware/tokenChecker');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const crypto     = require('crypto');
 const SALT_ROUNDS = 10;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret_key';
 
@@ -102,6 +104,44 @@ const readJsonFile = (filePath, callback) => {
 const writeJsonFile = (filePath, data, callback) => {
     fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8', callback);
 };
+
+// --- Servizio Email per Recupero Password (RF 1.4 / US 3) ---
+let mailTransporter = null;
+async function getMailTransporter() {
+    if (mailTransporter) return mailTransporter;
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+        mailTransporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.SMTP_PORT || '587', 10),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            }
+        });
+        console.log('[Email] Configurato transporter SMTP con utente:', process.env.SMTP_USER);
+    } else {
+        try {
+            const testAccount = await nodemailer.createTestAccount();
+            mailTransporter = nodemailer.createTransport({
+                host: 'smtp.ethereal.email',
+                port: 587,
+                secure: false,
+                auth: {
+                    user: testAccount.user,
+                    pass: testAccount.pass
+                }
+            });
+            console.log('[Email] Account Ethereal generato per sviluppo locale:', testAccount.user);
+        } catch (e) {
+            console.warn('[Email] Fallback su transporter locale JSON:', e.message);
+            mailTransporter = nodemailer.createTransport({
+                jsonTransport: true
+            });
+        }
+    }
+    return mailTransporter;
+}
 
 // =======================================================
 // API: Dati Spaziali
@@ -345,6 +385,242 @@ app.post('/api/v1/refresh-token', (req, res) => {
             );
             res.status(200).json({ accessToken: newAccessToken, token: newAccessToken });
         });
+    });
+});
+
+// =======================================================
+// =======================================================
+// API: Recupero Password Multilingua (RF 1.4 / US 3)
+// Supporto per IT, EN, DE
+// =======================================================
+
+const EMAIL_TEMPLATES = {
+    it: {
+        subject: 'Recupero Password — Trento Bike Parking',
+        title: 'Trento Bike Parking',
+        subtitle: 'Mappa rastrelliere e parcheggi protetti',
+        heading: 'Reimposta la tua password',
+        greeting: (name) => `Ciao <strong>${name || 'Utente'}</strong>,`,
+        body: 'Abbiamo ricevuto una richiesta di ripristino password per il tuo account. Clicca sul pulsante sottostante per impostare una nuova password:',
+        button: 'Reimposta Password',
+        expiry: 'Il link è valido per <strong>1 ora</strong>. Se il pulsante non funziona, copia questo link nel browser:',
+        disclaimer: 'Se non hai richiesto il reset, puoi ignorare questo messaggio in tutta sicurezza: il tuo account rimane protetto.',
+        textMsg: (name, link) => `Ciao ${name || ''},\n\nHai richiesto di reimpostare la tua password per Trento Bike Parking.\nClicca sul seguente link entro 1 ora per procedere:\n\n${link}\n\nSe non hai effettuato tu questa richiesta, ignora questa email.\n\nIl team di Trento Bike Parking`,
+        apiMsg: "Se l'indirizzo email è registrato, riceverai a breve un link per reimpostare la password.",
+        googleErr: "Questo account utilizza l'accesso tramite Google e non dispone di una password da reimpostare."
+    },
+    en: {
+        subject: 'Password Recovery — Trento Bike Parking',
+        title: 'Trento Bike Parking',
+        subtitle: 'Bike racks and secure parking map',
+        heading: 'Reset your password',
+        greeting: (name) => `Hello <strong>${name || 'User'}</strong>,`,
+        body: 'We received a request to reset the password for your account. Click the button below to set a new password:',
+        button: 'Reset Password',
+        expiry: 'This link is valid for <strong>1 hour</strong>. If the button does not work, copy this link into your browser:',
+        disclaimer: 'If you did not request a password reset, you can safely ignore this email: your account remains secure.',
+        textMsg: (name, link) => `Hello ${name || ''},\n\nYou requested to reset your password for Trento Bike Parking.\nClick the following link within 1 hour to proceed:\n\n${link}\n\nIf you did not request this, please ignore this email.\n\nThe Trento Bike Parking Team`,
+        apiMsg: "If the email address is registered, you will shortly receive a link to reset your password.",
+        googleErr: "This account uses Google Sign-In and does not have a standard password to reset."
+    },
+    de: {
+        subject: 'Passwort wiederherstellen — Trento Bike Parking',
+        title: 'Trento Bike Parking',
+        subtitle: 'Karte der Fahrradabstellplätze und Parkhäuser',
+        heading: 'Setzen Sie Ihr Passwort zurück',
+        greeting: (name) => `Hallo <strong>${name || 'Benutzer'}</strong>,`,
+        body: 'Wir haben eine Anfrage zum Zurücksetzen des Passworts für Ihr Konto erhalten. Klicken Sie auf die Schaltfläche unten, um ein neues Passwort festzulegen:',
+        button: 'Passwort zurücksetzen',
+        expiry: 'Dieser Link ist <strong>1 Stunde</strong> lang gültig. Wenn die Schaltfläche nicht funktioniert, kopieren Sie diesen Link in Ihren Browser:',
+        disclaimer: 'Wenn Sie das Zurücksetzen nicht angefordert haben, können Sie diese E-Mail ignorieren: Ihr Konto bleibt geschützt.',
+        textMsg: (name, link) => `Hallo ${name || ''},\n\nSie haben das Zurücksetzen Ihres Passworts für Trento Bike Parking beantragt.\nKlicken Sie innerhalb von 1 Stunde auf den folgenden Link:\n\n${link}\n\nWenn Sie dies nicht angefordert haben, ignorieren Sie bitte diese E-Mail.\n\nDas Team von Trento Bike Parking`,
+        apiMsg: "Wenn die E-Mail-Adresse registriert ist, erhalten Sie in Kürze einen Link zum Zurücksetzen des Passworts.",
+        googleErr: "Dieses Konto verwendet die Google-Anmeldung und verfügt über kein herkömmliches Passwort zum Zurücksetzen."
+    }
+};
+
+const RESET_RESPONSES = {
+    it: {
+        success: 'Password aggiornata con successo! Ora puoi accedere con le nuove credenziali.',
+        invalid: 'Link di recupero non valido o scaduto. Richiedine uno nuovo.',
+        tooShort: 'La password deve contenere almeno 4 caratteri'
+    },
+    en: {
+        success: 'Password updated successfully! You can now log in with your new credentials.',
+        invalid: 'Recovery link is invalid or has expired. Please request a new one.',
+        tooShort: 'Password must be at least 4 characters long'
+    },
+    de: {
+        success: 'Passwort erfolgreich aktualisiert! Sie können sich jetzt mit Ihren neuen Zugangsdaten anmelden.',
+        invalid: 'Wiederherstellungslink ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.',
+        tooShort: 'Das Passwort muss mindestens 4 Zeichen lang sein'
+    }
+};
+
+app.post('/api/v1/forgot-password', authLimiter, (req, res) => {
+    const { email, lang } = req.body;
+    const userLang = ['it', 'en', 'de'].includes(lang) ? lang : 'it';
+    const tpl = EMAIL_TEMPLATES[userLang];
+
+    if (!email) {
+        return res.status(400).json({ error: userLang === 'en' ? 'Email is required' : (userLang === 'de' ? 'E-Mail ist erforderlich' : 'L\'indirizzo email è obbligatorio') });
+    }
+
+    const trimmedEmail = String(email).trim().toLowerCase();
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+        return res.status(400).json({ error: userLang === 'en' ? 'Invalid email format' : (userLang === 'de' ? 'Ungültiges E-Mail-Format' : 'Formato email non valido') });
+    }
+
+    readJsonFile(usersFile, async (err, users) => {
+        if (err) return res.status(500).json({ error: 'Errore interno del server' });
+
+        const user = users.find(u => u.email && u.email.toLowerCase() === trimmedEmail);
+
+        // Anti-enumeration
+        if (!user) {
+            return res.status(200).json({ message: tpl.apiMsg });
+        }
+
+        // Se l'utente usa Google SSO
+        if (user.googleId && !user.password) {
+            return res.status(400).json({ error: tpl.googleErr });
+        }
+
+        // Genera token monouso sicuro a 64 caratteri esadecimali
+        const token = crypto.randomBytes(32).toString('hex');
+        const expires = Date.now() + 3600000; // 1 ora di validità
+
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = expires;
+
+        writeJsonFile(usersFile, users, async (werr) => {
+            if (werr) return res.status(500).json({ error: 'Errore durante il salvataggio della richiesta' });
+
+            const host = req.get('host');
+            const protocol = req.protocol;
+            const resetLink = `${protocol}://${host}/?action=reset-password&token=${token}&lang=${userLang}`;
+
+            try {
+                const transporter = await getMailTransporter();
+                const info = await transporter.sendMail({
+                    from: process.env.SMTP_FROM || '"Trento Bike Parking" <noreply@trentobikeparking.it>',
+                    to: trimmedEmail,
+                    subject: tpl.subject,
+                    text: tpl.textMsg(user.name, resetLink),
+                    html: `
+                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; border-radius: 16px; background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <h1 style="color: #0284c7; margin: 0; font-size: 22px;">${tpl.title}</h1>
+                                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 13px;">${tpl.subtitle}</p>
+                            </div>
+                            <div style="background-color: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <h2 style="color: #1e293b; font-size: 17px; margin-top: 0;">${tpl.heading}</h2>
+                                <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+                                    ${tpl.greeting(user.name)}<br>
+                                    ${tpl.body}
+                                </p>
+                                <div style="text-align: center; margin: 28px 0;">
+                                    <a href="${resetLink}" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; padding: 12px 28px; border-radius: 9999px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
+                                        ${tpl.button}
+                                    </a>
+                                </div>
+                                <p style="color: #64748b; font-size: 12px; line-height: 1.5;">
+                                    ${tpl.expiry}<br>
+                                    <a href="${resetLink}" style="color: #0284c7; word-break: break-all;">${resetLink}</a>
+                                </p>
+                                <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 20px 0;">
+                                <p style="color: #94a3b8; font-size: 11px; margin: 0;">
+                                    ${tpl.disclaimer}
+                                </p>
+                            </div>
+                        </div>
+                    `
+                });
+
+                const previewUrl = nodemailer.getTestMessageUrl(info);
+                if (previewUrl) {
+                    console.log(`[Email - ${userLang.toUpperCase()}] ✉️ Anteprima Ethereal per`, trimmedEmail, ':', previewUrl);
+                }
+                console.log(`[Email - ${userLang.toUpperCase()}] Link di reset per ${trimmedEmail}: ${resetLink}`);
+
+                res.status(200).json({
+                    message: tpl.apiMsg,
+                    previewUrl: previewUrl || null
+                });
+            } catch (mailErr) {
+                console.error('[Email] Errore invio:', mailErr.message);
+                console.log(`[Email] Link diretto di emergenza (per sviluppo locale): ${resetLink}`);
+                res.status(200).json({
+                    message: tpl.apiMsg,
+                    previewUrl: null
+                });
+            }
+        });
+    });
+});
+
+app.get('/api/v1/verify-reset-token', (req, res) => {
+    const { token } = req.query;
+    if (!token) {
+        return res.status(400).json({ valid: false, error: 'Token mancante' });
+    }
+
+    readJsonFile(usersFile, (err, users) => {
+        if (err) return res.status(500).json({ valid: false, error: 'Errore interno del server' });
+
+        const now = Date.now();
+        const user = users.find(u => u.resetPasswordToken === token && u.resetPasswordExpires && u.resetPasswordExpires > now);
+
+        if (!user) {
+            return res.status(400).json({ valid: false, error: 'Link di recupero non valido o scaduto.' });
+        }
+
+        res.status(200).json({ valid: true, email: user.email });
+    });
+});
+
+app.post('/api/v1/reset-password', authLimiter, (req, res) => {
+    const { token, newPassword, lang } = req.body;
+    const userLang = ['it', 'en', 'de'].includes(lang) ? lang : 'it';
+    const rMsg = RESET_RESPONSES[userLang];
+
+    if (!token || !newPassword) {
+        return res.status(400).json({ error: userLang === 'en' ? 'Token and password are required' : (userLang === 'de' ? 'Token und Passwort sind erforderlich' : 'Token e nuova password sono obbligatori') });
+    }
+
+    const cleanPassword = String(newPassword);
+    if (cleanPassword.length < 4) {
+        return res.status(400).json({ error: rMsg.tooShort });
+    }
+
+    readJsonFile(usersFile, async (err, users) => {
+        if (err) return res.status(500).json({ error: 'Errore interno del server' });
+
+        const now = Date.now();
+        const user = users.find(u => u.resetPasswordToken === token && u.resetPasswordExpires && u.resetPasswordExpires > now);
+
+        if (!user) {
+            return res.status(400).json({ error: rMsg.invalid });
+        }
+
+        try {
+            const hashedPassword = await bcrypt.hash(cleanPassword, SALT_ROUNDS);
+            user.password = hashedPassword;
+            delete user.resetPasswordToken;
+            delete user.resetPasswordExpires;
+            delete user.refreshToken;
+
+            writeJsonFile(usersFile, users, (werr) => {
+                if (werr) return res.status(500).json({ error: 'Errore durante il salvataggio della password' });
+
+                res.status(200).json({
+                    message: rMsg.success
+                });
+            });
+        } catch (hashErr) {
+            console.error('[Bcrypt] Errore hashing password:', hashErr);
+            return res.status(500).json({ error: 'Errore durante l\'aggiornamento della password' });
+        }
     });
 });
 
