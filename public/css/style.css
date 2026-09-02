@@ -1267,7 +1267,12 @@
     color: #38bdf8 !important;
 }
 
-
+#user-controls,
+[data-theme="dark"] #user-controls {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
 
 
 
