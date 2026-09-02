@@ -998,6 +998,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentSearchQuery    = '';
     let currentSearchLocation = null;
     let feedbackTimeout       = null;
+    let segnalazioniRecentiMap = new Map();
 
     // Layer per la posizione GPS dell'utente (User Story 1)
     let userLocationMarker = null;
@@ -1608,6 +1609,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isTokenValid(getToken())) {
             await loadUserPreferiti();
         }
+        await loadSegnalazioniRecenti();
         try {
             const res = await fetch('/api/v1/rastrelliere');
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1670,6 +1672,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) { showMapError('Impossibile caricare i parcheggi: ' + err.message); }
 
         applyFiltersAndSearch(false);
+    }
+
+    async function loadSegnalazioniRecenti() {
+        try {
+            const res = await fetch('/api/v1/segnalazioni/recenti');
+            const data = await res.json();
+            segnalazioniRecentiMap.clear();
+    
+            (data.segnalazioni || []).forEach(s => {
+                const id = Number(s.rastrellieraId);
+                if (!segnalazioniRecentiMap.has(id)) {
+                    segnalazioniRecentiMap.set(id, []);
+                }
+                segnalazioniRecentiMap.get(id).push(s);
+            });
+        } catch (err) {
+            console.warn('Impossibile caricare segnalazioni recenti:', err);
+        }
     }
 
 
