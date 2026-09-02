@@ -285,7 +285,9 @@ function renderSegnalazioni(items) {
     }
 
     list.innerHTML = [...items].reverse().map(s => {
-        const tipoText = tr(`tipo.${s.tipo}`) || s.tipo;
+        const normalizedKey = s.tipo ? `tipo.${s.tipo.toLowerCase().trim().replace(/\s+/g, '_')}` : '';
+        const translatedTipo = tr(normalizedKey);
+        const tipoText = (translatedTipo && translatedTipo !== normalizedKey) ? translatedTipo : s.tipo;
         const icon = getTipoIcon(s.tipo);
         const badgeClass = s.stato === 'risolta' ? 'badge-success text-white' : (s.stato === 'in_lavorazione' ? 'badge-warning text-white' : 'badge-info text-white');
         return `
