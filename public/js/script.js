@@ -410,7 +410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (btnLogout)        btnLogout.classList.remove('hidden');
         if (userGreeting) {
             userGreeting.classList.remove('hidden');
-            userGreeting.innerHTML = `<i class="fa-solid fa-circle-user"></i> <span>Ciao, <strong>${user.name}</strong>!</span>`;
+            userGreeting.innerHTML = `<i class="fa-solid fa-circle-user text-sm"></i><span class="whitespace-nowrap leading-none">Ciao, <strong>${user.name}</strong>!</span>`;
         }
         await loadUserPreferiti();
         applyFiltersAndSearch(false);
