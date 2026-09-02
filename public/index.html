@@ -41,6 +41,19 @@
             const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             const theme = savedTheme ? savedTheme : (systemDark ? 'dark' : 'trento');
             document.documentElement.setAttribute('data-theme', theme);
+            // Placeholder sincrono anti-flicker
+            const savedLang = localStorage.getItem('tbp_lang') || 'it';
+            const placeholders = {
+                it: 'Cerca via o parcheggio...',
+                en: 'Search street or parking...',
+                de: 'Straße oder Parkplatz suchen...'
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const s = document.getElementById('search-input');
+                if (s && !s.placeholder) {
+                    s.placeholder = placeholders[savedLang] || placeholders.it;
+                }
+            }, { once: true });
         })();
     </script>
 </head>
