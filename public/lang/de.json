@@ -89,7 +89,7 @@
   "tipo.luogo_non_sicuro": "Schlecht beleuchteter / unsicherer Ort",
   "tipo.danno_strutturale": "Struktureller Schaden am Fahrradständer",
   "tipo.vandalismo": "Vandalismus / versuchter Diebstahl",
-  "tipo.altro": "Sonstiges (in Notizen angeben)"
+  "tipo.altro": "Sonstiges (in Notizen angeben)",
 
   "popup.fav.add": "Zu Favoriten",
   "popup.fav.remove": "Gespeichert",
