@@ -49,7 +49,7 @@
   "tipo.luogo_non_sicuro": "Luogo poco illuminato / non sicuro",
   "tipo.danno_strutturale": "Danno strutturale alla rastrelliera",
   "tipo.vandalismo": "Vandalismo/tentato furto",
-  "tipo.altro": "Altro (specificare nelle note)"
+  "tipo.altro": "Altro (specificare nelle note)",
 
   "form.name": "Nome",
   "form.surname": "Cognome",
