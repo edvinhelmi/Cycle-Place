@@ -58,6 +58,9 @@ let cachedSegnalazioni = [];
 async function init() {
     await I18n.init();
 
+    document.documentElement.classList.remove('opacity-0');
+    document.documentElement.classList.add('opacity-100', 'transition-opacity', 'duration-300');
+
     const token = getToken();
     if (!isTokenValid(token)) {
         window.location.href = '/';
