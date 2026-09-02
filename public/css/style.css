@@ -1305,3 +1305,11 @@ html.is-logged-out #btn-logout {
     display: none !important;
 }
 
+.theme-toggle-container, 
+#theme-toggle-checkbox + label,
+.swap {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+    min-height: unset !important;
+}
+
