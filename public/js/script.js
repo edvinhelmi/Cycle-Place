@@ -1917,7 +1917,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 luogo_non_sicuro: 'luogo poco sicuro',
                 danno_strutturale: 'danni strutturali',
                 vandalismo: 'atti di vandalismo/tentato furto',
-                accesso_ostruito: 'Altro: '
+                altro: 'altre problematiche'
             };
 
             const allTipi = [];
@@ -2056,10 +2056,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const labelsMap = {
                 luogo_non_sicuro: 'luogo poco sicuro',
                 danno_strutturale: 'danni strutturali',
-                bici_abbandonata: 'bici abbandonate',
                 vandalismo: 'atti di vandalismo/tentato furto',
-                rastrelliera_piena: 'rastrelliera satura',
-                accesso_ostruito: 'accesso ostruito'
+                altro: 'altre problematiche'
             };
 
             const allTipi = [];
@@ -2780,6 +2778,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     I18n.onLanguageChange(() => {
         applyFiltersAndSearch(false);
         updateThemeUI(currentTheme);
+        initWeather();
         // Se c'è un percorso aperto o navigazione attiva, ricarica le istruzioni nella nuova lingua
         if (currentNavDestination && lastUserCoords) {
             calculateAndRenderRoute(lastUserCoords.lat, lastUserCoords.lng, currentNavDestination.lat, currentNavDestination.lng, currentNavMode, isLiveNavigating);
