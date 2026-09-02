@@ -239,6 +239,7 @@ function featureMatchesSearch(props, query) {
 document.addEventListener('DOMContentLoaded', async () => {
 
     await I18n.init();
+    initWeather();
 
     // =========================================================
     // UI — Riferimenti DOM & Modali (Inizializzazione Immediata)
@@ -2917,7 +2918,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             descEl.textContent = '--';
         }
     }
-
-    initWeather();
 
 }); // fine DOMContentLoaded
