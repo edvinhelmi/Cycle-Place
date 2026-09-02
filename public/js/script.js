@@ -97,6 +97,7 @@ async function authFetch(url, options = {}) {
                 return response;
             }
         } catch (e) {
+            if (e.name === 'AbortError') return response;
             console.error('[authFetch] Errore:', e);
             removeToken();
             return response;
