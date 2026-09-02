@@ -442,6 +442,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (d) {
         loginSuccess({ name: d.name || 'Utente', surname: d.surname || '', email: d.email || '' });
         }
+    } else {
+        // Se non autenticato, togliamo hidden dai bottoni login
+        if (btnLoginModal) btnLoginModal.classList.remove('hidden');
+        if (btnRegisterModal) btnRegisterModal.classList.remove('hidden');
     }
 
     if (btnLogout) btnLogout.addEventListener('click', logoutUser);
