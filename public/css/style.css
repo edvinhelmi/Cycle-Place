@@ -3,6 +3,16 @@
    Complementare a Tailwind CSS + DaisyUI
    ===================================================== */
 
+/* Nasconde la pagina all'avvio per evitare il flash dei testi in italiano */
+html:not(.i18n-loaded) body {
+    opacity: 0;
+    visibility: hidden;
+}
+
+body {
+    transition: opacity 0.25s ease-in-out;
+}
+
 /* =====================================================
    Glassmorphism System — Standard css.glass
    ===================================================== */
