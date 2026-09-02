@@ -33,6 +33,15 @@
             <span>Cycle-Place</span>
         </div>
 
+        <div id="weather-widget" class="flex items-center gap-2 bg-base-100/80 hover:bg-base-200/80 border border-base-300 rounded-xl px-2.5 py-1 shadow-xs select-none transition-colors" title="Meteo Trento">
+                <i id="weather-icon" class="fa-solid fa-cloud-sun text-primary text-base"></i>
+                <div class="flex flex-col leading-none justify-center">
+                    <span id="weather-temp" class="text-xs font-black text-slate-800">--°C</span>
+                    <span id="weather-desc" class="text-[10px] font-semibold text-slate-500 mt-0.5">Caricamento...</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Hamburger Button per Mobile (RNF1, RNF6) -->
         <button id="btn-hamburger" class="hamburger-btn btn btn-square btn-ghost btn-sm text-slate-700 md:hidden" aria-label="Menu" aria-expanded="false">
             <span class="hamburger-icon text-lg"><i class="fa-solid fa-bars"></i></span>
