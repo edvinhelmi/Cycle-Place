@@ -2873,6 +2873,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         const descEl = document.getElementById('weather-desc');
         const iconEl = document.getElementById('weather-icon');
         if (!tempEl || !descEl || !iconEl) return;
+            
+        const CACHE_KEY = 'tbp_weather_cache';
+        const CACHE_TTL = 15 * 60 * 1000; // 15 minuti in millisecondi
+        const cached = sessionStorage.getItem(CACHE_KEY);
+
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                if (Date.now() - parsed.timestamp < CACHE_TTL) {
+                    cachedWeatherTemp = parsed.temp;
+                    cachedWeatherCode = parsed.code;
+                    updateWeatherUI();
+                    return; // Mostrato istantaneamente, nessuna attesa di rete!
+                }
+            } catch (e) {
+                sessionStorage.removeItem(CACHE_KEY);
+            }
+        }
 
         try {
             const url = 'https://api.open-meteo.com/v1/forecast?latitude=46.0697&longitude=11.1211&current=temperature_2m,weather_code';
@@ -2885,6 +2903,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             cachedWeatherTemp = Math.round(current.temperature_2m);
             cachedWeatherCode = current.weather_code;
+
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+                temp: cachedWeatherTemp,
+                code: cachedWeatherCode,
+                timestamp: Date.now()
+            }));
 
             updateWeatherUI();
         } catch (err) {
