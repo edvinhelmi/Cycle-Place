@@ -18,6 +18,25 @@
     <!-- Anti-Flicker Theme Initialization -->
     <script>
         (function() {
+            try {
+                const t = localStorage.getItem('tbp_jwt');
+                const r = localStorage.getItem('tbp_refresh_jwt');
+                const isValid = (token) => {
+                    if (!token) return false;
+                    const d = JSON.parse(atob(token.split('.')[1]));
+                    return d && d.exp && d.exp * 1000 > Date.now();
+                };
+                if (isValid(t) || isValid(r)) {
+                    document.documentElement.classList.add('is-logged-in');
+                } else {
+                    document.documentElement.classList.add('is-logged-out');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    
+    <script>
+        (function() {
             const savedTheme = localStorage.getItem('tbp_theme');
             const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             const theme = savedTheme ? savedTheme : (systemDark ? 'dark' : 'trento');
@@ -53,8 +72,8 @@
             <span id="user-greeting" class="user-greeting hidden badge bg-primary/10 text-primary border-primary/20 h-auto min-h-[2.25rem] py-1.5 px-3.5 gap-2 font-semibold whitespace-nowrap inline-flex items-center">
                 <i class="fa-solid fa-circle-user"></i> <span id="user-name-text"></span>
             </span>
-            <button id="btn-login-modal" class="btn btn-primary btn-sm rounded-xl font-semibold shadow-sm text-white" data-i18n="nav.login">Login</button>
-            <button id="btn-register-modal" class="btn btn-secondary btn-sm rounded-xl font-semibold shadow-sm text-white" data-i18n="nav.register">Registrati</button>
+            <button id="btn-login-modal" class="btn btn-primary btn-sm rounded-xl font-semibold shadow-sm text-white hidden" data-i18n="nav.login">Login</button>
+            <button id="btn-register-modal" class="btn btn-secondary btn-sm rounded-xl font-semibold shadow-sm text-white hidden" data-i18n="nav.register">Registrati</button>
             <a id="btn-dashboard" class="btn btn-info btn-sm rounded-xl font-semibold shadow-sm text-white hidden" href="/dashboard.html" data-i18n="nav.dashboard">
                 <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
             </a>
