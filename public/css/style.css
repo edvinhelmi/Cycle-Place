@@ -1289,6 +1289,17 @@ html.is-logged-out #btn-register-modal {
     display: inline-flex !important;
 }
 
+/* Ottimizzazione fluidità 60fps durante il drag della mappa */
+.map-moving .custom-marker-pin,
+.map-moving .custom-fav-heart-pin,
+.map-moving .custom-search-pin-wrapper {
+    box-shadow: none !important;
+    transition: none !important;
+}
+
+.map-moving .custom-marker-icon-wrapper {
+    pointer-events: none !important;
+}
 html.is-logged-out #btn-dashboard,
 html.is-logged-out #btn-logout {
     display: none !important;
