@@ -1911,10 +1911,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const labelsMap = {
                 luogo_non_sicuro: 'luogo poco sicuro',
                 danno_strutturale: 'danni strutturali',
-                bici_abbandonata: 'bici abbandonate',
                 vandalismo: 'atti di vandalismo/tentato furto',
-                rastrelliera_piena: 'rastrelliera satura',
-                accesso_ostruito: 'accesso ostruito'
+                accesso_ostruito: 'Altro: '
             };
 
             const allTipi = [];
