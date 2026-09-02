@@ -1759,10 +1759,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             await loadUserPreferiti();
         }
         await loadSegnalazioniRecenti();
+
         try {
-            const res = await fetch('/api/v1/rastrelliere');
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            tutteRastrelliere = await res.json();
+            // Esegue le due fetch in parallelo
+            const [resRastr, resPark] = await Promise.all([
+                fetch('/api/v1/rastrelliere'),
+                fetch('/api/v1/parcheggi')
+            ]);
+
+            if (!resRastr.ok) throw new Error(`HTTP rastrelliere ${resRastr.status}`);
+            if (!resPark.ok) throw new Error(`HTTP parcheggi ${resPark.status}`);
+
+            tutteRastrelliere = await resRastr.json();
+            tuttiParcheggi    = await resPark.json();
 
             // Normalizzazione e sincronizzazione deterministica
             if (tutteRastrelliere && tutteRastrelliere.features) {
@@ -1796,7 +1805,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                             props.percentuale_occupazione = Math.round((occupati / tot) * 100);
                             props.piena = (liberi === 0);
                         } else {
-                            // Rastrelliere tradizionali: nessun sensore elettronico, sempre blu (mai piene/rosse)
                             props.smart_iot = false;
                             props.posti_totali = tot;
                             props.posti_occupati = undefined;
@@ -1807,22 +1815,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else {
                         props.piena = isBlocca ? (props.posti_liberi === 0) : false;
                     }
-
                 });
             }
-            console.log('[API] Rastrelliere caricate e normalizzate:', tutteRastrelliere.features.length);
-        } catch (err) { showMapError('Impossibile caricare le rastrelliere: ' + err.message); }
-
-        try {
-            const res = await fetch('/api/v1/parcheggi');
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            tuttiParcheggi = await res.json();
-            console.log('[API] Parcheggi caricati:', tuttiParcheggi.features.length);
-        } catch (err) { showMapError('Impossibile caricare i parcheggi: ' + err.message); }
+            console.log('[API] Dati mappa caricati in parallelo con successo');
+        } catch (err) { 
+            showMapError('Impossibile caricare i dati della mappa: ' + err.message); 
+        }
 
         applyFiltersAndSearch(false);
     }
-
+    
     async function loadSegnalazioniRecenti() {
         try {
             const res = await fetch('/api/v1/segnalazioni/recenti');
