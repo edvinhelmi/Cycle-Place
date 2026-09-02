@@ -1305,3 +1305,8 @@ html.is-logged-out #btn-logout {
     display: none !important;
 }
 
+/* Nasconde i marker durante il drag per garantire una fluidità nativa a 60fps */
+.map-moving .leaflet-marker-pane {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
