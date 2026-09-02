@@ -2064,7 +2064,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const motiviStr = allTipi.slice(0, 2).join(' e ');
 
             alertSegnalazioneHTML = `
-                <div class="alert alert-warning bg-amber-500/15 border border-amber-500/30 text-amber-900 rounded-2xl p-2.5 text-xs flex items-start gap-2 shadow-xs">
+                <div class="alert alert-warning recent-reports-alert bg-amber-500/15 border border-amber-500/30 text-amber-900 rounded-2xl p-2.5 text-xs flex items-start gap-2 shadow-xs">
                     <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm mt-0.5 shrink-0"></i>
                     <div class="leading-tight">
                         <strong class="font-bold block text-amber-900">Segnalazioni recenti:</strong>
@@ -2204,7 +2204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const motiviStr = allTipi.slice(0, 2).join(' e ');
 
             alertParkHTML = `
-                <div class="alert alert-warning bg-amber-500/15 border border-amber-500/30 text-amber-900 rounded-2xl p-2.5 text-xs flex items-start gap-2 shadow-xs">
+                <div class="alert alert-warning recent-reports-alert bg-amber-500/15 border border-amber-500/30 text-amber-900 rounded-2xl p-2.5 text-xs flex items-start gap-2 shadow-xs">
                     <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm mt-0.5 shrink-0"></i>
                     <div class="leading-tight">
                         <strong class="font-bold block text-amber-900">Segnalazioni recenti:</strong>

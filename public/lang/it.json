@@ -56,7 +56,7 @@
   "form.password": "Password",
   "form.passwordConfirm": "Conferma Password",
   "form.passwordHint": "Min. 8 caratteri, 1 maiuscola e 1 carattere speciale",
-  "form.tipoProblem": "Tipo di problema",
+  "form.tipoProblem": "Seleziona i problemi riscontrati:",
   "form.notes": "Note aggiuntive",
   "form.sendReport": "Invia segnalazione",
 

@@ -51,7 +51,7 @@
   "form.password": "Password",
   "form.passwordConfirm": "Confirm Password",
   "form.passwordHint": "Min. 8 characters, 1 uppercase and 1 special char",
-  "form.tipoProblem": "Issue type",
+  "form.tipoProblem": "Select the issues encountered:",
   "form.notes": "Additional notes",
   "form.sendReport": "Submit report",
 

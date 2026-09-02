@@ -51,7 +51,7 @@
   "form.password": "Passwort",
   "form.passwordConfirm": "Passwort bestätigen",
   "form.passwordHint": "Mind. 8 Zeichen, 1 Großbuchstabe und 1 Sonderzeichen",
-  "form.tipoProblem": "Problemart",
+  "form.tipoProblem": "Aufgetretene Probleme auswählen:",
   "form.notes": "Zusätzliche Anmerkungen",
   "form.sendReport": "Meldung senden",
 

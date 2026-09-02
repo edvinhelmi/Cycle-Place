@@ -222,7 +222,7 @@ function renderPreferiti(items) {
                     ${f.tipologia === 'Parcheggio_protetto' 
                         ? `<span><i class="fa-solid fa-shield-halved text-secondary"></i> ${f.zona || 'Parcheggio Protetto'}</span><span class="badge badge-sm badge-secondary text-white font-bold">Bici Box</span>` 
                         : `<span><i class="fa-solid fa-bicycle text-primary"></i> ${tr('dash.rack')} #${f.id}</span>`}
-                    ${f.stalli ? `<span class="badge badge-sm badge-ghost font-bold text-slate-600">(${f.stalli} ${tr('dash.stalli')})</span>` : ''}
+                    ${f.stalli ? `<span class="badge badge-sm badge-stalli font-bold">(${f.stalli} ${tr('dash.stalli')})</span>` : ''}
                     ${f.tipologia === 'Rastr_bloccatelaio' ? '<span class="badge badge-sm badge-accent text-white font-bold">bloccatelaio</span>' : ''}
                 </div>
                 <div class="text-xs text-slate-500 flex flex-wrap items-center gap-2">
