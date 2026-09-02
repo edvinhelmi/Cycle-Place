@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<style>
+    html:not(.i18n-loaded) body {
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+</style>
 <script>
     const savedLang = localStorage.getItem('tbp_lang') || 'it';
     document.documentElement.lang = savedLang;
