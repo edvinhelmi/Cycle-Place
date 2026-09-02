@@ -2786,10 +2786,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================
     async function initWeather() {
         const tempEl = document.getElementById('weather-temp');
+        const descEl = document.getElementById('weather-desc');
         const iconEl = document.getElementById('weather-icon');
-        if (!tempEl || !iconEl) return;
+        if (!tempEl || !descEl || !iconEl) return;
 
-        // Mappatura WMO Weather interpretation codes (WMO) a FontAwesome Icons
         function getWeatherDetails(code) {
             switch (code) {
                 case 0:
@@ -2842,13 +2842,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const details = getWeatherDetails(current.weather_code);
 
             tempEl.textContent = `${temp}°C`;
-            iconEl.className = `fa-solid ${details.icon} text-sm`;
-            
-            const widget = document.getElementById('weather-widget');
-            if (widget) widget.title = `Trento: ${details.desc}, ${temp}°C`;
+            descEl.textContent = details.desc;
+            iconEl.className = `fa-solid ${details.icon} text-base`;
         } catch (err) {
             console.warn('[Meteo] Impossibile recuperare i dati meteo:', err);
-            tempEl.textContent = 'N/D';
+            tempEl.textContent = '--°C';
+            descEl.textContent = 'Non disp.';
         }
     }
 
