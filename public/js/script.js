@@ -663,9 +663,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // =========================================================
-    // 1. MAPPA — inizializzazione
+    // 1. MAPPA — inizializzazione (preferCanvas per ridurre il carico DOM di cerchi e percorsi)
     // =========================================================
-    const map = L.map('map').setView([46.0697, 11.1211], 14);
+    const map = L.map('map', {
+        preferCanvas: true
+    }).setView([46.0697, 11.1211], 14);
+
+    // Disattiva hit-test ed eventi mouse sui 500 marker durante lo scorrimento per fluidità a 60fps (RNF6)
+    const mapContainer = map.getContainer();
+    map.on('movestart', () => mapContainer.classList.add('map-moving'));
+    map.on('moveend',   () => mapContainer.classList.remove('map-moving'));
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19

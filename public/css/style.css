@@ -18,6 +18,9 @@
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(7.4px) !important;
     border: 1px solid rgba(255, 255, 255, 0.72) !important;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .glass-navbar {
@@ -26,6 +29,8 @@
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(7.4px) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.72) !important;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .glass-modal,
@@ -37,6 +42,8 @@
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(8.5px) !important;
     border: 1px solid rgba(255, 255, 255, 0.75) !important;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .search-panel.glass-box,
@@ -194,6 +201,8 @@
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
     cursor: pointer;
     color: #ffffff;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .custom-marker-pin:hover {
@@ -271,12 +280,20 @@
     box-shadow: 0 4px 12px rgba(225, 29, 72, 0.45), 0 2px 4px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .custom-fav-heart-pin:hover {
     transform: scale(1.22);
     box-shadow: 0 6px 16px rgba(225, 29, 72, 0.55);
     z-index: 9999 !important;
+}
+
+/* Disattiva pointer-events sui marker durante lo spostamento della mappa per fluidità a 60fps su mobile (RNF6) */
+#map.map-moving .leaflet-marker-pane,
+#map.map-moving .leaflet-popup-pane {
+    pointer-events: none !important;
 }
 
 /* =====================
