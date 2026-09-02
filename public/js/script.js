@@ -2876,7 +2876,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
         const CACHE_KEY = 'tbp_weather_cache';
         const CACHE_TTL = 15 * 60 * 1000; // 15 minuti in millisecondi
-        const cached = sessionStorage.getItem(CACHE_KEY);
+        const cached = localStorage.getItem(CACHE_KEY);
 
         if (cached) {
             try {
@@ -2888,7 +2888,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return; // Mostrato istantaneamente, nessuna attesa di rete!
                 }
             } catch (e) {
-                sessionStorage.removeItem(CACHE_KEY);
+                localStorage.removeItem(CACHE_KEY);
             }
         }
 
@@ -2904,7 +2904,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cachedWeatherTemp = Math.round(current.temperature_2m);
             cachedWeatherCode = current.weather_code;
 
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
                 temp: cachedWeatherTemp,
                 code: cachedWeatherCode,
                 timestamp: Date.now()
