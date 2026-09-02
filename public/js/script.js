@@ -2781,4 +2781,77 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // =========================================================
+    // METEO LIVE (Open-Meteo API — Trento)
+    // =========================================================
+    async function initWeather() {
+        const tempEl = document.getElementById('weather-temp');
+        const iconEl = document.getElementById('weather-icon');
+        if (!tempEl || !iconEl) return;
+
+        // Mappatura WMO Weather interpretation codes (WMO) a FontAwesome Icons
+        function getWeatherDetails(code) {
+            switch (code) {
+                case 0:
+                    return { icon: 'fa-sun text-amber-500', desc: 'Sereno' };
+                case 1:
+                case 2:
+                    return { icon: 'fa-cloud-sun text-amber-400', desc: 'Poco nuvoloso' };
+                case 3:
+                    return { icon: 'fa-cloud text-slate-400', desc: 'Coperto' };
+                case 45:
+                case 48:
+                    return { icon: 'fa-smog text-slate-400', desc: 'Nebbia' };
+                case 51:
+                case 53:
+                case 55:
+                case 61:
+                case 63:
+                case 65:
+                    return { icon: 'fa-cloud-showers-heavy text-sky-500', desc: 'Pioggia' };
+                case 71:
+                case 73:
+                case 75:
+                case 77:
+                case 85:
+                case 86:
+                    return { icon: 'fa-snowflake text-sky-300', desc: 'Neve' };
+                case 80:
+                case 81:
+                case 82:
+                    return { icon: 'fa-cloud-rain text-sky-600', desc: 'Rovesci' };
+                case 95:
+                case 96:
+                case 99:
+                    return { icon: 'fa-bolt text-amber-500', desc: 'Temporale' };
+                default:
+                    return { icon: 'fa-cloud-sun text-primary', desc: 'Variabile' };
+            }
+        }
+
+        try {
+            const url = 'https://api.open-meteo.com/v1/forecast?latitude=46.0697&longitude=11.1211&current=temperature_2m,weather_code';
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Errore richiesta meteo');
+            
+            const data = await res.json();
+            const current = data.current;
+            if (!current) return;
+
+            const temp = Math.round(current.temperature_2m);
+            const details = getWeatherDetails(current.weather_code);
+
+            tempEl.textContent = `${temp}°C`;
+            iconEl.className = `fa-solid ${details.icon} text-sm`;
+            
+            const widget = document.getElementById('weather-widget');
+            if (widget) widget.title = `Trento: ${details.desc}, ${temp}°C`;
+        } catch (err) {
+            console.warn('[Meteo] Impossibile recuperare i dati meteo:', err);
+            tempEl.textContent = 'N/D';
+        }
+    }
+
+    initWeather();
+
 }); // fine DOMContentLoaded
