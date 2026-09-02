@@ -878,6 +878,27 @@ app.get('/api/v1/segnalazioni/user', tokenChecker, (req, res) => {
     });
 });
 
+// GET /api/v1/segnalazioni/recenti — Segnalazioni recenti pubbliche (ultime 48h)
+app.get('/api/v1/segnalazioni/recenti', (req, res) => {
+    readJsonFile(segFile, (err, data) => {
+        if (err || !Array.isArray(data)) return res.status(200).json({ segnalazioni: [] });
+        
+        const now = Date.now();
+        const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+
+        // Filtra quelle recenti e non risolte, omettendo dati privati (userId, userEmail)
+        const recenti = data
+            .filter(s => s.stato !== 'risolta' && (now - new Date(s.timestamp).getTime()) < FORTY_EIGHT_HOURS)
+            .map(s => ({
+                rastrellieraId: s.rastrellieraId,
+                tipo: s.tipo,
+                timestamp: s.timestamp
+            }));
+
+        res.status(200).json({ segnalazioni: recenti });
+    });
+});
+
 // =======================================================
 // API: Routing In-App con OpenRouteService (RF 3.4)
 // =======================================================
