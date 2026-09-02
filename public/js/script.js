@@ -344,6 +344,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            [loginModal, registerModal, segnalazioneModal, forgotPasswordModal, resetPasswordModal].forEach(m => {
+                if (m && !m.classList.contains('hidden')) {
+                    closeModal(m);
+                }
+            });
+        }
+    });
+
     [loginModal, registerModal, segnalazioneModal, forgotPasswordModal, resetPasswordModal].forEach(m => {
         if (m) {
             m.addEventListener('click', e => {
