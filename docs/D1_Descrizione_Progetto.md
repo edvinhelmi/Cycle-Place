@@ -113,26 +113,26 @@ RF 10 - Gestione dati e interfaccia amministrativa (Lato Comune)
 ## 3. Requisiti Non Funzionali (RNF)
 
 ### RNF 1 - Perfomance
-• **RNF 1.1 - Velocità della mappa**: Il caricamento ed il rendering della mappa interattiva deve essere completato entro un massimo di 2 secondi, anche con una connessione mobile media (3G/4G). Nota: le performance dipendono anche dai tempi di risposta dell'API OpenStreetMap.
-• **RNF 1.2 Latenza di routing**: Il calcolo del percorso ottimizzato per bici (RF 4) tramite OpenRouteService non deve superare i 5 secondi di elaborazione server, per garantire la fruibilità in movimento.
-• **RNF 1.3 - Tempi di risposta API**: Le chiamate alle API del backend (caricamento dati GeoJSON, invio di una segnalazione o richiesta di login) devono completarsi con successo entro 500 millisecondi con un carico medio.
-• **RNF 1.4 - Gestione connessione intermittente**: L'applicazione mobile deve mantenere le funzionalità di base (es. visualizzazione di mappe cache o dati dei parcheggi già caricati) anche in assenza temporanea di connessione Internet.
+- **RNF 1.1 - Velocità della mappa**: Il caricamento ed il rendering della mappa interattiva deve essere completato entro un massimo di 2 secondi, anche con una connessione mobile media (3G/4G). Nota: le performance dipendono anche dai tempi di risposta dell'API OpenStreetMap.
+- **RNF 1.2 Latenza di routing**: Il calcolo del percorso ottimizzato per bici (RF 4) tramite OpenRouteService non deve superare i 5 secondi di elaborazione server, per garantire la fruibilità in movimento.
+- **RNF 1.3 - Tempi di risposta API**: Le chiamate alle API del backend (caricamento dati GeoJSON, invio di una segnalazione o richiesta di login) devono completarsi con successo entro 500 millisecondi con un carico medio.
+- **RNF 1.4 - Gestione connessione intermittente**: L'applicazione mobile deve mantenere le funzionalità di base (es. visualizzazione di mappe cache o dati dei parcheggi già caricati) anche in assenza temporanea di connessione Internet.
 
 ### RNF 2 - Sicurezza e crittografia
-• **RNF 2.1 - Autenticazione e Autorizzazione**: Le comunicazioni tra l'app ed il server devono essere crittografate tramite protocolli TLS/SSL (HTTPS). Solo gli utenti autenticati e registrati (verificati tramite JWT) devono essere autorizzati ad inviare segnalazioni e ad accedere allo storico personale.
-• **RNF 2.2 - Protezione dati**: Le password degli utenti devono essere archiviate nel database locale tramite hashing sicuro (utilizzando l'algoritmo bcrypt).
-• **RNF 2.3 - Protezione dati di geolocalizzazione**: I dati di geolocalizzazione necessari per il routing devono essere trattati nel rispetto della privacy e non memorizzati in modo persistente se non strettamente necessario per le segnalazioni inviate esplicitamente dall'utente.
-• **RNF 2.4 - Validazione input e Affidabilità**: Il sistema deve implementare una precisa validazione di tutti gli input utente (form di registrazione, segnalazioni) per prevenire attacchi comuni e implementare rate limiting per limitare lo spam di segnalazioni.
+- **RNF 2.1 - Autenticazione e Autorizzazione**: Le comunicazioni tra l'app ed il server devono essere crittografate tramite protocolli TLS/SSL (HTTPS). Solo gli utenti autenticati e registrati (verificati tramite JWT) devono essere autorizzati ad inviare segnalazioni e ad accedere allo storico personale.
+- **RNF 2.2 - Protezione dati**: Le password degli utenti devono essere archiviate nel database locale tramite hashing sicuro (utilizzando l'algoritmo bcrypt).
+- **RNF 2.3 - Protezione dati di geolocalizzazione**: I dati di geolocalizzazione necessari per il routing devono essere trattati nel rispetto della privacy e non memorizzati in modo persistente se non strettamente necessario per le segnalazioni inviate esplicitamente dall'utente.
+- **RNF 2.4 - Validazione input e Affidabilità**: Il sistema deve implementare una precisa validazione di tutti gli input utente (form di registrazione, segnalazioni) per prevenire attacchi comuni e implementare rate limiting per limitare lo spam di segnalazioni.
 
 ### RNF 3 - Usabilità
-• **RNF 3.1 - Design coerente e Reattività**: L'interfaccia utente (UI) deve seguire le linee guida di design moderne (Material Design/Human Interface Guidelines) e rispondere ai gesti touch in modo istantaneo. Il processo di invio di una segnalazione deve essere rapido e intuitivo.
+- **RNF 3.1 - Design coerente e Reattività**: L'interfaccia utente (UI) deve seguire le linee guida di design moderne (Material Design/Human Interface Guidelines) e rispondere ai gesti touch in modo istantaneo. Il processo di invio di una segnalazione deve essere rapido e intuitivo.
 
 ### RNF 4 - Affidabilità e Disponibilità
-• **RNF 4.1 - Disponibilità del servizio**: Il back-end e l'API devono garantire un tempo di attività (uptime) pari al 99.5% su base mensile (esclusi gli slot di manutenzione programmati).
-• **RNF 4.2 - Durata della sessione**: Dopo il login, l'utente autenticato deve rimanere connesso per un periodo di tempo esteso (30 giorni, gestito tramite Refresh Token JWT), richiedendo un nuovo login solo in caso di logout esplicito o scadenza prolungata.
+- **RNF 4.1 - Disponibilità del servizio**: Il back-end e l'API devono garantire un tempo di attività (uptime) pari al 99.5% su base mensile (esclusi gli slot di manutenzione programmati).
+- **RNF 4.2 - Durata della sessione**: Dopo il login, l'utente autenticato deve rimanere connesso per un periodo di tempo esteso (30 giorni, gestito tramite Refresh Token JWT), richiedendo un nuovo login solo in caso di logout esplicito o scadenza prolungata.
 
 ### RNF 5 - Manutenibilità e Portabilità
-• **RNF 5.1 -Modularità, Logging e Standard dei dati**: Il codice sorgente del back-end deve essere strutturato in modo modulare. Il sistema deve implementare un logging degli errori e tutti i dati delle aree di sosta e delle segnalazioni devono essere scambiati nel formato standard GeoJSON.
+- **RNF 5.1 -Modularità, Logging e Standard dei dati**: Il codice sorgente del back-end deve essere strutturato in modo modulare. Il sistema deve implementare un logging degli errori e tutti i dati delle aree di sosta e delle segnalazioni devono essere scambiati nel formato standard GeoJSON.
 
 ---
 
