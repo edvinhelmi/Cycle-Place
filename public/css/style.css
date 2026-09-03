@@ -1428,7 +1428,14 @@ html.is-logged-out #btn-logout {
 }
 
 #weather-alert-banner {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(250, 204, 21, 0.4);
+    background-color: #fef9c3 !important;
+    color: #1e293b !important;
+    width: 440px;
+    height: 4.5rem;
+    max-width: calc(100vw - 2rem);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(234, 179, 8, 0.5);
+    box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.15);
+    z-index: 5000 !important;
 }
