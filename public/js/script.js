@@ -100,10 +100,22 @@ function checkWeatherAlert(code) {
         };
         textEl.textContent = alerts[lang] || alerts['it'];
         banner.classList.remove('hidden');
-        if (navbar) navbar.style.transform = 'translateY(38px)';
+        if (navbar) navbar.style.transform = 'translateY(42px)';
+        const searchPanel = document.getElementById('search-panel');
+        if (searchPanel) searchPanel.style.transform = 'translateY(42px)';
+        const filterPanel = document.getElementById('filter-panel');
+        if (filterPanel) filterPanel.style.transform = 'translateY(42px)';
+        const mapLegend = document.getElementById('map-legend');
+        if (mapLegend) mapLegend.style.transform = 'translateY(42px)';
     } else {
         banner.classList.add('hidden');
         if (navbar) navbar.style.transform = 'translateY(0px)';
+        const searchPanel = document.getElementById('search-panel');
+        if (searchPanel) searchPanel.style.transform = 'translateY(0px)';
+        const filterPanel = document.getElementById('filter-panel');
+        if (filterPanel) filterPanel.style.transform = 'translateY(0px)';
+        const mapLegend = document.getElementById('map-legend');
+        if (mapLegend) mapLegend.style.transform = 'translateY(0px)';
     }
 }
 
@@ -424,7 +436,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const banner = document.getElementById('weather-alert-banner');
             const navbar = document.querySelector('header.navbar');
             if (banner) banner.classList.add('hidden');
+
             if (navbar) navbar.style.transform = 'translateY(0px)';
+            const searchPanel = document.getElementById('search-panel');
+            if (searchPanel) searchPanel.style.transform = 'translateY(0px)';
+            const filterPanel = document.getElementById('filter-panel');
+            if (filterPanel) filterPanel.style.transform = 'translateY(0px)';
+            const mapLegend = document.getElementById('map-legend');
+            if (mapLegend) mapLegend.style.transform = 'translateY(0px)';
         });
     }
     
