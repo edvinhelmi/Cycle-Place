@@ -59,38 +59,38 @@ Le funzionalità principali dell'applicazione sono state definite per risolvere 
 ## 2. Requisiti Funzionali (RF)
 
 ### RF 1 - Gestione autenticazione
-• **RF 1.1 - Accesso anonimo**: Il sistema deve permettere la visualizzazione della mappa interattiva delle aree di sosta (filtrabili per tipologia) e delle iniziative del comune senza richiedere autenticazione.
-• **RF 1.2 - Registrazione**: Il sistema deve permettere la creazione di un account tramite email valida, nome, cognome e una password che soddisfi criteri di complessità. 
-• **RF 1.3 - Accesso utente registrato**: Autenticazione tramite credenziali locali (email e password) o tramite credenziali Google (OAuth 2.0).
-• **RF 1.4 - Flusso di autenticazione esterna**: Gestione del reindirizzamento al provider Google, validazione del token e creazione/associazione automatica del profilo.
-• **RF 1.5 - Recupero password**: Funzionalità sicura per il recupero della password tramite link temporaneo via email.
-• **RF 1.6 - Logout**: Disinclusione sicura della sessione attiva da qualsiasi dispositivo.
-• **RF 1.7 - Gestione della sessione**: Mantenimento della sessione tramite token JWT con supporto per il refresh automatico.
-• **RF 1.8 - Invalidazione della sessione**: Il logout o un nuovo login deve invalidare i Refresh Token precedenti, forzando la riautenticazione. 
-• **RF 1.9 - Rate Limiting Autenticazione**: Il sistema deve limitare i tentativi di login consecutivi per prevenire attacchi brute-force. 
+- **RF 1.1 - Accesso anonimo**: Il sistema deve permettere la visualizzazione della mappa interattiva delle aree di sosta (filtrabili per tipologia) e delle iniziative del comune senza richiedere autenticazione.
+- **RF 1.2 - Registrazione**: Il sistema deve permettere la creazione di un account tramite email valida, nome, cognome e una password che soddisfi criteri di complessità. 
+- **RF 1.3 - Accesso utente registrato**: Autenticazione tramite credenziali locali (email e password) o tramite credenziali Google (OAuth 2.0).
+- **RF 1.4 - Flusso di autenticazione esterna**: Gestione del reindirizzamento al provider Google, validazione del token e creazione/associazione automatica del profilo.
+- **RF 1.5 - Recupero password**: Funzionalità sicura per il recupero della password tramite link temporaneo via email.
+- **RF 1.6 - Logout**: Disinclusione sicura della sessione attiva da qualsiasi dispositivo.
+- **RF 1.7 - Gestione della sessione**: Mantenimento della sessione tramite token JWT con supporto per il refresh automatico.
+- **RF 1.8 - Invalidazione della sessione**: Il logout o un nuovo login deve invalidare i Refresh Token precedenti, forzando la riautenticazione. 
+- **RF 1.9 - Rate Limiting Autenticazione**: Il sistema deve limitare i tentativi di login consecutivi per prevenire attacchi brute-force. 
 
 ### RF 2 - Registrazione utente
-• **RF 2.1 - Registrazione con credenziali locali** tramite form (Nome, Cognome, email valida, password composta da almeno 8 caratteri di cui almeno 1 numero, una lettera maiuscola ed un carattere speciale).
-• **RF 2.2 - Registrazione tramite Google** con importazione automatica dei dati di base.
-• **RF 2.3 - Scelta della lingua**: Supporto per italiano, inglese e tedesco.
+- **RF 2.1 - Registrazione con credenziali locali** tramite form (Nome, Cognome, email valida, password composta da almeno 8 caratteri di cui almeno 1 numero, una lettera maiuscola ed un carattere speciale).
+- **RF 2.2 - Registrazione tramite Google** con importazione automatica dei dati di base.
+- **RF 2.3 - Scelta della lingua**: Supporto per italiano, inglese e tedesco.
 
 ### RF 3 - Gestione profilo
-• **RF 3.1 - Visualizzazione del profilo** (informazioni personali, rastrelliere salvate e segnalazioni effettuate).
-• **RF 3.2 - Modifica delle informazioni personali e delle preferenze** (es. notifiche push). (?)??????????????
-• **RF 3.3 - Modifica della password**.
-• **RF 3.4 - Richiesta di cancellazione definitiva dell'account e dei dati associati** (GDPR).
-• **RF 3.5 - Cancellazione definitiva del proprio account e di tutti i dati associati** (preferiti, segnalazioni). 
+- **RF 3.1 - Visualizzazione del profilo** (informazioni personali, rastrelliere salvate e segnalazioni effettuate).
+- **RF 3.2 - Modifica delle informazioni personali e delle preferenze** (es. notifiche push). (?)??????????????
+- **RF 3.3 - Modifica della password**.
+- **RF 3.4 - Richiesta di cancellazione definitiva dell'account e dei dati associati** (GDPR).
+- **RF 3.5 - Cancellazione definitiva del proprio account e di tutti i dati associati** (preferiti, segnalazioni). 
 
 ### RF 4 - Backup e Ripristino
 Esecuzione di backup regolari dei dati critici per garantirne il ripristino in caso di guasti.
 
 ### RF 5 - Gestione mappa e aree di sosta
-• **RF 5.1 - Visualizzazione mappa** centrata sulla posizione GPS dell'utente o sull'area selezionata.
-• **RF 5.2 - Visualizzazione delle aree di sosta** distinte per tipologia (rastrelliera, Ciclobox).
-• **RF 5.3 - Filtraggio delle aree di sosta per tipologia**.
-• **RF 5.4 - Dettaglio area di sosta** tramite popup (tipologia (rastrelliera o ciclobox), numero di stalli, zona, informazioni sullo stato (solo per i Ciclobox), ad es: disponibile/non disponibile, presenza di segnalazioni effettuate da altri utenti).
-• **RF 5.5 - Salvataggio e visualizzazione rapida delle aree di sosta preferite**.
-• **RF 5.6 - Calcolo del percorso efficiente e sicuro tra due punti**: il sistema deve integrare In-App l'API di OpenRouteService per calcolare e visualizzare sulla mappa il percorso tra la posizione attuale dell'utente (se concessa) e l'area di sosta selezionata.
+- **RF 5.1 - Visualizzazione mappa** centrata sulla posizione GPS dell'utente o sull'area selezionata.
+- **RF 5.2 - Visualizzazione delle aree di sosta** distinte per tipologia (rastrelliera, Ciclobox).
+- **RF 5.3 - Filtraggio delle aree di sosta per tipologia**.
+- **RF 5.4 - Dettaglio area di sosta** tramite popup (tipologia (rastrelliera o ciclobox), numero di stalli, zona, informazioni sullo stato (solo per i Ciclobox), ad es: disponibile/non disponibile, presenza di segnalazioni effettuate da altri utenti).
+- **RF 5.5 - Salvataggio e visualizzazione rapida delle aree di sosta preferite**.
+- **RF 5.6 - Calcolo del percorso efficiente e sicuro tra due punti**: il sistema deve integrare In-App l'API di OpenRouteService per calcolare e visualizzare sulla mappa il percorso tra la posizione attuale dell'utente (se concessa) e l'area di sosta selezionata.
 
 ### RF 6 - Gestione storico utilizzo
 Visualizzazione dello storico delle interazioni (segnalazioni inviate, aree salvate).
