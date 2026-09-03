@@ -87,6 +87,8 @@ function checkWeatherAlert(code) {
     const banner = document.getElementById('weather-alert-banner');
     const textEl = document.getElementById('weather-alert-text');
     const navbar = document.querySelector('header.navbar');
+    const leafletZoom = document.querySelector('.leaflet-top.leaflet-left');
+
     if (!banner || !textEl) return;
 
     const severeCodes = [53, 55, 63, 65, 73, 75, 81, 82, 95];
@@ -100,23 +102,14 @@ function checkWeatherAlert(code) {
         };
         textEl.textContent = alerts[lang] || alerts['it'];
         banner.classList.remove('hidden');
-        if (navbar) {
-            navbar.style.position = 'relative';
-            navbar.style.top = '42px';
-            navbar.style.left = '0px';
-        }
-        if (leafletZoom) {
-            leafletZoom.style.marginTop = '42px';
-        }
+
+        if (navbar) navbar.style.transform = 'translateY(42px)';
+        if (leafletZoom) leafletZoom.style.marginTop = '42px';
     } else {
         banner.classList.add('hidden');
 
-        if (navbar) {
-            navbar.style.top = '0px';
-        }
-        if (leafletZoom) {
-            leafletZoom.style.marginTop = '0px';
-        }
+        if (navbar) navbar.style.transform = 'translateY(0px)';
+        if (leafletZoom) leafletZoom.style.marginTop = '0px';
     }
 }
 
