@@ -94,9 +94,9 @@ function checkWeatherAlert(code) {
     if (severeCodes.includes(code)) {
         const lang = (window.I18n ? window.I18n.getLanguage() : 'it') || 'it';
         const alerts = {
-            it: '⚠️ Allerta meteo: condizioni avverse previste. Guida con prudenza o valuta percorsi alternativi.',
-            en: '⚠️ Weather alert: adverse conditions expected. Ride with caution or consider alternatives.',
-            de: '⚠️ Wetterwarnung: schlechte Bedingungen erwartet. Vorsicht beim Radfahren empfohlen.'
+            it: 'Allerta meteo: condizioni avverse previste. Guida con prudenza o valuta percorsi alternativi.',
+            en: 'Weather alert: adverse conditions expected. Ride with caution or consider alternatives.',
+            de: 'Wetterwarnung: schlechte Bedingungen erwartet. Vorsicht beim Radfahren empfohlen.'
         };
         textEl.textContent = alerts[lang] || alerts['it'];
         banner.classList.remove('hidden');
