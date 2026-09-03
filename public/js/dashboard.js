@@ -79,9 +79,11 @@ async function init() {
     }
 
     // Navbar & Saluto utente
-    const userGreeting = document.getElementById('dash-user-name');
-    if (userGreeting) {
-        userGreeting.innerHTML = `<i class="fa-solid fa-circle-user text-sm"></i> <span class="whitespace-nowrap leading-none">${tr('greeting', { name: `<strong class="text-primary">${user.name || 'Utente'}</strong>` })}</span>`;
+    function updateGreeting(user) {
+        const dashGreetingText = document.getElementById('dash-greeting-text');
+        if (dashGreetingText) {
+            dashGreetingText.innerHTML = tr('greeting', { name: `<strong class="text-primary">${user.name || 'Utente'}</strong>` });
+        }
     }
 
     // Dati Anagrafici Profilo
