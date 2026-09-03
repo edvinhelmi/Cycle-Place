@@ -414,6 +414,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         clearForms();
     };
 
+    // Chiudi banner meteo 
+    const btnCloseBanner = document.getElementById('btn-close-weather-banner');
+    if (btnCloseBanner) {
+        btnCloseBanner.addEventListener('click', () => {
+            const banner = document.getElementById('weather-alert-banner');
+            if (banner) banner.classList.add('hidden');
+        });
+    }
+    
     function clearForms() {
         ['register-form', 'login-form', 'forgot-password-form', 'reset-password-form'].forEach(id => {
             const f = document.getElementById(id); 
