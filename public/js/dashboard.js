@@ -58,6 +58,10 @@ let cachedSegnalazioni = [];
 async function init() {
     await I18n.init();
 
+    if (typeof I18n.applyTranslations === 'function') {
+        I18n.applyTranslations();
+    }
+
     document.documentElement.classList.remove('opacity-0');
     document.documentElement.classList.add('opacity-100', 'transition-opacity', 'duration-300');
 
@@ -84,14 +88,6 @@ async function init() {
             pProvider.innerHTML = user.provider === 'google' 
                 ? '<i class="fa-brands fa-google text-primary"></i> <span>' + tr('dash.googleAccount') + '</span>'
                 : '<i class="fa-solid fa-house-user"></i> <span>' + tr('dash.localAccount') + '</span>';
-        }
-    }
-
-    // Navbar & Saluto utente
-    function updateGreeting(user) {
-        const dashGreetingText = document.getElementById('dash-greeting-text');
-        if (dashGreetingText) {
-            dashGreetingText.innerHTML = tr('greeting', { name: `<strong class="text-primary">${user.name || 'Utente'}</strong>` });
         }
     }
 
