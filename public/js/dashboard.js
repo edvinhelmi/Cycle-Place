@@ -77,7 +77,7 @@ async function init() {
     function updateGreeting() {
         const dashGreetingText = document.getElementById('dash-greeting-text');
         if (dashGreetingText) {
-            dashGreetingText.innerHTML = tr('greeting', { name: `<strong class="text-blue-500">${user.name || 'Utente'}</strong>` });
+            dashGreetingText.innerHTML = tr('greeting', { name: `<strong style="color: #3b82f6 !important;">${user.name || 'Utente'}</strong>` });
         }
     }
     
