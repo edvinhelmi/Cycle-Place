@@ -82,7 +82,6 @@ function updateWeatherUI() {
 
     checkWeatherAlert(cachedWeatherCode);
 }
-
 function checkWeatherAlert(code) {
     const banner = document.getElementById('weather-alert-banner');
     const textEl = document.getElementById('weather-alert-text');
@@ -90,7 +89,6 @@ function checkWeatherAlert(code) {
 
     const severeCodes = [53, 55, 63, 65, 73, 75, 81, 82, 95];
 
-    // Se c'è maltempo, mostra sempre il banner all'apertura/ricarica della pagina
     if (severeCodes.includes(code)) {
         const lang = (window.I18n ? window.I18n.getLanguage() : 'it') || 'it';
         const alerts = {
@@ -422,7 +420,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnCloseBanner.addEventListener('click', () => {
             const banner = document.getElementById('weather-alert-banner');
             if (banner) banner.classList.add('hidden');
-            sessionStorage.setItem('tbp_weather_dismissed', 'true');
         });
     }
     
