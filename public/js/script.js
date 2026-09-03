@@ -100,22 +100,19 @@ function checkWeatherAlert(code) {
         };
         textEl.textContent = alerts[lang] || alerts['it'];
         banner.classList.remove('hidden');
-        if (navbar) navbar.style.transform = 'translateY(42px)';
-        const searchPanel = document.getElementById('search-panel');
-        if (searchPanel) searchPanel.style.transform = 'translateY(42px)';
-        const filterPanel = document.getElementById('filter-panel');
-        if (filterPanel) filterPanel.style.transform = 'translateY(42px)';
-        const mapLegend = document.getElementById('map-legend');
-        if (mapLegend) mapLegend.style.transform = 'translateY(42px)';
+        if (navbar) {
+            navbar.style.position = 'relative';
+            navbar.style.top = '42px';
+        }
+        const leafletZoom = document.querySelector('.leaflet-top.leaflet-left');
+        if (leafletZoom) leafletZoom.style.marginTop = '42px';
     } else {
         banner.classList.add('hidden');
-        if (navbar) navbar.style.transform = 'translateY(0px)';
-        const searchPanel = document.getElementById('search-panel');
-        if (searchPanel) searchPanel.style.transform = 'translateY(0px)';
-        const filterPanel = document.getElementById('filter-panel');
-        if (filterPanel) filterPanel.style.transform = 'translateY(0px)';
-        const mapLegend = document.getElementById('map-legend');
-        if (mapLegend) mapLegend.style.transform = 'translateY(0px)';
+        if (navbar) {
+            navbar.style.top = '0px';
+        }
+        const leafletZoom = document.querySelector('.leaflet-top.leaflet-left');
+        if (leafletZoom) leafletZoom.style.marginTop = '0px';
     }
 }
 
@@ -430,20 +427,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // Chiudi banner meteo 
-   const btnCloseBanner = document.getElementById('btn-close-weather-banner');
+   JavaScript
+
+    const btnCloseBanner = document.getElementById('btn-close-weather-banner');
     if (btnCloseBanner) {
         btnCloseBanner.addEventListener('click', () => {
             const banner = document.getElementById('weather-alert-banner');
             const navbar = document.querySelector('header.navbar');
-            if (banner) banner.classList.add('hidden');
+            const leafletZoom = document.querySelector('.leaflet-top.leaflet-left');
 
-            if (navbar) navbar.style.transform = 'translateY(0px)';
-            const searchPanel = document.getElementById('search-panel');
-            if (searchPanel) searchPanel.style.transform = 'translateY(0px)';
-            const filterPanel = document.getElementById('filter-panel');
-            if (filterPanel) filterPanel.style.transform = 'translateY(0px)';
-            const mapLegend = document.getElementById('map-legend');
-            if (mapLegend) mapLegend.style.transform = 'translateY(0px)';
+            if (banner) banner.classList.add('hidden');
+            if (navbar) navbar.style.top = '0px';
+            if (leafletZoom) leafletZoom.style.marginTop = '0px';
         });
     }
     
