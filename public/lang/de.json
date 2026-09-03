@@ -92,6 +92,7 @@
   "tipo.vandalismo": "Vandalismus / versuchter Diebstahl",
   "tipo.altro": "Sonstiges (in Notizen angeben)",
 
+  'popup.address': 'Indirizzo',
   "popup.fav.add": "Zu Favoriten",
   "popup.fav.remove": "Gespeichert",
   "popup.report": "Problem melden",
