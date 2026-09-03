@@ -103,16 +103,20 @@ function checkWeatherAlert(code) {
         if (navbar) {
             navbar.style.position = 'relative';
             navbar.style.top = '42px';
+            navbar.style.left = '0px';
         }
-        const leafletZoom = document.querySelector('.leaflet-top.leaflet-left');
-        if (leafletZoom) leafletZoom.style.marginTop = '42px';
+        if (leafletZoom) {
+            leafletZoom.style.marginTop = '42px';
+        }
     } else {
         banner.classList.add('hidden');
+
         if (navbar) {
             navbar.style.top = '0px';
         }
-        const leafletZoom = document.querySelector('.leaflet-top.leaflet-left');
-        if (leafletZoom) leafletZoom.style.marginTop = '0px';
+        if (leafletZoom) {
+            leafletZoom.style.marginTop = '0px';
+        }
     }
 }
 
@@ -427,7 +431,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // Chiudi banner meteo 
-   JavaScript
 
     const btnCloseBanner = document.getElementById('btn-close-weather-banner');
     if (btnCloseBanner) {
