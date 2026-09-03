@@ -65,12 +65,12 @@
 </head>
 <body class="bg-base-200 text-slate-800 antialiased overflow-hidden select-none">
     <!-- Banner Allerta Meteo in-app -->
-    <div id="weather-alert-banner" class="hidden bg-amber-500/90 text-slate-900 px-4 py-2 text-xs sm:text-sm font-bold flex items-center justify-between gap-3 shadow-md z-[2100] transition-all duration-300">
+    <div id="weather-alert-banner" class="hidden bg-amber-200 text-slate-900 px-4 py-2 text-xs sm:text-sm font-bold flex items-center justify-between gap-3 shadow-md z-[2100] transition-all duration-300">
         <div class="flex items-center gap-2.5 mx-auto">
-            <i class="fa-solid fa-triangle-exclamation text-base animate-pulse"></i>
-            <span id="weather-alert-text">Allerta meteo: è prevista pioggia intensa. Presta attenzione durante il tragitto in bici!</span>
+            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base animate-pulse"></i>
+            <span id="weather-alert-text">Allerta meteo: condizioni avverse previste. Guida con prudenza o valuta percorsi alternativi.</span>
         </div>
-        <button id="btn-close-weather-banner" class="btn btn-ghost btn-xs btn-circle text-slate-900 hover:bg-black/10 min-h-0 h-6 w-6" aria-label="Chiudi allerta">&times;</button>
+        <button id="btn-close-weather-banner" class="btn btn-ghost btn-xs btn-circle text-slate-900 hover:bg-black/10 min-h-0 h-6 w-6 cursor-pointer" aria-label="Chiudi allerta">&times;</button>
     </div>
     <!-- Navbar con Glassmorphism & DaisyUI Component (RNF1, RNF6) -->
     <header class="navbar glass-navbar px-4 sm:px-6 py-2.5 z-[2000] sticky top-0 flex justify-between items-center">
