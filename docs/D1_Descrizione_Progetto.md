@@ -293,8 +293,8 @@ Ricezione di allerte meteorologiche critiche.<br>
 Come utente, voglio visualizzare un banner di allerta in-app quando sono previste condizioni meteorologiche avverse, in modo da poter valutare percorsi alternativi o guidare con maggiore prudenza.<br>
 
 Criteri di Accettazione:
-- Il sistema interroga i dati meteo in tempo reale e attiva un banner full-width in cima alla viewport in caso di allerte severe.
-- Il banner include icone di avviso e il testo localizzato nella lingua selezionata dall'utente, con la possibilità di chiuderlo manualmente.
+- Il sistema interroga i dati meteo in tempo reale e attiva un banner fluttuante centrato a cavallo tra la navbar e la mappa in caso di allerte severe.
+- Il banner include icone di avviso e il testo localizzato nella lingua selezionata dall'utente, con la possibilità di chiuderlo manualmente tramite l'apposita "X", impedendone la ricomparsa fino alla chiusura della sessione del browser.
 
 TASKS – User Story 13:
 - Integrare il client meteo asincrono e la logica di controllo codici di allerta severa.
