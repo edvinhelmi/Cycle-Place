@@ -1431,11 +1431,15 @@ html.is-logged-out #btn-logout {
    Weather Alert Banner UI Shift (Navbar & Map Elements)
    ===================================================== */
 body.weather-alert-active header.navbar,
-body.weather-alert-active .search-panel,
 body.weather-alert-active .filter-panel,
 body.weather-alert-active .map-legend,
 body.weather-alert-active .leaflet-control-zoom {
     transform: translateY(42px);
+    transition: transform 0.3s ease-in-out;
+}
+
+body.weather-alert-active .search-panel {
+    transform: translateX(-50%) translateY(42px);
     transition: transform 0.3s ease-in-out;
 }
 
