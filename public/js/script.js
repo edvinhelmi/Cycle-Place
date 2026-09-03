@@ -2164,10 +2164,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <span class="popup-label text-slate-500 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-hashtag"></i> ${tr('popup.slots')}</span>
                         <span class="popup-val font-extrabold text-primary">${stalli} ${tr('dash.stalli')}</span>
                     </div>
-                    ${props.zona ? `
+                    ${props.via ? `
                     <div class="popup-row flex items-center justify-between py-1 border-b border-base-200/60">
-                        <span class="popup-label text-slate-500 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> ${tr('popup.zone')}</span>
-                        <span class="popup-val font-bold text-slate-800">${props.zona}</span>
+                        <span class="popup-label text-slate-500 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> ${tr('popup.address') || 'Indirizzo'}</span>
+                        <span class="popup-val font-bold text-slate-800">${props.via}</span>
                     </div>` : ''}
                     ${props.edificio ? `
                     <div class="popup-row flex items-center justify-between py-1 border-b border-base-200/60">
