@@ -1,14 +1,52 @@
-# D1 - Descrizione di Progetto: Trento Bike Parking
+UNIVERSITÀ DEGLI STUDI DI TRENTO
+Dipartimento di Ingegneria e Scienza dell’Informazione
 
-## 1. Il progetto Trento Bike Parking (Pitch e Scelte Architetturali)
+## Progetto: Cycle-Place
+## Titolo del documento: Descrizione di Progetto
 
-### Introduzione e Pitch
-La mobilità ciclabile rappresenta una colonna portante per lo sviluppo urbano sostenibile delle città moderne. Tuttavia, nella città di Trento, molti ciclisti e studenti affrontano quotidianamente ostacoli pratici, primo fra tutti il rischio di furti di biciclette e la conseguente difficoltà a individuare stalli sicuri, o la frustrazione di non sapere in anticipo se la rastrelliera di destinazione è già piena. **Trento Bike Parking** è la soluzione proposta: una Web Application interattiva e responsiva che mappa l'intera rete di rastrelliere e parcheggi sicuri (le cosiddette "Bici box") del Comune di Trento. 
-Questa piattaforma offre ai cittadini numerosi vantaggi: consente di pianificare spostamenti sicuri, riduce il tempo di ricerca del parcheggio tramite sistemi di geolocalizzazione, ricerca spaziale e routing, e incentiva attivamente la micro-mobilità. Come attuale limite di sistema, la simulazione dei dati IoT (Internet of Things) sopperisce temporaneamente all'assenza fisica di sensori comunali su larga scala, in attesa di future integrazioni hardware da parte delle amministrazioni locali.
+Document Info
+Doc. Name: D1-cycle-place-DescrizioneProgetto
+Doc. Number: D1 v1.2
+Description: Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place.
 
-### Scelte Architetturali
-Per l'infrastruttura dati, in netta discontinuità con soluzioni pesanti tradizionali, si è scelto di implementare un'architettura **RESTful Node.js stateless** che serve e interroga nativamente file statici **GeoJSON** dal file system (es. `rastrelliere.geojson`), rinunciando volutamente a un database documentale complesso come MongoDB per i dati geospaziali. 
-**Motivazione:** I dati strutturali urbani (coordinate di rastrelliere e parcheggi) sono caratterizzati da un *tasso di mutazione quasi nullo* nel breve/medio periodo. Appoggiarsi a un DBMS in questo specifico contesto genererebbe un notevole overhead per operazioni di I/O e queries, e complicherebbe i layer sistemistici. Il caricamento in memoria e la deserializzazione di un GeoJSON garantiscono tempi di risposta estremamente più performanti per le API (`/api/v1/rastrelliere`), risultando la scelta ingegneristica di gran lunga più efficiente ed adeguata al dominio del problema affrontato.
+INDICE
+1. Il progetto Cycle-Place
+2. Requisiti Funzionali
+3. Requisiti Non Funzionali
+4. Use Case Diagram
+5. User Story
+6. Design Front-end
+
+## 1. Il progetto Cycle Place (Pitch e Scelte Architetturali)
+
+#### INSERIRE SLIDES***********************+
+
+Il presente progetto mira ad affrontare la problematica della scarsa propensione degli individui all'utilizzo della bicicletta per gli spostamenti abituali, nonostante i numerosi benefici che il suo uso regolare può apportare alla salute ed il suo ruolo chiave nella promozione di una mobilità sostenibile. 
+Attualmente, molti potenziali ciclisti rinunciano a spostarsi in bicicletta a causa di ostacoli esterni, come per esempio la mancanza di parcheggi sicuri e accessibili, il potenziale rischio di furto e una più generale carenza di infrastrutture dedicate, che contribuiscono a una percezione diffusa di insicurezza. 
+Questa dinamica viene evidenziata dai dati pubblicati dall'Istituto Superiore della Sanità nel biennio 2023-2024 all'interno del progetto PASSI, dai quali emerge che, nonostante le città di Trento e Bolzano mostrino un uso superiore alla media nazionale, la percentuale di adulti che utilizza abitualmente la bicicletta rimane ancora limitata. Ulteriori riscontri emergono dai dati ISPAT sulla mobilità sostenibile, dal Piano mobilità ciclistica Alto Adige 2022 e dal Piano degli Spostamenti Casa-Lavoro (PSCL) 2025.
+Il progetto ha come obiettivo la realizzazione di una web app, Cycle-Place, finalizzata a promuovere l'adozione quotidiana della bicicletta. L'applicazione si rivolge a tutti i cittadini, offrendo uno strumento semplice e immediato per pianificare la sosta ed interagire con la community. 
+
+Le funzionalità principali dell'applicazione sono state definite per risolvere direttamente questi problemi e includono:
+- Localizzazione su mappa delle aree di sosta, visualizzazione delle caratteristiche della sosta (tipologia, numero stalli, zona) e possibilità di filtrare per modello di rastrelliera (es. bloccatelaio vs tradizionale).
+- Sistema Community-based (Preferiti e Segnalazioni): Gli utenti registrati possono salvare i propri parcheggi abituali e inviare segnalazioni (es. rastrelliera danneggiata, area insicura).
+- Pianificazione Percorsi (Routing): Integrazione In-App con OpenRouteService per calcolare tragitti ciclabili o pedonali dalla posizione attuale al parcheggio scelto.
+- Funzioni secondarie quali informazioni meteo per aiutare l'utente a pianificare il proprio tragitto.
+
+#### Vantaggi per il Comune:
+- Sostegno alla mobilità sostenibile: l'applicazione stimola l'uso quotidiano della bicicletta, contribuendo alla riduzione del traffico e delle emissioni inquinanti.
+- Supporto alla pianificazione urbana: le segnalazioni degli utenti e i dati raccolti offrono informazioni sempre aggiornate per la progettazione di interventi infrastrutturali più efficaci, supportando strategie come il PSCL 2025.
+- Economicità, integrabilità e scalabilità: si tratta di una soluzione a basso costo implementativo rispetto ad interventi fisici strutturali, progettata per integrarsi con i servizi esistenti.
+
+#### Vantaggi per gli utenti:
+- Partecipazione attiva alla qualità del servizio: la possibilità di segnalare punti poco sicuri e tipologie di sosta consente di contribuire direttamente al miglioramento dell'esperienza ciclistica cittadina.
+- Maggiore sicurezza: individuazione rapida di parcheggi sicuri e disponibilità di un canale immediato per la segnalazione dei problemi riscontrati.
+- Esperienza d’uso intuitiva: un’interfaccia semplice e funzionalità mirate rendono l’app accessibile a tutti, promuovendo un utilizzo naturale e frequente.
+
+#### Limiti dell'applicazione:
+- Partecipazione costante: la qualità delle mappe e delle segnalazioni dipende dalla partecipazione attiva della community, soprattutto nelle fasi iniziali.
+- Copertura territoriale variabile: nelle aree meno frequentate o extraurbane, la disponibilità di dati potrebbe essere limitata.
+- Requisiti tecnologici e connessione: l'app richiede uno smartphone e una connessione internet stabile, escludendo potenzialmente categorie di cittadini non digitalizzati.
+- Richiede investimenti iniziali: sono necessari per lo sviluppo e la configurazione della piattaforma, l'acquisizione e validazione dei dati sulle aree di sosta, e per garantire l'integrazione con i sistemi informativi esistenti. A queste voci si aggiungono le attività di formazione del personale sull'utilizzo degli strumenti di gestione delle segnalazioni.
 
 ---
 
