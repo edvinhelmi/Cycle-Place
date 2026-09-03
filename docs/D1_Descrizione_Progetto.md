@@ -322,14 +322,22 @@ La struttura dell'interfaccia utente (UI) si fonda su un pattern "Map-Centric", 
 3. **Restrizione Visiva:** L'utente estende il menu a tendina "Filtri" e deseleziona le rastrelliere tradizionali per focalizzarsi sui "Parcheggi protetti".
 4. **Ricerca Cartografica:** Notando uno stallo di interesse a qualche isolato di distanza, vi clicca/tocca sopra.
 5. **Apertura Metadati:** Si attiva l'evento: la mappa esegue un pan (micro-spostamento animato) per inquadrare bene il popup che emerge sullo schermo.
-6. **Routing Ext:** L'utente consulta il numero di posti e, soddisfatto, esegue il tap sul bottone interno "📍 Indicazioni".
-7. **Conclusione:** Una nuova tab si apre sul device instradando l'utente alla cartografia di Google Maps in modalità calcolo percorso attivato.
+6. **Routing In-App:** L'utente consulta il numero di posti e, soddisfatto, esegue il tap sul bottone interno per avviare il calcolo del percorso guidato.
+7. **Conclusione:** Il sistema mostra a schermo la polilinea del tragitto e le indicazioni turn-by-turn per raggiungere lo stallo in bicicletta o a piedi.
 
 ### Flusso 2: Autenticazione e visualizzazione Dashboard
 1. **Avvio:** L'utente accede all'app e intende controllare il proprio profilo.
 2. **Accesso form:** L'utente identifica la Navbar e preme il pulsante "Login". 
 3. **Interazione modale:** Un layer semi-trasparente sfuoca la mappa di background, ed emerge al centro un box di autenticazione ibrida.
 4. **Inserimento:** L'utente digita "email" e "password" classiche nel form formattato ad-hoc, per poi inviare il *submit*.
-5. **Validazione:** Il backend verifica (tempo netto < 10 secondi, come da vincolo RNF3) la conformità del payload.
+5. **Validazione:** Il backend verifica la conformità del payload.
 6. **Cambio di Stato UI:** L'esito è positivo. Il modale di login collassa. In modo invisibile la navbar effettua il binding reattivo e nasconde il bottone di Login/Registrazione, sostituendoli con un nuovo pulsante "Dashboard" e il saluto ("Ciao, Utente").
-7. **Conclusione:** L'utente clicca su "Dashboard" venendo reindirizzato al file `dashboard.html`, ove godrà dei pieni privilegi del suo ruolo.
+7. **Conclusione:** L'utente clicca su "Dashboard" venendo reindirizzato alla gestione del profilo, ove godrà dei pieni privilegi del suo ruolo, inclusa la gestione dei preferiti e delle segnalazioni.
+
+### Flusso 3: Salvataggio preferiti e invio segnalazione
+1. **Avvio:** L'utente autenticato naviga sulla mappa ed individua una rastrelliera di riferimento abituale.
+2. **Interazione pin:** Clicca sul marker aprendo il popup descrittivo in stile Glassmorphism.
+3. **Aggiunta preferiti:** L'utente preme l'icona a forma di cuore; il sistema registra istantaneamente lo stallo tra i preferiti sincronizzandolo con il database e aggiornando la grafica del pin.
+4. **Segnalazione criticità:** Accedendo allo stesso popup, l'utente nota un danno strutturale e clicca su "Segnala problema".
+5. **Compilazione form:** Si apre il modulo di segnalazione in cui seleziona il tipo di problematica e inserisce una breve nota descrittiva.
+6. **Conclusione:** All'invio, la segnalazione viene memorizzata nel sistema per il supporto alla mobilità e l'avviso della community.
