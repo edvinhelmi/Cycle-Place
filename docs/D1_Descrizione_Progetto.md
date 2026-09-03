@@ -23,7 +23,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 
 ---
 
-## 1. Il progetto Cycle Place (Pitch e Scelte Architetturali)
+## 1. Il progetto Cycle Place 
 <img src="1.jpg" alt="Titolo" width="700" />
 <img src="2.jpg" alt="Problema" width="700" />
 <img src="3.jpg" alt="Soluzione" width="700" />
