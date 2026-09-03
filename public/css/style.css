@@ -1427,26 +1427,8 @@ html.is-logged-out #btn-logout {
     font-weight: 700;
 }
 
-/* =====================================================
-   Weather Alert Banner UI Shift (Navbar & Map Elements)
-   ===================================================== */
-body.weather-alert-active header.navbar,
-body.weather-alert-active .filter-panel,
-body.weather-alert-active .map-legend,
-body.weather-alert-active .leaflet-control-zoom {
-    transform: translateY(40px);
-    transition: transform 0.3s ease-in-out;
-}
-
-body.weather-alert-active .search-panel {
-    transform: translateX(-50%) translateY(40px);
-    transition: transform 0.3s ease-in-out;
-}
-
-header.navbar,
-.search-panel,
-.filter-panel,
-.map-legend,
-.leaflet-control-zoom {
-    transition: transform 0.3s ease-in-out;
+#weather-alert-banner {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(250, 204, 21, 0.4);
 }
