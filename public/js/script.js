@@ -90,21 +90,22 @@ function checkWeatherAlert(code) {
 
     const severeCodes = [53, 55, 63, 65, 73, 75, 81, 82, 95];
 
-    if (severeCodes.includes(code)) {
+    const isDismissed = sessionStorage.getItem('tbp_weather_dismissed');
+
+    if (severeCodes.includes(code) && !isDismissed) {
         const lang = (window.I18n ? window.I18n.getLanguage() : 'it') || 'it';
         const alerts = {
-            it: 'Allerta meteo: condizioni avverse previste. Guida con prudenza o valuta percorsi alternativi.',
-            en: 'Weather alert: adverse conditions expected. Ride with caution or consider alternatives.',
-            de: 'Wetterwarnung: schlechte Bedingungen erwartet. Vorsicht beim Radfahren empfohlen.'
+            it: 'Allerta meteo: condizioni avverse previste',
+            en: 'Weather alert: adverse conditions expected',
+            de: 'Wetterwarnung: schlechte Bedingungen erwartet'
         };
         textEl.textContent = alerts[lang] || alerts['it'];
         banner.classList.remove('hidden');
-        document.body.classList.add('weather-alert-active'); // Sposta tutto in blocco
     } else {
         banner.classList.add('hidden');
-        document.body.classList.remove('weather-alert-active'); // Riporta tutto a posto
     }
 }
+
 async function initWeather() {
     const tempEl = document.getElementById('weather-temp');
     const descEl = document.getElementById('weather-desc');
@@ -420,7 +421,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnCloseBanner.addEventListener('click', () => {
             const banner = document.getElementById('weather-alert-banner');
             if (banner) banner.classList.add('hidden');
-            document.body.classList.remove('weather-alert-active');
+            sessionStorage.setItem('tbp_weather_dismissed', 'true');
         });
     }
     
