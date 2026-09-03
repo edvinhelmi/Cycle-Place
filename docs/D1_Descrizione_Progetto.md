@@ -308,18 +308,6 @@ TASKS – User Story 13:
 - Integrare il client meteo asincrono e la logica di controllo codici di allerta severa.
 - Sviluppare la componente grafica del banner in-app e la gestione dinamica del posizionamento UI correlato.
 
-******************** NON SERVE? *********************
-#### User Story 14 – Associata a RF 10 (10.1 - 10.6): Dashboard amministrativa e gestione comunale
-Controllo e moderazione lato operatore comunale.<br>
-Come operatore del Comune, voglio accedere a una dashboard dedicata per visualizzare e gestire le segnalazioni dei cittadini e monitorare lo stato delle aree di sosta, in modo da pianificare interventi di manutenzione efficaci.<br>
-
-Criteri di Accettazione:
-- L'accesso alla dashboard amministrativa è consentito esclusivamente agli utenti con privilegi di operatore comunale.
-- L'interfaccia permette di filtrare le segnalazioni, inserire note interne e visualizzare dati statistici aggregati sull'utilizzo delle rastrelliere.
-
-TASKS – User Story 14:
-- Sviluppare le rotte protette e la UI della dashboard amministrativa per il Comune.
-- Implementare le funzioni di gestione e filtraggio delle segnalazioni e la visualizzazione dei report statistici.
 ---
 
 ## 6. Design Front-end
