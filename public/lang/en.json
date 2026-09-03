@@ -6,7 +6,7 @@
   "nav.backToMap": "Back to Map",
   "theme.toDark": "Switch to dark mode",
   "theme.toLight": "Switch to light mode",
-  "greeting": "Hello, {name}!"
+  "greeting": "Hello, {name}!",
 
   "filter.title": "Filters",
   "filter.tradizionali": "Traditional Racks",
