@@ -115,7 +115,7 @@
   "popup.present": "Present",
   "popup.access": "Access",
   "popup.mittLink": "MITT Website ↗",
-  'popup.address': 'Address',
+  "popup.address": "Address",
 
   "stats.racks": "Bike racks",
   "stats.protected": "Protected parking",
