@@ -2018,6 +2018,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isBlocca = props.Tipo_generale === 'Rastr_bloccatelaio';
         const stalli   = props.n_posti ?? props.tot_bici ?? 'N/D';
         const isFav    = userFavoritiIds.has(Number(props.id));
+        const viaStr = (props.via || 'Indirizzo non disponibile').replace(/['"\\]/g, ' ');
 
         // Calcolo e risoluzione telemetria IoT realistica
         let freeSlots = props.posti_liberi;
@@ -2059,7 +2060,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const favIcon = isFav ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>';
         const favBtn = `<button id="fav-btn-${props.id}" class="popup-btn btn btn-sm ${isFav ? 'btn-error text-white' : 'btn-outline btn-error'} rounded-xl font-bold flex-1 min-w-0 text-xs px-2 shadow-xs whitespace-normal text-center leading-tight py-1.5 h-auto min-h-[2.4rem] flex items-center justify-center gap-1.5"
-            onclick="toggleFavorito(${Number(props.id)},'${tipoStr}',${numStalli},'${zonaStr}',${lat},${lng})">
+            onclick="toggleFavorito(${Number(props.id)},'${tipoStr}',${numStalli},'${viaStr}',${lat},${lng})">
             ${favIcon} <span class="truncate">${isFav ? tr('popup.fav.remove') : tr('popup.fav.add')}</span>
         </button>`;
 
