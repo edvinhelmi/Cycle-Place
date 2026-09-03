@@ -24,10 +24,10 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 ---
 
 ## 1. Il progetto Cycle Place (Pitch e Scelte Architetturali)
-![Titolo](1.jpg)
-![Problema](2.jpg)
-![Soluzione](3.jpg)
-![Conclusioni](4.jpg)
+<img src="1.jpg" alt="Titolo" width="500" />
+<img src="2.jpg" alt="Problema" width="500" />
+<img src="3.jpg" alt="Soluzione" width="500" />
+<img src="4.jpg" alt="Conclusioni" width="500" />
 
 Il presente progetto mira ad affrontare la problematica della scarsa propensione degli individui all'utilizzo della bicicletta per gli spostamenti abituali, nonostante i numerosi benefici che il suo uso regolare può apportare alla salute ed il suo ruolo chiave nella promozione di una mobilità sostenibile. 
 Attualmente, molti potenziali ciclisti rinunciano a spostarsi in bicicletta a causa di ostacoli esterni, come per esempio la mancanza di parcheggi sicuri e accessibili, il potenziale rischio di furto e una più generale carenza di infrastrutture dedicate, che contribuiscono a una percezione diffusa di insicurezza. 
