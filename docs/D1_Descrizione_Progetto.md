@@ -1,5 +1,4 @@
 UNIVERSITÀ DEGLI STUDI DI TRENTO
-
 Dipartimento di Ingegneria e Scienza dell’Informazione
 
 ## Progetto: Cycle-Place
@@ -20,7 +19,7 @@ INDICE
 
 ## 1. Il progetto Cycle Place (Pitch e Scelte Architetturali)
 
-#### INSERIRE SLIDES***********************+
+#### *********************** INSERIRE SLIDES ***********************
 
 Il presente progetto mira ad affrontare la problematica della scarsa propensione degli individui all'utilizzo della bicicletta per gli spostamenti abituali, nonostante i numerosi benefici che il suo uso regolare può apportare alla salute ed il suo ruolo chiave nella promozione di una mobilità sostenibile. 
 Attualmente, molti potenziali ciclisti rinunciano a spostarsi in bicicletta a causa di ostacoli esterni, come per esempio la mancanza di parcheggi sicuri e accessibili, il potenziale rischio di furto e una più generale carenza di infrastrutture dedicate, che contribuiscono a una percezione diffusa di insicurezza. 
@@ -33,17 +32,17 @@ Le funzionalità principali dell'applicazione sono state definite per risolvere 
 - Pianificazione Percorsi (Routing): Integrazione In-App con OpenRouteService per calcolare tragitti ciclabili o pedonali dalla posizione attuale al parcheggio scelto.
 - Funzioni secondarie quali informazioni meteo per aiutare l'utente a pianificare il proprio tragitto.
 
-#### Vantaggi per il Comune:
+### Vantaggi per il Comune:
 - Sostegno alla mobilità sostenibile: l'applicazione stimola l'uso quotidiano della bicicletta, contribuendo alla riduzione del traffico e delle emissioni inquinanti.
 - Supporto alla pianificazione urbana: le segnalazioni degli utenti e i dati raccolti offrono informazioni sempre aggiornate per la progettazione di interventi infrastrutturali più efficaci, supportando strategie come il PSCL 2025.
 - Economicità, integrabilità e scalabilità: si tratta di una soluzione a basso costo implementativo rispetto ad interventi fisici strutturali, progettata per integrarsi con i servizi esistenti.
 
-#### Vantaggi per gli utenti:
+### Vantaggi per gli utenti:
 - Partecipazione attiva alla qualità del servizio: la possibilità di segnalare punti poco sicuri e tipologie di sosta consente di contribuire direttamente al miglioramento dell'esperienza ciclistica cittadina.
 - Maggiore sicurezza: individuazione rapida di parcheggi sicuri e disponibilità di un canale immediato per la segnalazione dei problemi riscontrati.
 - Esperienza d’uso intuitiva: un’interfaccia semplice e funzionalità mirate rendono l’app accessibile a tutti, promuovendo un utilizzo naturale e frequente.
 
-#### Limiti dell'applicazione:
+### Limiti dell'applicazione:
 - Partecipazione costante: la qualità delle mappe e delle segnalazioni dipende dalla partecipazione attiva della community, soprattutto nelle fasi iniziali.
 - Copertura territoriale variabile: nelle aree meno frequentate o extraurbane, la disponibilità di dati potrebbe essere limitata.
 - Requisiti tecnologici e connessione: l'app richiede uno smartphone e una connessione internet stabile, escludendo potenzialmente categorie di cittadini non digitalizzati.
@@ -53,28 +52,78 @@ Le funzionalità principali dell'applicazione sono state definite per risolvere 
 
 ## 2. Requisiti Funzionali (RF)
 
-I requisiti funzionali descrivono il dominio del problema, ovvero i servizi che il sistema deve obbligatoriamente fornire all'utenza.
+### RF 1 - Gestione autenticazione
+• **RF 1.1 - Accesso anonimo**: Il sistema deve permettere la visualizzazione della mappa interattiva delle aree di sosta (filtrabili per tipologia) e delle iniziative del comune senza richiedere autenticazione.
+• **RF 1.2 - Registrazione**: Il sistema deve permettere la creazione di un account tramite email valida, nome, cognome e una password che soddisfi criteri di complessità. 
+• **RF 1.3 - Accesso utente registrato**: Autenticazione tramite credenziali locali (email e password) o tramite credenziali Google (OAuth 2.0).
+• **RF 1.4 - Flusso di autenticazione esterna**: Gestione del reindirizzamento al provider Google, validazione del token e creazione/associazione automatica del profilo.
+• **RF 1.5 - Recupero password**: Funzionalità sicura per il recupero della password tramite link temporaneo via email.
+• **RF 1.6 - Logout**: Disinclusione sicura della sessione attiva da qualsiasi dispositivo.
+• **RF 1.7 - Gestione della sessione**: Mantenimento della sessione tramite token JWT con supporto per il refresh automatico.
+• **RF 1.8 - Invalidazione della sessione**: Il logout o un nuovo login deve invalidare i Refresh Token precedenti, forzando la riautenticazione. 
+• **RF 1.9 - Rate Limiting Autenticazione**: Il sistema deve limitare i tentativi di login consecutivi per prevenire attacchi brute-force. 
 
-### Utente Anonimo
-* **RF3 - Visualizzazione Mappa e Differenziazione Marker:** Il sistema deve mostrare all'utente una mappa interattiva, posizionando dei segnaposto differenziati visivamente per tipologia (es. Rastrelliera Tradizionale, Rastrelliera Bloccatelaio Smart, Parcheggio Protetto).
-* **RF4 - Ricerca e Filtri:** Il sistema deve permettere la ricerca tramite testo di vie o piazze e consentire all'utente di filtrare dinamicamente i punti di sosta visualizzati sulla base della loro categoria strutturale.
-* **RF5 - Geolocalizzazione GPS:** Il sistema deve, previo consenso, acquisire le coordinate dell'utente e ri-centrare la mappa sulla sua posizione esatta in tempo reale.
-* **RF6 - Routing verso Google Maps:** Il sistema deve generare dinamicamente un URI e consentire il reindirizzamento al navigatore esterno (Google Maps) partendo dalle coordinate del parcheggio selezionato.
+### RF 2 - Registrazione utente
+• **RF 2.1 - Registrazione con credenziali locali** tramite form (Nome, Cognome, email valida, password composta da almeno 8 caratteri di cui almeno 1 numero, una lettera maiuscola ed un carattere speciale).
+• **RF 2.2 - Registrazione tramite Google** con importazione automatica dei dati di base.
+• **RF 2.3 - Scelta della lingua**: Supporto per italiano, inglese e tedesco.
 
-### Utente Registrato
-* **RF1 - Login Ibrido:** Il sistema deve fornire un modulo di autenticazione per consentire l'accesso sia tramite credenziali locali (email e password) sia tramite un provider di identità esterno (Google OAuth).
-* **RF2 - Registrazione:** Il sistema deve permettere ad un nuovo utente di creare un profilo personale inserendo i propri dati anagrafici e di sicurezza.
-* **RF7 - Dashboard Statistiche:** Il sistema deve consentire all'utente autenticato di accedere ad un'area protetta (Dashboard) in cui consultare informazioni e metriche avanzate del proprio profilo o dei propri parcheggi preferiti.
+### RF 3 - Gestione profilo
+• **RF 3.1 - Visualizzazione del profilo** (informazioni personali, rastrelliere salvate e segnalazioni effettuate).
+• **RF 3.2 - Modifica delle informazioni personali e delle preferenze** (es. notifiche push). (?)??????????????
+• **RF 3.3 - Modifica della password**.
+• **RF 3.4 - Richiesta di cancellazione definitiva dell'account e dei dati associati** (GDPR).
+• **RF 3.5 - Cancellazione definitiva del proprio account e di tutti i dati associati** (preferiti, segnalazioni). 
+
+### RF 4 - Backup e Ripristino
+Esecuzione di backup regolari dei dati critici per garantirne il ripristino in caso di guasti.
+
+### RF 5 - Gestione mappa e aree di sosta
+• **RF 5.1 - Visualizzazione mappa** centrata sulla posizione GPS dell'utente o sull'area selezionata.
+• **RF 5.2 - Visualizzazione delle aree di sosta** distinte per tipologia (rastrelliera, Ciclobox).
+• **RF 5.3 - Filtraggio delle aree di sosta per tipologia**.
+• **RF 5.4 - Dettaglio area di sosta** tramite popup (tipologia (rastrelliera o ciclobox), numero di stalli, zona, informazioni sullo stato (solo per i Ciclobox), ad es: disponibile/non disponibile, presenza di segnalazioni effettuate da altri utenti).
+• **RF 5.5 - Salvataggio e visualizzazione rapida delle aree di sosta preferite**.
+• **RF 5.6 - Calcolo del percorso efficiente e sicuro tra due punti**: il sistema deve integrare In-App l'API di OpenRouteService per calcolare e visualizzare sulla mappa il percorso tra la posizione attuale dell'utente (se concessa) e l'area di sosta selezionata.
+
+### RF 6 - Gestione storico utilizzo
+Visualizzazione dello storico delle interazioni (segnalazioni inviate, aree salvate).
+
+### RF 7 - Gestione avvisi
+Invio di avvisi intelligenti in-app per allerte meteo e aggiornamenti sullo stato delle segnalazioni. ???
+
+******************* qui da vedere **********************************
+RF 10 - Gestione dati e interfaccia amministrativa (Lato Comune)
+• RF 10.1 - Dashboard amministrativa dedicata agli operatori comunali.
+• RF 10.2 - Gestione e filtraggio delle segnalazioni con inserimento di note interne.
+• RF 10.3 - Operazioni CRUD ufficiali sulle aree di sosta.
+• RF 10.4 - Visualizzazione di dati aggregati, report e statistiche di utilizzo.
+• RF 10.5 - Mappatura dei futuri punti di sosta con data di previsione apertura.
+• RF 10.6 - Gestione delle iniziative comunali informative.
+
 
 ---
 
 ## 3. Requisiti Non Funzionali (RNF)
 
-I requisiti non funzionali dettano i criteri di vincolo architetturale, prestazionale e di usabilità.
+RNF 1 - Perfomance
+RNF 1.1 - Velocità della mappa: Il caricamento ed il rendering della mappa interattiva deve essere completato entro un massimo di 2 secondi, anche con una connessione mobile media (3G/4G). Nota: le performance dipendono anche dai tempi di risposta dell'API OpenStreetMap.
+RNF 1.2 Latenza di routing: Il calcolo del percorso ottimizzato per bici (RF 4) tramite OpenRouteService non deve superare i 5 secondi di elaborazione server, per garantire la fruibilità in movimento.
+RNF 1.3 - Tempi di risposta API: Le chiamate alle API del backend (caricamento dati GeoJSON, invio di una segnalazione o richiesta di login) devono completarsi con successo entro 500 millisecondi con un carico medio.
+RNF 1.4 - Gestione connessione intermittente: L'applicazione mobile deve mantenere le funzionalità di base (es. visualizzazione di mappe cache o dati dei parcheggi già caricati) anche in assenza temporanea di connessione Internet.
+RNF 2 - Sicurezza e crittografia
+RNF 2.1 - Autenticazione e Autorizzazione: Le comunicazioni tra l'app ed il server devono essere crittografate tramite protocolli TLS/SSL (HTTPS). Solo gli utenti autenticati e registrati (verificati tramite JWT) devono essere autorizzati ad inviare segnalazioni e ad accedere allo storico personale.
+RNF 2.2 - Protezione dati: Le password degli utenti devono essere archiviate nel database locale tramite hashing sicuro (utilizzando l'algoritmo bcrypt).
+RNF 2.3 - Protezione dati di geolocalizzazione: I dati di geolocalizzazione necessari per il routing devono essere trattati nel rispetto della privacy e non memorizzati in modo persistente se non strettamente necessario per le segnalazioni inviate esplicitamente dall'utente.
+RNF 2.4 - Validazione input e Affidabilità: Il sistema deve implementare una precisa validazione di tutti gli input utente (form di registrazione, segnalazioni) per prevenire attacchi comuni e implementare rate limiting per limitare lo spam di segnalazioni.
+RNF 3 - Usabilità
+RNF 3.1 - Design coerente e Reattività: L'interfaccia utente (UI) deve seguire le linee guida di design moderne (Material Design/Human Interface Guidelines) e rispondere ai gesti touch in modo istantaneo. Il processo di invio di una segnalazione deve essere rapido e intuitivo.
+RNF 4 - Affidabilità e Disponibilità
+RNF 4.1 - Disponibilità del servizio: Il back-end e l'API devono garantire un tempo di attività (uptime) pari al 99.5% su base mensile (esclusi gli slot di manutenzione programmati).
+RNF 4.2 - Durata della sessione: Dopo il login, l'utente autenticato deve rimanere connesso per un periodo di tempo esteso (30 giorni, gestito tramite Refresh Token JWT), richiedendo un nuovo login solo in caso di logout esplicito o scadenza prolungata.
+RNF 5 - Manutenibilità e Portabilità
+RNF 5.1 -Modularità, Logging e Standard dei dati: Il codice sorgente del back-end deve essere strutturato in modo modulare. Il sistema deve implementare un logging degli errori e tutti i dati delle aree di sosta e delle segnalazioni devono essere scambiati nel formato standard GeoJSON.
 
-* **RNF1 (Compatibilità):** L'applicazione web deve garantire una perfetta renderizzazione e compatibilità per le versioni recenti dei principali browser web commerciali (supporto garantito per Google Chrome >= 90, Mozilla Firefox >= 88, Apple Safari >= 14).
-* **RNF2 (Facilità d'uso e Responsività):** L'interfaccia utente deve essere "Mobile First". Il sistema deve riorganizzare l'HUD (Head-up display) su viewport inferiori a `768px` garantendo che nessun elemento a comparsa (es. Menu Hamburger, Pannello Filtri a tendina, Legenda) causi overlap o sovrapposizioni visive che rendano la UI inusabile.
-* **RNF3 (Prestazioni):** Per questioni di UX e validazione di sicurezza, il tempo di risposta del sistema, compreso tra l'inserimento della password utente nel form di login e la conferma d'accesso, deve essere strettamente inferiore a **10 secondi**.
 
 ---
 
