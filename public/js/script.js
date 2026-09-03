@@ -100,10 +100,10 @@ function checkWeatherAlert(code) {
         };
         textEl.textContent = alerts[lang] || alerts['it'];
         banner.classList.remove('hidden');
-        if (navbar) navbar.style.marginTop = '38px'; // Spinge giù solo la navbar
+        if (navbar) navbar.style.transform = 'translateY(38px)';
     } else {
         banner.classList.add('hidden');
-        if (navbar) navbar.style.marginTop = '0px';
+        if (navbar) navbar.style.transform = 'translateY(0px)';
     }
 }
 
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const banner = document.getElementById('weather-alert-banner');
             const navbar = document.querySelector('header.navbar');
             if (banner) banner.classList.add('hidden');
-            if (navbar) navbar.style.marginTop = '0px'; // Riporta la navbar a posto
+            if (navbar) navbar.style.transform = 'translateY(0px)';
         });
     }
     
