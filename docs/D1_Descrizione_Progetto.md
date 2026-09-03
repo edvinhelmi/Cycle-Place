@@ -41,7 +41,7 @@ Le funzionalità principali dell'applicazione sono state definite per risolvere 
 - Funzioni secondarie quali informazioni meteo per aiutare l'utente a pianificare il proprio tragitto.
 
 ### Vantaggi per il Comune:
-- Sostegno alla mobilità sostenibile: l'applicazione stimola l'uso quotidiano della bicicletta, contribuendo alla riduzione del traffico e delle emissioni inquinanti.
+- Supporto alla mobilità sostenibile: l'applicazione stimola l'uso quotidiano della bicicletta, contribuendo alla riduzione del traffico e delle emissioni inquinanti.
 - Supporto alla pianificazione urbana: le segnalazioni degli utenti e i dati raccolti offrono informazioni sempre aggiornate per la progettazione di interventi infrastrutturali più efficaci, supportando strategie come il PSCL 2025.
 - Economicità, integrabilità e scalabilità: si tratta di una soluzione a basso costo implementativo rispetto ad interventi fisici strutturali, progettata per integrarsi con i servizi esistenti.
 
