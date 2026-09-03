@@ -2166,7 +2166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     ${props.zona ? `
                     <div class="popup-row flex items-center justify-between py-1 border-b border-base-200/60">
-                        <span class="popup-label text-slate-500 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> ${tr('popup.address') || 'Indirizzo'}</span>
+                        <span class="popup-label text-slate-500 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> ${tr('popup.zone') || 'Zona'}</span>
                         <span class="popup-val font-bold text-slate-800">${props.zona}</span>
                     </div>` : ''}
                     ${props.edificio ? `
