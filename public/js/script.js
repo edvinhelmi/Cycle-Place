@@ -86,6 +86,7 @@ function updateWeatherUI() {
 function checkWeatherAlert(code) {
     const banner = document.getElementById('weather-alert-banner');
     const textEl = document.getElementById('weather-alert-text');
+    const navbar = document.querySelector('header.navbar');
     if (!banner || !textEl) return;
 
     const severeCodes = [53, 55, 63, 65, 73, 75, 81, 82, 95];
