@@ -6,14 +6,14 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 
 ---
 
-Document Info<br>
-Doc. Name: D1-cycle-place-DescrizioneProgetto<br>
-Doc. Number: D1 v1.2<br>
-Description: Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place.
+### Document Info<br>
+**Doc. Name**: D1-cycle-place-DescrizioneProgetto<br>
+**Doc. Number**: D1 v1.2<br>
+**Description**: Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place.
 
 ---
 
-INDICE
+**INDICE**
 1. Il progetto Cycle-Place
 2. Requisiti Funzionali
 3. Requisiti Non Funzionali
