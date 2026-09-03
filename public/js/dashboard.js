@@ -69,6 +69,15 @@ async function init() {
 
     const user = decodeToken(token);
 
+    // Navbar & Saluto utente
+    function updateGreeting() {
+        const dashGreetingText = document.getElementById('dash-greeting-text');
+        if (dashGreetingText) {
+            dashGreetingText.innerHTML = tr('greeting', { name: `<strong class="text-primary">${user.name || 'Utente'}</strong>` });
+        }
+    }
+    updateGreeting();
+
     function updateProfileProvider() {
         const pProvider = document.getElementById('p-provider');
         if (pProvider) {
@@ -139,6 +148,7 @@ async function init() {
         updateProfileProvider();
         renderPreferiti(cachedPreferiti);
         renderSegnalazioni(cachedSegnalazioni);
+        updateGreeting();
         updateThemeUI(document.documentElement.getAttribute('data-theme') || 'trento');
     });
 
