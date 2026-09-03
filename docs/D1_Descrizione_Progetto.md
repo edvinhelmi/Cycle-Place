@@ -1,4 +1,5 @@
 UNIVERSITÀ DEGLI STUDI DI TRENTO
+
 Dipartimento di Ingegneria e Scienza dell’Informazione
 
 ## Progetto: Cycle-Place
