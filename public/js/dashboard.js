@@ -77,9 +77,10 @@ async function init() {
     function updateGreeting() {
         const dashGreetingText = document.getElementById('dash-greeting-text');
         if (dashGreetingText) {
-            dashGreetingText.innerHTML = tr('greeting', { name: `<strong class="text-primary">${user.name || 'Utente'}</strong>` });
+            dashGreetingText.innerHTML = tr('greeting', { name: `<strong class="text-blue-500">${user.name || 'Utente'}</strong>` });
         }
     }
+    
     updateGreeting();
 
     function updateProfileProvider() {
