@@ -142,14 +142,130 @@ RF 10 - Gestione dati e interfaccia amministrativa (Lato Comune)
 
 ## 5. User Stories
 
-### Epic: Gestione Account
-1. **Come** cittadino, **voglio** potermi registrare tramite indirizzo email e password, **in modo da** creare un account sicuro personale per l'utilizzo dell'app.
-2. **Come** utente registrato, **voglio** poter fare il login utilizzando il mio account Google OAuth, **in modo da** snellire il processo di autenticazione senza dover gestire un'ulteriore password.
+#### User Story 1 – Associata allo Use Case RF 1.1 / RF 5.3: Accesso anonimo e filtri mappa
+Visualizzazione della mappa interattiva, filtraggio delle aree di sosta e consultazione delle iniziative senza autenticazione.<br>
+Come utente non registrato, voglio poter visualizzare la mappa interattiva, filtrare le aree di sosta per tipologia ed effettuare ricerche, in modo da poter consultare le informazioni di base senza dover effettuare l'accesso.<br>
 
-### Epic: Gestione Mappa e Mobilità
-3. **Come** ciclista, **voglio** poter filtrare dinamicamente i punti sulla mappa selezionando solo tra rastrelliere tradizionali o parcheggi protetti, **in modo da** eliminare il disordine visivo e trovare subito il tipo di infrastruttura di cui ho bisogno.
-4. **Come** ciclista, **voglio** cliccare su un pulsante di geolocalizzazione ("🎯"), **in modo da** far muovere istantaneamente la mappa per mostrare la mia attuale posizione nella città di Trento.
-5. **Come** pendolare in mobilità, **voglio** avere a disposizione all'interno delle informazioni del parcheggio un link d'azione diretta ("Indicazioni stradali"), **in modo da** aprire il mio navigatore predefinito ed essere guidato allo stallo.
+Criteri di Accettazione:
+- La mappa carica i dati delle aree di sosta entro 2 secondi (RNF 1.1) prima di ogni autenticazione.
+- La funzionalità di filtraggio delle aree per tipologia (es. rastrelliere e Ciclobox) è attiva anche in modalità anonima.
+- I marker delle aree di sosta sulla mappa sono visibili e interattivi.
+
+TASKS – User Story 1:
+- Sviluppare la logica di caricamento dati cartografici per utenti anonimi.
+- Implementare i filtri mappa base sul lato client per l'accesso non autenticato.
+- Testare la visualizzazione dei contenuti pubblici. (RF 1.1).
+
+#### User Story 2 – Associata allo Use Case RF 1.2 / RF 1.3: Login e sessioneScelta tra credenziali locali o autenticazione Google per gli utenti
+Come utente, voglio potermi autenticare con credenziali locali o tramite l'account Google, in modo da poter accedere nel modo che preferisco e con una gestione sicura della sessione.<br>
+
+Criteri di Accettazione:
+- Il form di login offre la scelta tra le credenziali locali e il pulsante di autenticazione "Accedi con Google".
+- Tutte le comunicazioni di autenticazione sono crittografate tramite HTTPS (RNF 2.1).
+- La sessione è mantenuta attiva tramite token JWT con supporto per il refresh automatico.
+
+TASKS – User Story 2:
+- Sviluppare la logica di gestione dei token JWT (emissione e refresh automatico).
+- Integrare il protocollo OAuth 2.0 per il servizio di autenticazione Google.
+- Testare la gestione della sessione persistente.
+
+#### User Story 3 – Associata allo Use Case RF 1.4 / RF 1.5: Recupero password e logout
+Ripristino sicuro delle credenziali e disconnessione.<br>
+Come utente, voglio ricevere un link sicuro per reimpostare la mia password in caso di smarrimento e potermi disconnettere in modo sicuro, in modo da proteggere il mio account da qualsiasi dispositivo.<br>
+
+Criteri di Accettazione:
+1. La richiesta di recupero password invia un link temporaneo all'indirizzo email registrato.
+2. L'azione di logout revoca la sessione attiva.
+3. Il processo di aggiornamento della password utilizza un hashing sicuro (RNF 2.3).
+
+TASKS – User Story 3:
+* Sviluppare il servizio di invio email e gestione del token di reimpostazione.
+* Implementare l'endpoint di logout che pulisce i token locali e di sessione.
+* Testare la disconnessione sicura.
+
+#### User Story 4 – Associata allo Use Case RF 2.3 / RF 3.2: Selezione lingua e preferenze
+Personalizzazione della lingua e delle preferenze visive (tema).<br>
+Come utente, voglio selezionare la lingua dell'interfaccia tra italiano, inglese e tedesco e cambiare il tema grafico, in modo da utilizzare l'app comodamente secondo le mie preferenze.<br>
+
+Criteri di Accettazione:
+1. Il sistema supporta la selezione dinamica e la visualizzazione dell'interfaccia in italiano, inglese e tedesco.
+2. L'utente può commutare istantaneamente il tema grafico dell'applicazione (chiaro/scuro).
+
+TASKS – User Story 4:
+- Implementare il framework di internazionalizzazione (i18n) con file JSON dedicati per le tre lingue.
+- Sviluppare la UI per il cambio tema persistente tramite localStorage.
+
+#### User Story 5 – Associata allo Use Case RF 3.1 / RF 3.4: Gestione profilo e cancellazione account
+Visualizzazione dei dati personali e rimozione dell'account (GDPR).<br>
+Come utente registrato, voglio visualizzare il mio profilo e richiedere la cancellazione definitiva del mio account, in modo da gestire i miei dati in conformità con la privacy.<br>
+
+Criteri di Accettazione:
+1. Il profilo utente mostra chiaramente nome, cognome, email e provider di accesso.
+2. L'utente può richiedere la cancellazione definitiva e irreversibile del proprio account e dei dati associati.
+
+TASKS – User Story 5:
+- Creare la UI della dashboard personale per la visualizzazione dei dati anagrafici.
+- Sviluppare l'endpoint API e il modale di conferma per la cancellazione definitiva dell'account.
+
+#### User Story 6 – Associata allo Use Case RF 5.1 / RF 5.4: Visualizzazione mappa e geolocalizzazione GPS
+Mappa interattiva e individuazione della posizione corrente.<br>
+Come utente, voglio vedere la mappa centrata sulla mia posizione tramite GPS e visualizzare i dettagli completi delle rastrelliere e dei parcheggi protetti, in modo da trovare il punto di sosta più vicino.<br>
+
+Criteri di Accettazione:
+1. La mappa si centra sulla posizione GPS rilevata del dispositivo tramite il pulsante "La mia posizione".
+2. Selezionando un marker sulla mappa, si apre un popup con i dettagli specifici (tipo, stalli liberi/occupati, indirizzo).
+
+TASKS – User Story 6:
+- Implementare le API di geolocalizzazione HTML5 per il tracciamento della posizione utente.
+- Sviluppare i popup dinamici di dettaglio per rastrelliere tradizionali, bloccatelaio e parcheggi protetti.
+
+#### User Story 7 – Associata allo Use Case RF 5.6: Calcolo del percorso e Routing In-App
+Pianificazione del tragitto ciclabile o a piedi.<br>
+Come utente, voglio calcolare il percorso tra la mia posizione e una destinazione selezionata, in modo da visualizzare le indicazioni stradali passo-passo (turn-by-turn).<br>
+
+Criteri di Accettazione:
+1. Il sistema calcola il percorso ottimizzato scegliendo tra il profilo in bici o a piedi.
+2. L'interfaccia mostra la distanza e il tempo stimato di percorrenza.
+
+TASKS – User Story 7:
+- Integrare il servizio di routing OpenRouteService per il calcolo dei percorsi.
+- Sviluppare il pannello di navigazione in-app con indicazioni e statistiche di viaggio.
+
+#### User Story 8 – Associata allo Use Case RF 5.5: Salvataggio preferiti
+Gestione rapida delle rastrelliere preferite.<br>
+Come utente registrato, voglio salvare una rastrelliera o un parcheggio tra i miei preferiti, in modo da poterli ritrovare rapidamente nella dashboard personale.<br>
+
+Criteri di Accettazione:
+1. È presente un pulsante interattivo (icona cuore) all'interno del popup di dettaglio per aggiungere o rimuovere il preferito.
+2. I preferiti salvati vengono sincronizzati nel database e consultabili nell'area personale.
+
+TASKS – User Story 8:
+- Sviluppare gli endpoint API per il salvataggio e la rimozione dei preferiti utente.
+- Configurare l'aggiornamento visivo immediato dei marker a forma di cuore sulla mappa.
+
+#### User Story 9 – Associata allo Use Case RF 6: Modulo segnalazione guasti e problemi
+Invio di segnalazioni sulla mappa.<br>
+Come utente registrato, voglio poter inviare una segnalazione in corrispondenza di una rastrelliera o di un parcheggio, in modo da avvisare su problemi riscontrati.<br>
+
+Criteri di Accettazione:
+1. L'accesso al modulo di segnalazione richiede l'autenticazione dell'utente.
+2. Il modulo permette di selezionare le tipologie di problematica riscontrata e inserire note descrittive.
+
+TASKS – User Story 9:
+- Sviluppare la UI del modale di segnalazione collegato alle coordinate della rastrelliera.
+- Sviluppare l'endpoint API per la memorizzazione delle segnalazioni nel sistema.
+
+#### User Story 10 – Associata allo Use Case RF 7: Storico interazioni (Dashboard)
+Consultazione delle attività personali nell'area riservata.<br>
+Come utente registrato, voglio visualizzare la mia dashboard personale contenente i preferiti salvati e le segnalazioni inviate, in modo da tenere traccia delle mie interazioni.<br>
+
+Criteri di Accettazione:
+1. La pagina di dashboard è accessibile esclusivamente tramite autenticazione valida.
+2. Vengono elencate le rastrelliere preferite e l'elenco storico delle segnalazioni effettuate.
+
+TASKS – User Story 10:
+- Sviluppare la UI della pagina dedicata `dashboard.html`.
+- Implementare le chiamate asincrone per il recupero dei dati salvati dell'utente.
 
 ---
 
