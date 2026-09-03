@@ -4,10 +4,14 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 ## Progetto: Cycle-Place
 ## Titolo del documento: Descrizione di Progetto
 
+---
+
 Document Info
 Doc. Name: D1-cycle-place-DescrizioneProgetto
 Doc. Number: D1 v1.2
 Description: Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place.
+
+---
 
 INDICE
 1. Il progetto Cycle-Place
@@ -16,6 +20,8 @@ INDICE
 4. Use Case Diagram
 5. User Story
 6. Design Front-end
+
+---
 
 ## 1. Il progetto Cycle Place (Pitch e Scelte Architetturali)
 
@@ -106,62 +112,31 @@ RF 10 - Gestione dati e interfaccia amministrativa (Lato Comune)
 
 ## 3. Requisiti Non Funzionali (RNF)
 
-RNF 1 - Perfomance
-RNF 1.1 - Velocità della mappa: Il caricamento ed il rendering della mappa interattiva deve essere completato entro un massimo di 2 secondi, anche con una connessione mobile media (3G/4G). Nota: le performance dipendono anche dai tempi di risposta dell'API OpenStreetMap.
-RNF 1.2 Latenza di routing: Il calcolo del percorso ottimizzato per bici (RF 4) tramite OpenRouteService non deve superare i 5 secondi di elaborazione server, per garantire la fruibilità in movimento.
-RNF 1.3 - Tempi di risposta API: Le chiamate alle API del backend (caricamento dati GeoJSON, invio di una segnalazione o richiesta di login) devono completarsi con successo entro 500 millisecondi con un carico medio.
-RNF 1.4 - Gestione connessione intermittente: L'applicazione mobile deve mantenere le funzionalità di base (es. visualizzazione di mappe cache o dati dei parcheggi già caricati) anche in assenza temporanea di connessione Internet.
-RNF 2 - Sicurezza e crittografia
-RNF 2.1 - Autenticazione e Autorizzazione: Le comunicazioni tra l'app ed il server devono essere crittografate tramite protocolli TLS/SSL (HTTPS). Solo gli utenti autenticati e registrati (verificati tramite JWT) devono essere autorizzati ad inviare segnalazioni e ad accedere allo storico personale.
-RNF 2.2 - Protezione dati: Le password degli utenti devono essere archiviate nel database locale tramite hashing sicuro (utilizzando l'algoritmo bcrypt).
-RNF 2.3 - Protezione dati di geolocalizzazione: I dati di geolocalizzazione necessari per il routing devono essere trattati nel rispetto della privacy e non memorizzati in modo persistente se non strettamente necessario per le segnalazioni inviate esplicitamente dall'utente.
-RNF 2.4 - Validazione input e Affidabilità: Il sistema deve implementare una precisa validazione di tutti gli input utente (form di registrazione, segnalazioni) per prevenire attacchi comuni e implementare rate limiting per limitare lo spam di segnalazioni.
-RNF 3 - Usabilità
-RNF 3.1 - Design coerente e Reattività: L'interfaccia utente (UI) deve seguire le linee guida di design moderne (Material Design/Human Interface Guidelines) e rispondere ai gesti touch in modo istantaneo. Il processo di invio di una segnalazione deve essere rapido e intuitivo.
-RNF 4 - Affidabilità e Disponibilità
-RNF 4.1 - Disponibilità del servizio: Il back-end e l'API devono garantire un tempo di attività (uptime) pari al 99.5% su base mensile (esclusi gli slot di manutenzione programmati).
-RNF 4.2 - Durata della sessione: Dopo il login, l'utente autenticato deve rimanere connesso per un periodo di tempo esteso (30 giorni, gestito tramite Refresh Token JWT), richiedendo un nuovo login solo in caso di logout esplicito o scadenza prolungata.
-RNF 5 - Manutenibilità e Portabilità
-RNF 5.1 -Modularità, Logging e Standard dei dati: Il codice sorgente del back-end deve essere strutturato in modo modulare. Il sistema deve implementare un logging degli errori e tutti i dati delle aree di sosta e delle segnalazioni devono essere scambiati nel formato standard GeoJSON.
+### RNF 1 - Perfomance
+• **RNF 1.1 - Velocità della mappa**: Il caricamento ed il rendering della mappa interattiva deve essere completato entro un massimo di 2 secondi, anche con una connessione mobile media (3G/4G). Nota: le performance dipendono anche dai tempi di risposta dell'API OpenStreetMap.
+• **RNF 1.2 Latenza di routing**: Il calcolo del percorso ottimizzato per bici (RF 4) tramite OpenRouteService non deve superare i 5 secondi di elaborazione server, per garantire la fruibilità in movimento.
+• **RNF 1.3 - Tempi di risposta API**: Le chiamate alle API del backend (caricamento dati GeoJSON, invio di una segnalazione o richiesta di login) devono completarsi con successo entro 500 millisecondi con un carico medio.
+• **RNF 1.4 - Gestione connessione intermittente**: L'applicazione mobile deve mantenere le funzionalità di base (es. visualizzazione di mappe cache o dati dei parcheggi già caricati) anche in assenza temporanea di connessione Internet.
 
+### RNF 2 - Sicurezza e crittografia
+• **RNF 2.1 - Autenticazione e Autorizzazione**: Le comunicazioni tra l'app ed il server devono essere crittografate tramite protocolli TLS/SSL (HTTPS). Solo gli utenti autenticati e registrati (verificati tramite JWT) devono essere autorizzati ad inviare segnalazioni e ad accedere allo storico personale.
+• **RNF 2.2 - Protezione dati**: Le password degli utenti devono essere archiviate nel database locale tramite hashing sicuro (utilizzando l'algoritmo bcrypt).
+• **RNF 2.3 - Protezione dati di geolocalizzazione**: I dati di geolocalizzazione necessari per il routing devono essere trattati nel rispetto della privacy e non memorizzati in modo persistente se non strettamente necessario per le segnalazioni inviate esplicitamente dall'utente.
+• **RNF 2.4 - Validazione input e Affidabilità**: Il sistema deve implementare una precisa validazione di tutti gli input utente (form di registrazione, segnalazioni) per prevenire attacchi comuni e implementare rate limiting per limitare lo spam di segnalazioni.
+
+### RNF 3 - Usabilità
+• **RNF 3.1 - Design coerente e Reattività**: L'interfaccia utente (UI) deve seguire le linee guida di design moderne (Material Design/Human Interface Guidelines) e rispondere ai gesti touch in modo istantaneo. Il processo di invio di una segnalazione deve essere rapido e intuitivo.
+
+### RNF 4 - Affidabilità e Disponibilità
+• **RNF 4.1 - Disponibilità del servizio**: Il back-end e l'API devono garantire un tempo di attività (uptime) pari al 99.5% su base mensile (esclusi gli slot di manutenzione programmati).
+• **RNF 4.2 - Durata della sessione**: Dopo il login, l'utente autenticato deve rimanere connesso per un periodo di tempo esteso (30 giorni, gestito tramite Refresh Token JWT), richiedendo un nuovo login solo in caso di logout esplicito o scadenza prolungata.
+
+### RNF 5 - Manutenibilità e Portabilità
+• **RNF 5.1 -Modularità, Logging e Standard dei dati**: Il codice sorgente del back-end deve essere strutturato in modo modulare. Il sistema deve implementare un logging degli errori e tutti i dati delle aree di sosta e delle segnalazioni devono essere scambiati nel formato standard GeoJSON.
 
 ---
 
-## 4. Use Case Diagram (Descrizione Testuale)
-
-### Caso d'uso 1: Effettuare il login
-* **Attori:** Utente Anonimo.
-* **Riassunto:** L'utente accede al proprio profilo sulla piattaforma mediante credenziali o provider esterno.
-* **Precondizione:** L'utente ha un account registrato e si trova nell'interfaccia pubblica (home page).
-* **Flusso Principale:** 
-  1. L'utente seleziona la funzione "Login".
-  2. Il sistema mostra il modale di autenticazione.
-  3. L'utente compila i campi email e password e clicca "Accedi".
-  4. Il sistema verifica i dati.
-  5. Il sistema aggiorna l'interfaccia utente (UI) mostrando l'accesso alla dashboard.
-* **Postcondizione:** Lo stato dell'utente passa a "Utente Registrato".
-
-### Caso d'uso 2: Cercare parcheggi in una via
-* **Attori:** Utente Anonimo, Utente Registrato.
-* **Riassunto:** L'utente identifica gli stalli localizzati in un'area d'interesse definita tramite testo.
-* **Precondizione:** Il sistema ha terminato di caricare la mappa cartografica e l'aggregato dei marker.
-* **Flusso Principale:** 
-  1. L'utente focalizza la barra di ricerca spaziale.
-  2. L'utente digita un toponimo (es. "Via Belenzani").
-  3. L'utente avvia la ricerca.
-  4. Il sistema interpreta l'input, applica uno zoom, fa il *panning* della mappa e visualizza esclusivamente i parcheggi prossimi alla via indicata.
-* **Postcondizione:** Il *viewport* della mappa copre le coordinate della destinazione inserita e i dati filtrati sono a schermo.
-
-### Caso d'uso 3: Ottenere indicazioni stradali per un parcheggio protetto
-* **Attori:** Utente Anonimo, Utente Registrato.
-* **Riassunto:** L'utente richiede il calcolo dell'itinerario per raggiungere uno stallo di sicurezza.
-* **Precondizione:** L'utente ha individuato visivamente sulla mappa e selezionato con un click (o tap) uno specifico parcheggio protetto.
-* **Flusso Principale:** 
-  1. Il sistema apre un popup sopra il parcheggio contenente metadati e funzionalità d'azione.
-  2. L'utente preme il bottone "Indicazioni".
-  3. Il sistema estrapola latitudine e longitudine del target.
-  4. Il sistema lancia un evento di reindirizzamento (Routing).
-* **Postcondizione:** L'utente viene trasferito alla piattaforma esterna Google Maps con la destinazione pre-compilata.
+## 4. Use Case Diagram ***************************************** AGGIUNGERE
 
 ---
 
