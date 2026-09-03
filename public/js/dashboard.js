@@ -80,7 +80,9 @@ async function init() {
 
     // Navbar & Saluto utente
     const userNameSpan = document.getElementById('dash-user-name');
-    if (userNameSpan) userNameSpan.textContent = user.name || 'Utente';
+    if (userNameSpan) {
+        userNameSpan.innerHTML = tr('greeting', { name: `<strong class="text-primary">${user.name || 'Utente'}</strong>` });
+    }
 
     // Dati Anagrafici Profilo
     const pName     = document.getElementById('p-name');
