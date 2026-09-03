@@ -86,6 +86,12 @@ function checkWeatherAlert(code) {
     const banner = document.getElementById('weather-alert-banner');
     const textEl = document.getElementById('weather-alert-text');
     if (!banner || !textEl) return;
+    
+    const isDismissed = sessionStorage.getItem('tbp_weather_dismissed');
+    if (isDismissed) {
+        banner.classList.add('hidden');
+        return;
+    }
 
     const severeCodes = [53, 55, 63, 65, 73, 75, 81, 82, 95];
 
@@ -419,6 +425,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnCloseBanner) {
         btnCloseBanner.addEventListener('click', () => {
             const banner = document.getElementById('weather-alert-banner');
+            sessionStorage.setItem('tbp_weather_dismissed', 'true');
             if (banner) banner.classList.add('hidden');
         });
     }
