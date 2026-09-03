@@ -79,6 +79,29 @@ function updateWeatherUI() {
     tempEl.textContent = `${cachedWeatherTemp}°C`;
     descEl.textContent = details.desc;
     iconEl.className = `fa-solid ${details.icon} text-sm`;
+
+    checkWeatherAlert(cachedWeatherCode);
+}
+
+function checkWeatherAlert(code) {
+    const banner = document.getElementById('weather-alert-banner');
+    const textEl = document.getElementById('weather-alert-text');
+    if (!banner || !textEl) return;
+
+    const severeCodes = [53, 55, 63, 65, 73, 75, 81, 82, 95];
+
+    if (severeCodes.includes(code)) {
+        const lang = (window.I18n ? window.I18n.getLanguage() : 'it') || 'it';
+        const alerts = {
+            it: '⚠️ Allerta meteo: condizioni avverse previste. Guida con prudenza o valuta percorsi alternativi.',
+            en: '⚠️ Weather alert: adverse conditions expected. Ride with caution or consider alternatives.',
+            de: '⚠️ Wetterwarnung: schlechte Bedingungen erwartet. Vorsicht beim Radfahren empfohlen.'
+        };
+        textEl.textContent = alerts[lang] || alerts['it'];
+        banner.classList.remove('hidden');
+    } else {
+        banner.classList.add('hidden');
+    }
 }
 
 async function initWeather() {
