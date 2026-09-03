@@ -1,5 +1,5 @@
 /**
- * dashboard.js — Area Personale Trento Bike Parking
+ * dashboard.js —F Area Personale Trento Bike Parking
  * Coerente con la pagina principale (Task 1, Task 4, RNF1, RNF6)
  */
 
@@ -79,9 +79,9 @@ async function init() {
     }
 
     // Navbar & Saluto utente
-    const userNameSpan = document.getElementById('dash-user-name');
-    if (userNameSpan) {
-        userNameSpan.innerHTML = tr('greeting', { name: `<strong class="text-primary">${user.name || 'Utente'}</strong>` });
+    const userGreeting = document.getElementById('dash-user-name');
+    if (userGreeting) {
+        userGreeting.innerHTML = `<i class="fa-solid fa-circle-user text-sm"></i> <span class="whitespace-nowrap leading-none">${tr('greeting', { name: `<strong class="text-primary">${user.name || 'Utente'}</strong>` })}</span>`;
     }
 
     // Dati Anagrafici Profilo
