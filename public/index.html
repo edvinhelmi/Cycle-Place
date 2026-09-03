@@ -65,13 +65,12 @@
 </head>
 <body class="bg-base-200 text-slate-800 antialiased overflow-hidden select-none">
     <!-- Banner Allerta Meteo in-app -->
-        <div id="weather-alert-banner" class="hidden fixed top-0 left-0 right-0 w-full px-4 py-2 text-xs sm:text-sm font-bold flex items-center justify-between gap-3 shadow-md z-[3500] transition-all duration-300" style="background-color: #fef08a !important; color: #1e293b !important; border: none !important;">
-            <div class="flex items-center justify-center gap-2.5 mx-auto overflow-hidden">
-                <span style="color: #dc2626 !important; font-size: 1rem;" class="animate-pulse shrink-0">⚠️</span>
-                <span id="weather-alert-text" class="truncate">Allerta meteo: condizioni avverse previste. Guida con prudenza o valuta percorsi alternativi.</span>
-                <span style="color: #dc2626 !important; font-size: 1rem;" class="animate-pulse shrink-0">⚠️</span>
+        <div id="weather-alert-banner" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[3500] px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3 transition-all duration-300" style="background-color: #fef9c3 !important; color: #1e293b !important; width: 380px; max-width: calc(100vw - 2rem);">
+            <div class="flex items-center gap-2.5">
+                <span style="color: #ca8a04 !important; font-size: 1.1rem;">⚠️</span>
+                <span class="text-xs sm:text-sm font-bold leading-snug">Allerta meteo: condizioni avverse previste</span>
             </div>
-            <button id="btn-close-weather-banner" class="btn btn-ghost btn-xs btn-circle min-h-0 h-6 w-6 shrink-0 cursor-pointer" style="color: #1e293b !important;" aria-label="Chiudi allerta">&times;</button>
+            <button id="btn-close-weather-banner" class="btn btn-ghost btn-xs btn-circle min-h-0 h-6 w-6 cursor-pointer" style="color: #1e293b !important;" aria-label="Chiudi allerta">&times;</button>
         </div>
     <!-- Navbar con Glassmorphism & DaisyUI Component (RNF1, RNF6) -->
     <header class="navbar glass-navbar px-4 sm:px-6 py-2.5 z-[2000] sticky top-0 flex justify-between items-center">
