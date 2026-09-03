@@ -6,6 +6,7 @@
   "nav.backToMap": "Zurück zur Karte",
   "theme.toDark": "Zum dunklen Modus wechseln",
   "theme.toLight": "Zum hellen Modus wechseln",
+  "greeting": "Hallo, {name}!"
 
   "filter.title": "Filter",
   "filter.tradizionali": "Traditionelle Fahrradständer",
