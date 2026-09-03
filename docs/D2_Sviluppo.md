@@ -12,12 +12,21 @@ L'architettura del sistema di comunicazione segue fedelmente il paradigma **REST
 **Endpoint Principali (Selezione):**
 *   `GET /api/v1/rastrelliere`: (*Pubblica*) Restituisce il censimento delle rastrelliere trasformando (tramite la libreria `proj4`) la proiezione EPSG:25832 nello standard WGS84. Include un micro-servizio che simula e inietta real-time l'occupazione fisica degli stalli IoT.
 *   `GET /api/v1/parcheggi`: (*Pubblica*) Inoltra i dati cartografici dei parcheggi protetti Bici Box pronti per essere agganciati alla libreria Leaflet sul frontend. Implementa una logica di *dynamic injection* per assegnare `id` univoci numerici real-time qualora il formato raw originario ne fosse sprovvisto, uniformando così la base dati e abilitando le funzionalità account-linked (Preferiti e Segnalazioni).
-*   `GET /api/v1/weather/alerts`: (*Pubblica*) Interroga in tempo reale il servizio meteo esterno (Open-Meteo) per rilevare condizioni di allerta severa e pilotare l'attivazione dinamica del banner di avviso in-app.
 *   `POST /api/v1/login`: (*Pubblica*) Riceve un payload contenente email e password, convalida le credenziali ed emette il token JWT se la validazione ha esito positivo.
 *   `POST /api/v1/auth/google`: (*Pubblica*) Endpoint federato SSO (Single Sign-On). Riceve il ticket emesso da Google OAuth, lo decodifica per estrapolare la trusted-identity e rilascia il token JWT di sessione.
-*   `POST /api/v1/user/preferiti`: (*Protetta da JWT*) Registra o aggiunge uno specifico ID parcheggio/rastrelliera alla lista dei preferiti legati all'account identificato dal payload del token JWT.
+*   `GET / api/v1/user/preferiti` / `POST /api/v1/user/preferiti`: (*Protetta da JWT*) Gestiscono la consultazione e l'aggiunta di rastrelliere e parcheggi protetti ai preferiti dell'utente.
 *   `DELETE /api/v1/user/preferiti/:id`: (*Protetta da JWT*) Rimuove un elemento specifico dalla lista dei luoghi preferiti salvati dall'utente nel proprio profilo.
 *   `POST /api/v1/segnalazioni`: (*Protetta da JWT*) Riceve il feedback geolocalizzato dell'utente (es. furto, danni all'infrastruttura), salvandolo a registro con timestamp annesso.
+*   `POST /api/v1/register`: (*Pubblica*) Gestisce la registrazione di un nuovo utente validando i campi anagrafici e applicando l'hashing sicuro (bcrypt) alla password.
+*   `GET /api/v1/config`: (*Pubblica*) Restituisce le configurazioni pubbliche necessarie al client, inclusa la chiave `googleClientId` per l'inizializzazione del modulo Google SSO.
+*   `POST /api/v1/refresh-token`: (*Pubblica*) Riceve il refresh token e genera un nuovo access token JWT valido per estendere la sessione utente.
+*   `POST /api/v1/forgot-password`: (*Pubblica*) Invia un link temporaneo di recupero password all'indirizzo email specificato dall'utente.
+*   `GET /api/v1/verify-reset-token`: (*Pubblica*) Verifica la validità e la scadenza del token di recupero password prima di consentire il reset.
+*   `POST /api/v1/reset-password`: (*Pubblica*) Aggiorna la password dell'utente nel sistema validando il token temporaneo associato.
+*   `GET /api/v1/segnalazioni/recenti`: (*Pubblica*) Recupera l'elenco delle segnalazioni recenti inviate dalla community per evidenziare eventuali criticità attive sui marker della mappa.
+*   `GET /api/v1/segnalazioni/user`: (*Protetta da JWT*) Restituisce lo storico delle segnalazioni inviate dall'utente all'interno della sua area personale (Dashboard).
+*   `PUT /api/v1/user/profile`: (*Protetta da JWT*) Permette l'aggiornamento dei dati anagrafici, delle preferenze di notifica e l'eventuale modifica sicura della password.
+*   `DELETE /api/v1/user/account`: (*Protetta da JWT*) Esegue la cancellazione definitiva e irreversibile dell'account e dei dati associati in conformità al GDPR.
 
 ---
 
@@ -44,7 +53,7 @@ Le librerie principali che hanno consentito lo sviluppo rapido e sicuro del sist
 *   **Leaflet.js**: (Frontend) Framework cartografico client-side integrato nativamente su CDN. Consente l'innesto della View Map in HTML5, la gestione del pan/zoom dinamico, e l'overlay dei custom marker e geo-layer.
 
 ### 2.4 Database
-A causa del ridottissimo I/O rate temporale (modificare uno stallo strutturale o l'asset di un parcheggio cittadino richiede mesi), il progetto rifiuta il sovradimensionamento causato da complessi DBMS come MongoDB, prediligendo un approccio leggero su standard cartografico open. Le infrastrutture sono state serializzate in formati puramente testuali **GeoJSON** caricati dal file-system su richiesta dell'Express Server. Persino gli attributi utente e di reportistica (segnalazioni/preferiti) sono implementati programmaticamente (JSON-file store) per mantenere le latenze allo zero logico e massimizzare la facilità di deployment in ambienti containerizzati in questa prima versione prototipale.
+A causa del ridottissimo I/O rate temporale, il progetto rifiuta il sovradimensionamento di DBMS complessi, prediligendo un approccio leggero orientato agli standard aperti. Le infrastrutture geografiche sono serializzate in formati GeoJSON caricati dal file-system su richiesta dell'Express Server. La persistenza dei dati utente correlati (profilo, preferiti e segnalazioni) sfrutta endpoint backend dedicati con storage strutturato su file system, garantendo latenze azzerate e la massima portabilità del prototipo.
 
 ### 2.5 Testing (FONDAMENTALE)
 A garanzia dell'affidabilità del sistema, è stata effettuata un'Analisi Funzionale del layer applicativo secondo il paradigma logico di ispezione **Black Box Testing**, non curandosi della logica interna ma validando il perimetro tra l'input e l'output generato dal sistema.
