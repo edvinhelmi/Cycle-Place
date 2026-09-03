@@ -383,8 +383,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await I18n.init();
     initWeather();
 
-    checkWeatherAlert(95);
-
     // =========================================================
     // UI — Riferimenti DOM & Modali (Inizializzazione Immediata)
     // =========================================================
