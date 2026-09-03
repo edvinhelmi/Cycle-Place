@@ -97,17 +97,7 @@ Esecuzione di backup regolari dei dati critici per garantirne il ripristino in c
 Visualizzazione dello storico delle interazioni (segnalazioni inviate, aree salvate).
 
 ### RF 7 - Gestione avvisi
-Invio di avvisi intelligenti in-app per allerte meteo e aggiornamenti sullo stato delle segnalazioni. ???
-
-******************* qui da vedere **********************************
-RF 10 - Gestione dati e interfaccia amministrativa (Lato Comune)
-• RF 10.1 - Dashboard amministrativa dedicata agli operatori comunali.
-• RF 10.2 - Gestione e filtraggio delle segnalazioni con inserimento di note interne.
-• RF 10.3 - Operazioni CRUD ufficiali sulle aree di sosta.
-• RF 10.4 - Visualizzazione di dati aggregati, report e statistiche di utilizzo.
-• RF 10.5 - Mappatura dei futuri punti di sosta con data di previsione apertura.
-• RF 10.6 - Gestione delle iniziative comunali informative.
-
+Invio di avvisi intelligenti in-app per allerte meteo e aggiornamenti sullo stato delle segnalazioni. 
 
 ---
 
