@@ -90,9 +90,8 @@ function checkWeatherAlert(code) {
 
     const severeCodes = [53, 55, 63, 65, 73, 75, 81, 82, 95];
 
-    const isDismissed = sessionStorage.getItem('tbp_weather_dismissed');
-
-    if (severeCodes.includes(code) && !isDismissed) {
+    // Se c'è maltempo, mostra sempre il banner all'apertura/ricarica della pagina
+    if (severeCodes.includes(code)) {
         const lang = (window.I18n ? window.I18n.getLanguage() : 'it') || 'it';
         const alerts = {
             it: 'Allerta meteo: condizioni avverse previste',
@@ -383,6 +382,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await I18n.init();
     initWeather();
+
+    checkWeatherAlert(63);
 
     // =========================================================
     // UI — Riferimenti DOM & Modali (Inizializzazione Immediata)
