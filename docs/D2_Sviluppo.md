@@ -1,7 +1,7 @@
 # D2 - Sviluppo (Implementazione e Testing)
 
 ## Scopo del documento
-Il presente documento descrive in dettaglio le fasi di implementazione, architettura e collaudo della piattaforma web "Trento Bike Parking". Riporta inoltre le specifiche delle interfacce API, l'organizzazione della *codebase*, la pipeline di testing formale e le procedure di Deployment (CI/CD) adottate dal team di sviluppo.
+Il presente documento descrive in dettaglio le fasi di implementazione, architettura e collaudo della piattaforma web "Cycle Place". Riporta inoltre le specifiche delle interfacce API, l'organizzazione della *codebase*, la pipeline di testing formale e le procedure di Deployment (CI/CD) adottate dal team di sviluppo.
 
 ---
 
@@ -12,9 +12,11 @@ L'architettura del sistema di comunicazione segue fedelmente il paradigma **REST
 **Endpoint Principali (Selezione):**
 *   `GET /api/v1/rastrelliere`: (*Pubblica*) Restituisce il censimento delle rastrelliere trasformando (tramite la libreria `proj4`) la proiezione EPSG:25832 nello standard WGS84. Include un micro-servizio che simula e inietta real-time l'occupazione fisica degli stalli IoT.
 *   `GET /api/v1/parcheggi`: (*Pubblica*) Inoltra i dati cartografici dei parcheggi protetti Bici Box pronti per essere agganciati alla libreria Leaflet sul frontend. Implementa una logica di *dynamic injection* per assegnare `id` univoci numerici real-time qualora il formato raw originario ne fosse sprovvisto, uniformando così la base dati e abilitando le funzionalità account-linked (Preferiti e Segnalazioni).
+*   `GET /api/v1/weather/alerts`: (*Pubblica*) Interroga in tempo reale il servizio meteo esterno (Open-Meteo) per rilevare condizioni di allerta severa e pilotare l'attivazione dinamica del banner di avviso in-app.
 *   `POST /api/v1/login`: (*Pubblica*) Riceve un payload contenente email e password, convalida le credenziali ed emette il token JWT se la validazione ha esito positivo.
 *   `POST /api/v1/auth/google`: (*Pubblica*) Endpoint federato SSO (Single Sign-On). Riceve il ticket emesso da Google OAuth, lo decodifica per estrapolare la trusted-identity e rilascia il token JWT di sessione.
 *   `POST /api/v1/user/preferiti`: (*Protetta da JWT*) Registra o aggiunge uno specifico ID parcheggio/rastrelliera alla lista dei preferiti legati all'account identificato dal payload del token JWT.
+*   `DELETE /api/v1/user/preferiti/:id`: (*Protetta da JWT*) Rimuove un elemento specifico dalla lista dei luoghi preferiti salvati dall'utente nel proprio profilo.
 *   `POST /api/v1/segnalazioni`: (*Protetta da JWT*) Riceve il feedback geolocalizzato dell'utente (es. furto, danni all'infrastruttura), salvandolo a registro con timestamp annesso.
 
 ---
@@ -55,6 +57,7 @@ A garanzia dell'affidabilità del sistema, è stata effettuata un'Analisi Funzio
 | **TC-04** | *Autolocalizzazione GPS* | Verifica la funzionalità del bottone Floating GPS sulla UI Mobile/Desktop. | Azione: Click su bottone "🎯" | Browser HTML5 Geolocation API e consensi utente. | Hardware GPS/Rete | La Viewport esegue un fly-pan morbido, focalizzando le coordinate geolocalizzate al centro esatto dello schermo. | Positivo |
 | **TC-05** | *Protezione Segnalazioni (Bound. Case)*| Verifica che un Utente Anonimo non possa spammare segnalazioni. | Payload dummy di segnalazione | Stato Utente: Logout / Non autorizzato. | API Router `/api/v1/segnalazioni` | Il Middleware intercetta assenza di token Bearer e blocca (drop) il pacchetto con HTTP 401. | Positivo |
 | **TC-06** | *Ricerca toponomastica spaziale* | Verifica che l'immissione testuale si leghi in modo corretto allo spostamento vettoriale della View. | Input Testo: "Via Roma" | Marker serializzati nel LayerGroup. | OpenStreetMap Nominatim/Geocode | Lo script interpola l'input e lancia una bounding-box sulla zona di "Via Roma", mostrando le sole rastrelliere ivi contenute. | Positivo |
+| **TC-07** | *Rimozione rastrelliera preferita* | Verifica la cancellazione di un preferito dall'area profilo utente. | ID Rastrelliera target | Utente autenticato con almeno un preferito attivo. | Endpoint `DELETE /api/v1/user/preferiti/:id` | Il server risponde con `200 OK`, il record viene rimosso dal database e i marker sulla mappa si aggiornano rimuovendo lo stato attivo. | Positivo |
 
 ---
 
@@ -65,7 +68,7 @@ Il front-end è stato architettato come un ibrido ad elevate prestazioni nel pan
 Sul fronte Design System, la Web App attinge ai dogmi UI **Mobile-first** mediante un'integrazione radicale e nativa di **Tailwind CSS e DaisyUI**. Per scongiurare conflitti di spazio o problemi di rendering multi-risoluzione (tipico fattore limitante su mobile viewport), la Navbar migra organicamente verso un Hamburger Menu integrato, le card d'informazione adottano posizionamenti relativi governati dallo Z-Index e la barra di ricerca sfrutta il pattern componentistico "Join" per compattare gli input utente. 
 La logica delle finestre modali è gestita programmaticamente manipolando le classi di stato di DaisyUI (es. toggle tra `.hidden` e `.modal-open`). L'intero ecosistema grafico abbraccia la filosofia del *Glassmorphism* (filtri di sfocatura dello sfondo e trasparenze).
 
-Il core cartografico, affidato interamente a **Leaflet**, vanta l'iniezione programmatica di marker vettoriali dinamici: all'evento `onClick`, scaturisce il rendering di un *popup UI* intelligente, dotato di bottoni interattivi (inserimento preferiti, form di segnalazione problemi) e di una "Call-To-Action" per il calcolo avanzato del Routing geo-spaziale nativo verso il provider dominante di settore (Google Maps). 
+Il core cartografico, affidato interamente a **Leaflet**, vanta l'iniezione programmatica di marker vettoriali dinamici: all'evento `onClick`, scaturisce il rendering di un *popup UI* intelligente, dotato di bottoni interattivi (inserimento preferiti, form di segnalazione problemi) e di una "Call-To-Action" per il calcolo avanzato del Routing geo-spaziale in-app tramite l'integrazione di **OpenRouteService**. 
 I controlli stessi della mappa sono reattivi (UI responsive): su desktop sono renderizzati con temi Glassmorphism, mentre su mobile sono interamente off-screen per massimizzare la percezione touch (Pinch-to-zoom).
 
 ---
