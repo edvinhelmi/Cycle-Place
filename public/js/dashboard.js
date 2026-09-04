@@ -1,5 +1,5 @@
 /**
- * dashboard.js —F Area Personale Trento Bike Parking
+ * dashboard.js —F Area Personale Cycle Place
  * Coerente con la pagina principale (Task 1, Task 4, RNF1, RNF6)
  */
 
