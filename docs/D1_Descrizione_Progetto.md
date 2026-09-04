@@ -74,7 +74,6 @@ Le funzionalità principali dell'applicazione sono state definite per risolvere 
 ### RF 2 - Registrazione utente
 - **RF 2.1 - Registrazione con credenziali locali** tramite form (Nome, Cognome, email valida, password composta da almeno 8 caratteri di cui almeno 1 numero, una lettera maiuscola ed un carattere speciale).
 - **RF 2.2 - Registrazione tramite Google** con importazione automatica dei dati di base.
-- **RF 2.3 - Scelta della lingua**: Supporto per italiano, inglese e tedesco.
 
 ### RF 3 - Gestione profilo
 - **RF 3.1 - Visualizzazione del profilo** (informazioni personali, rastrelliere salvate e segnalazioni effettuate).
@@ -94,12 +93,20 @@ Esecuzione di backup regolari dei dati critici per garantirne il ripristino in c
 - **RF 5.4 - Dettaglio area di sosta** tramite popup (tipologia (rastrelliera o ciclobox), numero di stalli, zona, informazioni sullo stato (solo per i Ciclobox), ad es: disponibile/non disponibile, presenza di segnalazioni effettuate da altri utenti).
 - **RF 5.5 - Salvataggio e visualizzazione rapida delle aree di sosta preferite**.
 - **RF 5.6 - Calcolo del percorso efficiente e sicuro tra due punti**: il sistema deve integrare In-App l'API di OpenRouteService per calcolare e visualizzare sulla mappa il percorso tra la posizione attuale dell'utente (se concessa) e l'area di sosta selezionata.
+- **RF 5.7 - Sintesi vocale in-app**: Durante la navigazione Turn-by-Turn, il sistema deve integrare la Web Speech API per riprodurre automaticamente le istruzioni di guida a voce alta, supportando la localizzazione multilingua (Italiano, Inglese e Tedesco).
 
 ### RF 6 - Gestione storico utilizzo
 Visualizzazione dello storico delle interazioni (segnalazioni inviate, aree salvate).
 
-### RF 7 - Gestione avvisi
-Invio di avvisi intelligenti in-app per allerte meteo e aggiornamenti sullo stato delle segnalazioni. 
+### RF 7 - Widget Meteo e Sistema di Allerta
+- **RF 7.1 - Visualizzazione meteo live**: Il sistema deve integrare un widget nella barra di navigazione che mostra in tempo reale la temperatura e le condizioni atmosferiche correnti (tramite l'API Open-Meteo).
+- **RF 7.2 - Banner di allerta meteo automatizzato**: Il sistema deve monitorare le condizioni meteorologiche e attivare automaticamente un banner fluttuante di allerta in-app in caso di eventi avversi (es. forti piogge, temporali, neve), informando l'utente prima di mettersi in marcia.
+
+### RF 8 - Personalizzazione del Tema Grafico
+- **RF 8.1 - Toggle Tema Chiaro/Scuro**: Il sistema deve permettere all'utente di alternare in qualsiasi momento il tema visivo dell'interfaccia tra la modalità chiara di default e la modalità scura (dark), salvando la preferenza nel localStorage del browser.
+
+### RF 9 - Scelta della lingua
+Il sistema deve permettere all'utente di scegliere in quale lingua fruire dell'applicazioni. Sono disponibili il supporto per italiano, inglese e tedesco.
 
 ---
 
@@ -110,12 +117,14 @@ Invio di avvisi intelligenti in-app per allerte meteo e aggiornamenti sullo stat
 - **RNF 1.2 Latenza di routing**: Il calcolo del percorso ottimizzato per bici (RF 4) tramite OpenRouteService non deve superare i 5 secondi di elaborazione server, per garantire la fruibilità in movimento.
 - **RNF 1.3 - Tempi di risposta API**: Le chiamate alle API del backend (caricamento dati GeoJSON, invio di una segnalazione o richiesta di login) devono completarsi con successo entro 500 millisecondi con un carico medio.
 - **RNF 1.4 - Gestione connessione intermittente**: L'applicazione mobile deve mantenere le funzionalità di base (es. visualizzazione di mappe cache o dati dei parcheggi già caricati) anche in assenza temporanea di connessione Internet.
+- **RNF 1.5 - Ottimizzazione del rendering cartografico**: Per garantire fluidità a 60fps e ridurre il carico sul DOM durante lo scorrimento della mappa con centinaia di punti, il sistema deve sfruttare il rendering basato su canvas (preferCanvas: true) e disattivare temporaneamente gli eventi mouse sui marker durante il movimento.
 
 ### RNF 2 - Sicurezza e crittografia
 - **RNF 2.1 - Autenticazione e Autorizzazione**: Le comunicazioni tra l'app ed il server devono essere crittografate tramite protocolli TLS/SSL (HTTPS). Solo gli utenti autenticati e registrati (verificati tramite JWT) devono essere autorizzati ad inviare segnalazioni e ad accedere allo storico personale.
 - **RNF 2.2 - Protezione dati**: Le password degli utenti devono essere archiviate nel database locale tramite hashing sicuro (utilizzando l'algoritmo bcrypt).
 - **RNF 2.3 - Protezione dati di geolocalizzazione**: I dati di geolocalizzazione necessari per il routing devono essere trattati nel rispetto della privacy e non memorizzati in modo persistente se non strettamente necessario per le segnalazioni inviate esplicitamente dall'utente.
 - **RNF 2.4 - Validazione input e Affidabilità**: Il sistema deve implementare una precisa validazione di tutti gli input utente (form di registrazione, segnalazioni) per prevenire attacchi comuni e implementare rate limiting per limitare lo spam di segnalazioni.
+- **RNF 2.5 - Rate Limiting delle API**: Il sistema deve implementare limitazioni di frequenza (express-rate-limit) sugli endpoint critici, come le richieste di autenticazione e l'invio di segnalazioni, per prevenire abusi, attacchi brute-force e spam da parte degli utenti.
 
 ### RNF 3 - Usabilità
 - **RNF 3.1 - Design coerente e Reattività**: L'interfaccia utente (UI) deve seguire le linee guida di design moderne (Material Design/Human Interface Guidelines) e rispondere ai gesti touch in modo istantaneo. Il processo di invio di una segnalazione deve essere rapido e intuitivo.
@@ -304,13 +313,53 @@ TASKS – User Story 13:
 
 ## 6. Design Front-end
 
-La struttura dell'interfaccia utente (UI) si fonda su un pattern "Map-Centric", implementato nativamente tramite il framework **Tailwind CSS** abbinato alla libreria di componenti **DaisyUI**. L'intera applicazione adotta uno stile **Glassmorphism**, caratterizzato da sfondi traslucidi e sfocati (`backdrop-filter: blur(65px)`). 
+In questo capitolo vengono presentati i mockup delle schermate principali dell'applicazione Cycle Place, illustrando come l'interfaccia si presenta all'utente finale. Ciascuna interfaccia è associata ai relativi requisiti funzionali (RF) e non funzionali (RNF) definiti nei capitoli precedenti, accompagnata da una descrizione testuale per chiarire gli elementi chiave dell'UX/UI.
 
-* **Navbar Superiore:** Un'intestazione (header) permanente e fissa al vertice (z-index elevato), che ospita il branding, il selettore lingua e i tasti rapidi. Su schermi piccoli degenera armoniosamente in un menu "hamburger", che garantisce l'assenza di sovrapposizioni visive quando esteso a tutto schermo.
-* **Area Mappa Centrale:** Implementata con layer tile di OpenStreetMap/Leaflet, abbraccia tutto lo schermo. Su di essa "galleggiano" gli altri widget d'interfaccia per massimizzare la percezione dello spazio. Su desktop, i controlli di zoom mantengono lo stile Glassmorphism, mentre su mobile vengono nascosti per favorire le gestures.
-* **Barra di Ricerca (Join Component) e Filtri:** La ricerca spaziale è implementata tramite un componente *Join* (input e pulsante fusi assieme) in stile Glassmorphism. I filtri sono ancorati in modo fisso e permanente nell'angolo in alto a destra su desktop, mentre su mobile appaiono tramite un pratico menu a discesa attivabile dalla barra di ricerca stessa.
-* **Cruscotto delle Statistiche:** Posizionato centralmente a fondo schermo (bottom-center). Costituito da card traslucide e bordi smussati in cui vengono renderizzati in tempo reale i contatori numerici globali o parziali dei posti liberi, progettati in modo responsivo per evitare troncamenti di testo.
-* **Design dei Popup UI:** Alla pressione di un marker, sorge un tooltip (Popup UI) in stile Glassmorphism. L'interno espone metriche dettagliate e, oltre al link di routing, include bottoni d'azione interattivi basati su DaisyUI per l'aggiunta rapida ai **Preferiti** e l'apertura del modale di **Segnalazione Problema** (sia per rastrelliere che per parcheggi protetti).
+### 1. Schermata Principale e Mappa Interattiva
+
+La schermata principale rappresenta il cuore della Web App ed è progettata per offrire un accesso immediato a tutti i servizi cartografici e di mobilità sostenibile del Comune di Trento.
+- **RF 5.1 & RF 5.2 (Visualizzazione mappa e aree di sosta)**: L'interfaccia è occupata per la quasi totalità dallo spazio cartografico interattivo gestito tramite Leaflet.js e OpenStreetMap. Sulla mappa vengono renderizzati i marker geolocalizzati delle rastrelliere tradizionali, delle rastrelliere bloccatelaio e dei parcheggi protetti (Ciclobox).
+- **RF 7 (Gestione avvisi e allerte meteo in-app)**: Nella barra di navigazione superiore, accanto al logo, è integrato un widget meteo in tempo reale (fornito da Open-Meteo) che mostra temperatura e condizioni atmosferiche correnti. In caso di condizioni meteorologiche avverse, compare dinamicamente un banner d'allerta fluttuante posizionato tra la navbar e la barra di ricerca, dotato di pulsante di chiusura manuale (x).
+- **RF 5.1 (Barra di ricerca spaziale e geocoding)**: In alto al centro della mappa è posizionata una barra di ricerca che consente di cercare indirizzi o punti di interesse nel territorio, avviando automaticamente una geolocalizzazione e un filtraggio spaziale nel raggio di 200 metri nel caso in cui non venissero rilevati parcheggi nella via specificata.
+- **RF 5.3 (Filtri mappa e legenda)**: Sulla destra della mappa si trova il pannello dei filtri (accessibile anche da mobile tramite drawer responsive) che consente di filtrare le tipologie di sosta, nascondere le rastrelliere piene o visualizzare esclusivamente i preferiti salvati, con relativa legenda descrittiva dei pin.
+- **RNF 1.1 (Velocità della mappa) & RNF 3.1 (Design e Reattività)**: L'utilizzo del rendering su canvas (preferCanvas: true) assicura una fluidità elevata anche durante lo scorrimento e lo zoom su centinaia di punti, offrendo un'esperienza touch reattiva e coerente.
+- **RF 9 (Selezione lingua)**: Nell'header è integrato un selettore di lingua interattivo che permette all'utente di passare istantaneamente tra Italiano (IT), Inglese (EN) e Tedesco (DE), aggiornando in tempo reale tutti i testi dell'interfaccia e la guida vocale TTS.
+- **Tema Chiaro/Scuro (UI Styling) (RF 8)**: Nell'header è presente un interruttore (toggle switch) che consente all'utente di cambiare istantaneamente il tema grafico dell'applicazione tra la modalità chiara di default e la modalità scura. La preferenza viene memorizzata localmente nel browser, garantendo continuità visiva tra le sessioni.
+- **Responsive Design e Menu Hamburger (RNF 3.1)**: L'interfaccia adotta un layout completamente adattivo. Sui dispositivi mobili, i controlli utente, i filtri cartografici e la legenda si riorganizzano tramite un menu a comparsa azionato da un pulsante hamburger dedicato, garantendo un'esperienza d'uso fluida anche su schermi di ridotte dimensioni.
+
+### 2. Modale di Autenticazione (Login & Registrazione)
+
+La schermata di autenticazione è pensata per essere pratica e veloce: si apre direttamente sopra la mappa con un pannello a comparsa, pensata così per non interrompere l'esperienza di navigazione cartografica dell'utente.
+
+- **RF 1.3 & RF 1.4 (Accesso utente e OAuth 2.0)**: Cliccando sul pulsante "Login" nella navbar, si apre una schermata centrata che offre la doppia opzione: l'inserimento delle credenziali locali (email e password) oppure l'accesso rapido e sicuro tramite il pulsante ufficiale Google SSO.
+- **RF 1.5 & RF 2.1 (Recupero password e Registrazione)**: Dalla stessa area è possibile accedere al flusso di recupero password tramite link temporaneo via email o aprire il modale di registrazione (richiedendo Nome, Cognome, email valida e password conforme ai criteri di complessità).
+- **RNF 2.1 & RNF 2.2 (Sicurezza)**: Le modali implementano una rigida validazione lato client e si appoggiano a comunicazioni protette via HTTPS, crittografia delle password con bcrypt e meccanismi di Rate Limiting sul backend per prevenire attacchi brute-force.
+
+### 3. Navigazione Turn-by-Turn in-app (Routing)
+
+Quando l'utente seleziona una rastrelliera o un parcheggio dalla mappa e richiede le indicazioni stradali, l'applicazione attiva il modulo di navigazione assistita.
+
+- **RF 5.6 (Calcolo del percorso efficiente e sicuro)**: Sfruttando l'integrazione con l'API di OpenRouteService, il sistema calcola la rotta ottimale scegliendo tra il profilo ciclabile o pedonale.
+- **Banner Turn-by-Turn e Guida Vocale (TTS) (RF 5.7)**: Durante la navigazione attiva, compare in alto un banner scuro che indica la distanza residua alla prossima manovra, l'icona direzionale e il testo dell'istruzione. Grazie alla Web Speech API, l'applicazione pronuncia automaticamente le indicazioni a voce nella lingua selezionata dall'utente.
+- **Funzionalità di controllo**: L'interfaccia gestisce i pulsanti per recentrare la mappa sulla posizione GPS corrente, disattivare o attivare l'audio e terminare la sessione di navigazione in qualsiasi momento.
+
+### 4. Popup Interattivi delle Aree di Sosta
+
+Cliccando su un qualsiasi marker sulla mappa si attiva un popup strutturato in stile Glassmorphism che adatta i suoi contenuti in base alla tipologia di stallo selezionata.
+
+- **RF 5.4 (Dettaglio area di sosta)**: Per le rastrelliere tradizionali e i parcheggi protetti vengono mostrati i dati anagrafici, il modello, il numero di stalli e la zona. Per i Ciclobox (Bloccatelaio), il popup integra una sezione di telemetria IoT in tempo reale con una progress bar dinamica e il conteggio esatto dei posti liberi e occupati.
+- **RF 3.6 & RF 5.5 (Gestione Preferiti)**: Il popup include un pulsante interattivo con l'icona di un cuore per aggiungere o rimuovere il luogo dai preferiti personali con un singolo click, aggiornando istantaneamente l'aspetto grafico del pin sulla mappa.
+- **RF 6 (Segnalazione guasti e problemi)**: È presente un pulsante d'allerta che apre un modale per l'invio di segnalazioni (es. danni strutturali, atti di vandalismo, luoghi non sicuri). Qualora siano presenti segnalazioni recenti per quello stallo, il popup mostra automaticamente un avviso in evidenza.
+
+### 5. Dashboard Personale (Area Riservata)
+
+La dashboard è un'area protetta e accessibile unicamente agli utenti autenticati, strutturata come un pannello di controllo completo per la gestione del profilo e delle preferenze.
+
+- **RF 3.1 & RF 3.2 (Visualizzazione e modifica profilo)**: L'utente può visualizzare i propri dati anagrafici, il provider di accesso (Locale o Google) e modificare le proprie informazioni personali o la password tramite un form dedicato con controlli di sicurezza.
+- **RF 3.6 & RF 5.5 (Storico Rastrelliere Preferite)**: Una sezione dedicata elenca tutte le rastrelliere e i parcheggi salvati nei preferiti, consentendo all'utente di consultarli o di rimuoverli rapidamente sincronizzando la modifica in tempo reale con il database.
+- **RF 6 (Storico Segnalazioni)**: Mostra l'elenco cronologico di tutte le segnalazioni inviate dall'utente, evidenziandone lo stato di lavorazione corrente.
+- **RF 3.4 & RF 3.5 (Cancellazione Account)**: In conformità con le normative sulla privacy, è presente una sezione di sicurezza con richiesta di conferma esplicita per la cancellazione definitiva e irreversibile del profilo e di tutti i dati correlati.
+
 
 ---
 
