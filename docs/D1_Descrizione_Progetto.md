@@ -326,6 +326,10 @@ La schermata principale rappresenta il cuore della Web App ed è progettata per 
 <img src="design-front-end/popup_meteo.jpeg" alt="Banner meteo" width="700">
 
 - **RF 5.1 (Barra di ricerca spaziale e geocoding)**: In alto al centro della mappa è posizionata una barra di ricerca che consente di cercare indirizzi o punti di interesse nel territorio, avviando automaticamente una geolocalizzazione e un filtraggio spaziale nel raggio di 200 metri nel caso in cui non venissero rilevati parcheggi nella via specificata.
+
+<img src="design-front-end/ricerca_negativa.png" alt="Ricerca negativa" width="700">
+<img src="design-front-end/ricerca_positiva.png" alt="Ricerca positiva" width="700">
+
 - **RF 5.3 (Filtri mappa e legenda)**: Sulla destra della mappa si trova il pannello dei filtri (accessibile anche da mobile tramite drawer responsive) che consente di filtrare le tipologie di sosta, nascondere le rastrelliere piene o visualizzare esclusivamente i preferiti salvati, con relativa legenda descrittiva dei pin.
 - **RNF 1.1 (Velocità della mappa) & RNF 3.1 (Design e Reattività)**: L'utilizzo del rendering su canvas (preferCanvas: true) assicura una fluidità elevata anche durante lo scorrimento e lo zoom su centinaia di punti, offrendo un'esperienza touch reattiva e coerente.
 - **RF 9 (Selezione lingua)**: Nell'header è integrato un selettore di lingua interattivo che permette all'utente di passare istantaneamente tra Italiano (IT), Inglese (EN) e Tedesco (DE), aggiornando in tempo reale tutti i testi dell'interfaccia e la guida vocale TTS.
@@ -375,6 +379,7 @@ Cliccando su un qualsiasi marker sulla mappa si attiva un popup strutturato in s
 - **RF 6 (Segnalazione guasti e problemi)**: È presente un pulsante d'allerta che apre un modale per l'invio di segnalazioni (es. danni strutturali, atti di vandalismo, luoghi non sicuri). Qualora siano presenti segnalazioni recenti per quello stallo, il popup mostra automaticamente un avviso in evidenza.
 
 <img src="design-front-end/form_segnalazione.png" alt="Segnalazione problemi" width="700">
+<img src="design-front-end/elimina_account.png" alt="Elimina account" width="700">
 
 
 ### 5. Dashboard Personale (Area Riservata)
