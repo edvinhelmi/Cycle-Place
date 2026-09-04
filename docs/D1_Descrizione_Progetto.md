@@ -379,7 +379,6 @@ Cliccando su un qualsiasi marker sulla mappa si attiva un popup strutturato in s
 - **RF 6 (Segnalazione guasti e problemi)**: È presente un pulsante d'allerta che apre un modale per l'invio di segnalazioni (es. danni strutturali, atti di vandalismo, luoghi non sicuri). Qualora siano presenti segnalazioni recenti per quello stallo, il popup mostra automaticamente un avviso in evidenza.
 
 <img src="design-front-end/form_segnalazione.png" alt="Segnalazione problemi" width="700">
-<img src="design-front-end/elimina_account.png" alt="Elimina account" width="700">
 
 
 ### 5. Dashboard Personale (Area Riservata)
@@ -392,7 +391,7 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 - **RF 3.4 & RF 3.5 (Cancellazione Account)**: In conformità con le normative sulla privacy, è presente una sezione di sicurezza con richiesta di conferma esplicita per la cancellazione definitiva e irreversibile del profilo e di tutti i dati correlati.
 
 <img src="design-front-end/profilo.png" alt="Dashboard" width="700">
-
+<img src="design-front-end/elimina_account.png" alt="Elimina account" width="700">
 
 ---
 
