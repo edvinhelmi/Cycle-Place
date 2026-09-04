@@ -19,8 +19,8 @@ Scegli le istruzioni corrispondenti al tuo sistema operativo:
 
 1. **Scarica il progetto e accedi alla cartella:**
    ```bash
-   git clone https://github.com/edvinhelmi/trento-bike-parking.git
-   cd trento-bike-parking
+   git clone https://github.com/edvinhelmi/cycle-place.git
+   cd cycle-place
    ```
 
 2. **Installa le dipendenze:**
@@ -45,8 +45,8 @@ Scegli le istruzioni corrispondenti al tuo sistema operativo:
 1. **Scarica il progetto e accedi alla cartella:**
    Apri il Prompt dei Comandi (cmd) o PowerShell ed esegui:
    ```cmd
-   git clone https://github.com/edvinhelmi/trento-bike-parking.git
-   cd trento-bike-parking
+   git clone https://github.com/edvinhelmi/cycle-place.git
+   cd cycle-place
    ```
 
 2. **Installa le dipendenze:**

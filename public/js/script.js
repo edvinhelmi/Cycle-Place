@@ -1,5 +1,5 @@
 /**
- * script.js — Trento Bike Parking
+ * script.js — Cycle Place
  * Task 1: Dashboard + Preferiti (❤️)
  * Task 2: Filtri additivi per layer
  * Task 3: Segnalazioni guasti

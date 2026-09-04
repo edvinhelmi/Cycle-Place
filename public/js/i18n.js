@@ -1,5 +1,5 @@
 /**
- * i18n.js — Trento Bike Parking Custom Translation Engine
+ * i18n.js — Cycle Place Custom Translation Engine
  * Gestisce caricamento asincrono dei file JSON di lingua,
  * cambio dinamico della lingua, sincronizzazione DOM e persistenza in localStorage.
  */
