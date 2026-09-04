@@ -1,10 +1,10 @@
 # Cycle Place 🚲
 
 Cycle Place è una Web Application interattiva e responsiva che mappa l'intera rete di rastrelliere e parcheggi sicuri (Bici Box) del Comune di Trento.
-Il progetto offre una mappa cartografica interattiva, funzioni di geolocalizzazione, navigazione live Turn-by-Turn in-app con guida vocale multilingua (IT/EN/DE), un sistema di ricerca spaziale, e permette agli utenti (tramite account locale o Google OAuth) di salvare i propri parcheggi preferiti e inviare segnalazioni di guasti o problemi.
+Il progetto offre una mappa cartografica interattiva, funzioni di geolocalizzazione, navigazione live Turn-by-Turn in-app con guida vocale multilingua (IT/EN/DE), un sistema di ricerca spaziale, e permette agli utenti (tramite account locale o Google OAuth) di salvare i propri parcheggi preferiti e inviare segnalazioni di guasti o problemi. Inoltre, integra un widget meteo live (con Open-Meteo) e un sistema di allerta meteo automatizzato per segnalare condizioni meteorologiche avverse e mette a disposizione una dashboard personale dedicata in cui gli utenti possono visualizzare e gestire il proprio profilo, modificare la propria password (con flusso di recupero dedicato), consultare lo storico dei preferiti e monitorare lo stato delle proprie segnalazioni.
 
 ## Tecnologie Utilizzate
-*   **Backend:** Node.js, Express, JSON Web Token (JWT), OpenRouteService Proxy
+*   **Backend:** Node.js, Express, JSON Web Token (JWT) con meccanismo di Refresh Token, bcrypt (hashing password), express-rate-limit (protezione anti-abuso), OpenRouteService Proxy.
 *   **Frontend:** HTML5, JavaScript (Vanilla), Tailwind CSS, DaisyUI, Web Speech API (TTS)
 *   **Mappa & Dati:** Leaflet.js, OpenStreetMap, GeoJSON, proj4
 
