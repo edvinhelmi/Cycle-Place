@@ -2,7 +2,7 @@
 
 | Doc. Name | Doc. Number | Description |
 | :--- | :--- | :--- |
-| D4-Cycle PlaceFinale | D4 V1.0 | Report Finale del progetto: organizzazione del lavoro, ruoli, documentazione, video, tempo complessivo e di ciascun membro dedicato al progetto, criticità, autovalutazione. |
+| D4-Cycle PlaceFinale | D4 V1.1 | Report Finale del progetto: organizzazione del lavoro, ruoli, documentazione, video, tempo complessivo e di ciascun membro dedicato al progetto, criticità, autovalutazione. |
 
 ## 1. Organizzazione del lavoro
 Per lo sviluppo dell'applicazione "Cycle Place", il Gruppo G01 ha adottato una metodologia di sviluppo ispirata ai principi **Agile**, mirata a favorire un approccio incrementale e iterativo. Al fine di mantenere l'allineamento sui task e sul progresso delle attività, è stato impiegato un sistema di gestione visuale **Kanban**, che ha permesso di mappare in modo trasparente gli stati di avanzamento (To Do, In Progress, Done). Il versionamento del codice e la gestione della *codebase* sono stati centralizzati su **GitHub**, sfruttando le dinamiche di branching e pull request per garantire integrità e revisione paritaria. 
