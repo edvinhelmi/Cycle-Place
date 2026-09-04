@@ -317,8 +317,10 @@ In questo capitolo vengono presentati i mockup delle schermate principali dell'a
 
 ### 1. Schermata Principale e Mappa Interattiva
 
+<p align="center">
 <img src="design-front-end/schermata_iniziale.png" alt="Schermata iniziale" width="700">
-*Schermata iniziale*
+<em>Schermata iniziale</em>
+</p>
 
 La schermata principale rappresenta il cuore della Web App ed è progettata per offrire un accesso immediato a tutti i servizi cartografici e di mobilità sostenibile del Comune di Trento.
 - **RF 5.1 & RF 5.2 (Visualizzazione mappa e aree di sosta)**: L'interfaccia è occupata per la quasi totalità dallo spazio cartografico interattivo gestito tramite Leaflet.js e OpenStreetMap. Sulla mappa vengono renderizzati i marker geolocalizzati delle rastrelliere tradizionali, delle rastrelliere bloccatelaio e dei parcheggi protetti (Ciclobox).
