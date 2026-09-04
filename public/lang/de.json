@@ -2,6 +2,7 @@
   "nav.login": "Anmelden",
   "nav.register": "Registrieren",
   "nav.logout": "Abmelden",
+  "nav.logoutSuccess": "Erfolgreich abgemeldet",
   "nav.dashboard": "Dashboard",
   "nav.backToMap": "Zurück zur Karte",
   "theme.toDark": "Zum dunklen Modus wechseln",
@@ -163,5 +164,6 @@
   "routing.recalculating": "Route wird neu berechnet...",
   "routing.inDistance": "In {dist}",
   "routing.voiceOn": "Sprachführung aktiviert",
-  "routing.voiceOff": "Sprachführung deaktiviert"
+  "routing.voiceOff": "Sprachführung deaktiviert",
+  "routing.now": "Jetzt"
 }

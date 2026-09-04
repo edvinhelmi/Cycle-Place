@@ -82,5 +82,17 @@
     "lng": 11.149899287432948,
     "timestamp": "2026-08-31T15:32:07.005Z",
     "stato": "inviata"
+  },
+  {
+    "id": "seg_1788518990479",
+    "userId": "117827982692808573140",
+    "userEmail": "edvinhelmi@gmail.com",
+    "rastrellieraId": 25,
+    "tipo": "luogo_non_sicuro",
+    "note": "",
+    "lat": 46.0669415328323,
+    "lng": 11.123051901154113,
+    "timestamp": "2026-09-04T10:49:50.479Z",
+    "stato": "inviata"
   }
 ]

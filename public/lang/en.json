@@ -2,6 +2,7 @@
   "nav.login": "Login",
   "nav.register": "Register",
   "nav.logout": "Logout",
+  "nav.logoutSuccess": "Successfully logged out",
   "nav.dashboard": "Dashboard",
   "nav.backToMap": "Back to Map",
   "theme.toDark": "Switch to dark mode",
@@ -163,5 +164,6 @@
   "routing.recalculating": "Recalculating route...",
   "routing.inDistance": "In {dist}",
   "routing.voiceOn": "Voice guidance enabled",
-  "routing.voiceOff": "Voice guidance disabled"
+  "routing.voiceOff": "Voice guidance disabled",
+  "routing.now": "Now"
 }

@@ -574,6 +574,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Stato utente — login / logout
     async function loginSuccess(user) {
+        document.documentElement.classList.remove('is-logged-out');
+        document.documentElement.classList.add('is-logged-in');
         if (btnLoginModal)    btnLoginModal.classList.add('hidden');
         if (btnRegisterModal) btnRegisterModal.classList.add('hidden');
         if (btnDashboard)     btnDashboard.classList.remove('hidden');
@@ -590,6 +592,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         removeToken();
         userFavoritiIds.clear();
         if (window.google?.accounts) google.accounts.id.disableAutoSelect();
+
+        document.documentElement.classList.remove('is-logged-in');
+        document.documentElement.classList.add('is-logged-out');
+
         if (btnLoginModal)    btnLoginModal.classList.remove('hidden');
         if (btnRegisterModal) btnRegisterModal.classList.remove('hidden');
         if (btnDashboard)     btnDashboard.classList.add('hidden');
@@ -598,20 +604,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             userGreeting.classList.add('hidden');
             userGreeting.textContent = '';
         }
+        if (window.map) map.closePopup();
         closeMobileMenu();
         applyFiltersAndSearch(false);
+        window.alert(tr('nav.logoutSuccess') || 'Disconnessione effettuata con successo', 'info');
     }
 
     // Ripristino sessione da localStorage
     const storedToken = getToken();
     const storedRefresh = getRefreshToken();
     if (isTokenValid(storedToken)) {
+        document.documentElement.classList.remove('is-logged-out');
+        document.documentElement.classList.add('is-logged-in');
         const d = decodeToken(storedToken) || decodeToken(storedRefresh);
         if (d) {
-        loginSuccess({ name: d.name || 'Utente', surname: d.surname || '', email: d.email || '' });
+            loginSuccess({ name: d.name || 'Utente', surname: d.surname || '', email: d.email || '' });
         }
     } else {
-        // Se non autenticato, togliamo hidden dai bottoni login
+        document.documentElement.classList.remove('is-logged-in');
+        document.documentElement.classList.add('is-logged-out');
         if (btnLoginModal) btnLoginModal.classList.remove('hidden');
         if (btnRegisterModal) btnRegisterModal.classList.remove('hidden');
     }
@@ -1210,6 +1221,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     let voiceEnabled            = true;
     let lastSpokenInstruction   = null;
     let lastRerouteTime         = 0;
+    let currentUserHeading      = null; // In gradi (0-360)
+    let currentArrowAngle       = 0;    // Angolo visuale normalizzato per rotazione fluida
+    let totalRouteDistance      = 0;    // Distanza totale iniziale percorso (metri)
+    let totalRouteDuration      = 0;    // Tempo totale iniziale percorso (secondi)
+    let lastAnnouncedStepIndex  = -1;
+    let hasAnnouncedNear        = false;
 
     const groupSearchRadius = L.layerGroup().addTo(map);
     const groupTradizionale = L.layerGroup().addTo(map);
@@ -1722,29 +1739,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const accuracy = position.coords.accuracy || 30; // raggio in metri
             lastUserCoords = { lat, lng };
 
-            // Rimuovi eventuali indicatori precedenti
-            if (userLocationMarker) map.removeLayer(userLocationMarker);
-            if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
-
-            // Cerchio di precisione GPS
-            userAccuracyCircle = L.circle([lat, lng], {
-                radius: Math.min(accuracy, 400),
-                color: '#1a73e8',
-                fillColor: '#1a73e8',
-                fillOpacity: 0.15,
-                weight: 1.5,
-                interactive: false
-            }).addTo(map);
-
-            // Marker utente dedicato
-            userLocationMarker = L.circleMarker([lat, lng], {
-                radius: 9,
-                fillColor: '#1a73e8',
-                color: '#ffffff',
-                weight: 3,
-                opacity: 1,
-                fillOpacity: 1
-            }).addTo(map);
+            // Aggiorna il marker utente personalizzato (beacon pulsante o freccia di navigazione)
+            updateUserMarker(lat, lng, currentUserHeading, accuracy);
 
             if (!isLiveNavigating) {
                 // Spostamento fluido verso la posizione dell'utente
@@ -2310,28 +2306,192 @@ document.addEventListener('DOMContentLoaded', async () => {
         return R * c;
     }
 
-    function distanceToSegmentMeters(pLat, pLng, aLat, aLng, bLat, bLng) {
-        const dx = bLng - aLng;
-        const dy = bLat - aLat;
-        if (dx === 0 && dy === 0) {
-            return calcDistanceMeters(pLat, pLng, aLat, aLng);
+    function calculateBearing(lat1, lon1, lat2, lon2) {
+        const phi1 = lat1 * Math.PI / 180;
+        const phi2 = lat2 * Math.PI / 180;
+        const deltaLon = (lon2 - lon1) * Math.PI / 180;
+        const y = Math.sin(deltaLon) * Math.cos(phi2);
+        const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLon);
+        const theta = Math.atan2(y, x);
+        return (theta * 180 / Math.PI + 360) % 360;
+    }
+
+    function getShortestAngle(targetAngle, currentAngle) {
+        let diff = (targetAngle - currentAngle) % 360;
+        if (diff < -180) diff += 360;
+        if (diff > 180) diff -= 360;
+        return currentAngle + diff;
+    }
+
+    function findClosestRoutePoint(userLat, userLng, coords) {
+        if (!coords || coords.length === 0) return null;
+        if (coords.length === 1) {
+            return {
+                minDist: calcDistanceMeters(userLat, userLng, coords[0][0], coords[0][1]),
+                segmentIndex: 0,
+                projLat: coords[0][0],
+                projLng: coords[0][1]
+            };
         }
-        const t = Math.max(0, Math.min(1, ((pLng - aLng) * dx + (pLat - aLat) * dy) / (dx * dx + dy * dy)));
-        const projLng = aLng + t * dx;
-        const projLat = aLat + t * dy;
-        return calcDistanceMeters(pLat, pLng, projLat, projLng);
+
+        let minDist = Infinity;
+        let closestSegmentIndex = 0;
+        let closestProjLat = coords[0][0];
+        let closestProjLng = coords[0][1];
+
+        for (let i = 0; i < coords.length - 1; i++) {
+            const aLat = coords[i][0];
+            const aLng = coords[i][1];
+            const bLat = coords[i + 1][0];
+            const bLng = coords[i + 1][1];
+
+            const midLat = (aLat + bLat) * 0.5 * Math.PI / 180;
+            const cosLat = Math.cos(midLat);
+
+            const dx = (bLng - aLng) * cosLat * 111320;
+            const dy = (bLat - aLat) * 110574;
+            const px = (userLng - aLng) * cosLat * 111320;
+            const py = (userLat - aLat) * 110574;
+
+            const lenSq = dx * dx + dy * dy;
+            const t = lenSq === 0 ? 0 : Math.max(0, Math.min(1, (px * dx + py * dy) / lenSq));
+
+            const pLat = aLat + t * (bLat - aLat);
+            const pLng = aLng + t * (bLng - aLng);
+            const d = calcDistanceMeters(userLat, userLng, pLat, pLng);
+
+            if (d < minDist) {
+                minDist = d;
+                closestSegmentIndex = i;
+                closestProjLat = pLat;
+                closestProjLng = pLng;
+            }
+        }
+
+        return {
+            minDist,
+            segmentIndex: closestSegmentIndex,
+            projLat: closestProjLat,
+            projLng: closestProjLng
+        };
     }
 
     function minDistanceToPolyline(lat, lng, coords) {
-        if (!coords || coords.length === 0) return 0;
-        if (coords.length === 1) return calcDistanceMeters(lat, lng, coords[0][0], coords[0][1]);
+        const closest = findClosestRoutePoint(lat, lng, coords);
+        return closest ? closest.minDist : 0;
+    }
 
-        let min = Infinity;
-        for (let i = 0; i < coords.length - 1; i++) {
-            const d = distanceToSegmentMeters(lat, lng, coords[i][0], coords[i][1], coords[i+1][0], coords[i+1][1]);
-            if (d < min) min = d;
+    function createUserLocationIcon(heading, isNavigating) {
+        if (isNavigating && heading !== null && heading !== undefined && !isNaN(heading)) {
+            currentArrowAngle = getShortestAngle(heading, currentArrowAngle);
+            return L.divIcon({
+                className: 'custom-user-marker-icon',
+                html: `
+                    <div class="user-marker-container">
+                        <div class="user-nav-arrow-wrapper" style="transform: rotate(${Math.round(currentArrowAngle)}deg);">
+                            <svg class="user-nav-arrow-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 2 L33 30 C33 30 25 24 18 24 C11 24 3 30 3 30 Z" fill="rgba(37, 99, 235, 0.25)"/>
+                                <path d="M18 4 L30 28 L18 22 L6 28 Z" fill="#2563eb" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+                                <circle cx="18" cy="13" r="2.5" fill="#93c5fd"/>
+                            </svg>
+                        </div>
+                    </div>`,
+                iconSize: [44, 44],
+                iconAnchor: [22, 22]
+            });
+        } else {
+            return L.divIcon({
+                className: 'custom-user-marker-icon',
+                html: `
+                    <div class="user-marker-container">
+                        <div class="user-beacon-dot">
+                            <span class="beacon-pulse"></span>
+                            <span class="beacon-core"></span>
+                        </div>
+                    </div>`,
+                iconSize: [44, 44],
+                iconAnchor: [22, 22]
+            });
         }
-        return min;
+    }
+
+    function updateUserMarker(lat, lng, heading = null, accuracy = 20) {
+        const isNav = isLiveNavigating;
+        const newIcon = createUserLocationIcon(heading, isNav);
+
+        if (userLocationMarker) {
+            userLocationMarker.setLatLng([lat, lng]);
+            userLocationMarker.setIcon(newIcon);
+        } else {
+            userLocationMarker = L.marker([lat, lng], {
+                icon: newIcon,
+                zIndexOffset: 1000,
+                interactive: false
+            }).addTo(map);
+        }
+
+        const radius = Math.min(accuracy || 20, 250);
+        if (userAccuracyCircle) {
+            userAccuracyCircle.setLatLng([lat, lng]);
+            userAccuracyCircle.setRadius(radius);
+        } else {
+            userAccuracyCircle = L.circle([lat, lng], {
+                radius: radius,
+                color: '#1a73e8',
+                fillColor: '#1a73e8',
+                fillOpacity: 0.12,
+                weight: 1.5,
+                interactive: false
+            }).addTo(map);
+        }
+    }
+
+    function updateRemainingTripStats(closest) {
+        if (!routeCoordinates || routeCoordinates.length === 0) return;
+        const distEl = document.getElementById('nav-stat-distance');
+        const durEl  = document.getElementById('nav-stat-duration');
+        if (!distEl && !durEl) return;
+
+        let remainingDist = 0;
+        if (closest && closest.segmentIndex < routeCoordinates.length - 1) {
+            const segIdx = closest.segmentIndex;
+            // Distanza dal punto proiettato al vertice successivo
+            remainingDist += calcDistanceMeters(
+                closest.projLat, closest.projLng,
+                routeCoordinates[segIdx + 1][0], routeCoordinates[segIdx + 1][1]
+            );
+            // Distanza lungo tutti i vertici successivi fino alla fine del percorso
+            for (let i = segIdx + 1; i < routeCoordinates.length - 1; i++) {
+                remainingDist += calcDistanceMeters(
+                    routeCoordinates[i][0], routeCoordinates[i][1],
+                    routeCoordinates[i + 1][0], routeCoordinates[i + 1][1]
+                );
+            }
+        }
+
+        if (distEl) {
+            if (remainingDist >= 1000) {
+                distEl.textContent = `${(remainingDist / 1000).toFixed(1)} ${tr('routing.km') || 'km'}`;
+            } else {
+                distEl.textContent = `${Math.round(remainingDist)} ${tr('routing.meters') || 'm'}`;
+            }
+        }
+
+        if (durEl) {
+            let remainingMinutes = 1;
+            if (totalRouteDistance > 0 && totalRouteDuration > 0) {
+                const speed = totalRouteDistance / totalRouteDuration; // m/s
+                const remainingSeconds = remainingDist / speed;
+                remainingMinutes = Math.round(remainingSeconds / 60);
+            }
+            if (remainingMinutes >= 60) {
+                const h = Math.floor(remainingMinutes / 60);
+                const m = remainingMinutes % 60;
+                durEl.textContent = `${h} ${tr('routing.hours') || 'h'} ${m} ${tr('routing.min') || 'min'}`;
+            } else {
+                durEl.textContent = `${Math.max(1, remainingMinutes)} ${tr('routing.min') || 'min'}`;
+            }
+        }
     }
 
     function getManeuverIcon(type) {
@@ -2519,7 +2679,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const distEl = document.getElementById('turn-banner-distance');
         const instEl = document.getElementById('turn-banner-instruction');
 
-        // Controlla se l'utente è arrivato a destinazione (< 15 metri)
+        // Controllo arrivo a destinazione (< 15 metri)
         if (currentNavDestination) {
             const distToDest = calcDistanceMeters(userLat, userLng, currentNavDestination.lat, currentNavDestination.lng);
             if (distToDest < 15) {
@@ -2527,95 +2687,150 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (distEl) distEl.textContent = '0 m';
                 if (instEl) instEl.textContent = tr('routing.arrived') || 'Sei arrivato a destinazione!';
                 speakInstruction(tr('routing.arrived') || 'Sei arrivato a destinazione!');
+                const dStat = document.getElementById('nav-stat-distance');
+                const tStat = document.getElementById('nav-stat-duration');
+                if (dStat) dStat.textContent = '0 m';
+                if (tStat) tStat.textContent = `0 ${tr('routing.min') || 'min'}`;
                 return;
             }
         }
 
-        if (!routeSteps || routeSteps.length === 0) return;
+        if (!routeCoordinates || routeCoordinates.length === 0 || !routeSteps || routeSteps.length === 0) return;
 
-        // Avanzamento step se l'utente è vicino (< 18m) al termine dello step corrente
-        let step = routeSteps[currentStepIndex];
-        if (step && step.way_points) {
-            const endIdx = step.way_points[1];
-            const targetCoord = routeCoordinates[endIdx];
-            if (targetCoord) {
-                const distToStepEnd = calcDistanceMeters(userLat, userLng, targetCoord[0], targetCoord[1]);
-                if (distToStepEnd < 18 && currentStepIndex < routeSteps.length - 1) {
+        // Proietta la posizione GPS esatta dell'utente sul tracciato stradale
+        const closest = findClosestRoutePoint(userLat, userLng, routeCoordinates);
+        if (!closest) return;
+
+        // Aggiorna cruscotto distanza e durata residua in tempo reale (countdown dinamico Google Maps)
+        updateRemainingTripStats(closest);
+
+        // Avanzamento step automatico se la posizione supera o raggiunge il waypoint di svolta
+        while (currentStepIndex < routeSteps.length - 1) {
+            const step = routeSteps[currentStepIndex];
+            const endPointIdx = step.way_points ? step.way_points[1] : 0;
+            if (closest.segmentIndex > endPointIdx) {
+                currentStepIndex++;
+            } else if (closest.segmentIndex === endPointIdx) {
+                currentStepIndex++;
+            } else {
+                // Se siamo sull'ultimo segmento dello step e vicini (< 15m) alla svolta
+                const endCoord = routeCoordinates[endPointIdx];
+                if (endCoord && calcDistanceMeters(userLat, userLng, endCoord[0], endCoord[1]) < 15) {
                     currentStepIndex++;
-                    step = routeSteps[currentStepIndex];
+                } else {
+                    break;
                 }
             }
         }
 
-        if (!step) return;
+        const currentStep = routeSteps[currentStepIndex];
+        if (!currentStep) return;
 
-        const nextIdx = step.way_points ? step.way_points[1] : 0;
-        const nextCoord = routeCoordinates[nextIdx];
-        let distanceText = '--';
-        if (nextCoord) {
-            const d = Math.round(calcDistanceMeters(userLat, userLng, nextCoord[0], nextCoord[1]));
-            if (d >= 1000) {
-                distanceText = (tr('routing.inDistance') || 'Tra {dist}').replace('{dist}', (d / 1000).toFixed(1) + ' ' + (tr('routing.km') || 'km'));
-            } else {
-                distanceText = (tr('routing.inDistance') || 'Tra {dist}').replace('{dist}', d + ' ' + (tr('routing.meters') || 'm'));
+        // Calcola distanza residua lungo la strada fino alla prossima manovra
+        const endManeuverIdx = currentStep.way_points ? currentStep.way_points[1] : 0;
+        let distToManeuver = 0;
+
+        if (closest.segmentIndex < endManeuverIdx) {
+            distToManeuver += calcDistanceMeters(
+                closest.projLat, closest.projLng,
+                routeCoordinates[closest.segmentIndex + 1][0], routeCoordinates[closest.segmentIndex + 1][1]
+            );
+            for (let i = closest.segmentIndex + 1; i < endManeuverIdx; i++) {
+                distToManeuver += calcDistanceMeters(
+                    routeCoordinates[i][0], routeCoordinates[i][1],
+                    routeCoordinates[i + 1][0], routeCoordinates[i + 1][1]
+                );
             }
         }
 
-        const activeLang = I18n.getLanguage() || 'it';
-        const formattedInstruction = formatInstructionText(step.instruction || step.name || '', activeLang);
+        const roundedDist = Math.round(distToManeuver);
+        let distanceText = '';
+        if (roundedDist >= 1000) {
+            distanceText = (tr('routing.inDistance') || 'Tra {dist}').replace('{dist}', (roundedDist / 1000).toFixed(1) + ' ' + (tr('routing.km') || 'km'));
+        } else if (roundedDist > 20) {
+            distanceText = (tr('routing.inDistance') || 'Tra {dist}').replace('{dist}', roundedDist + ' ' + (tr('routing.meters') || 'm'));
+        } else {
+            distanceText = tr('routing.now') || 'Ora';
+        }
 
-        if (iconEl) iconEl.className = getManeuverIcon(step.type);
+        const activeLang = I18n.getLanguage() || 'it';
+        const formattedInstruction = formatInstructionText(currentStep.instruction || currentStep.name || '', activeLang);
+
+        if (iconEl) iconEl.className = getManeuverIcon(currentStep.type);
         if (distEl) distEl.textContent = distanceText;
         if (instEl) instEl.textContent = formattedInstruction;
 
-        if (formattedInstruction) {
-            speakInstruction(formattedInstruction);
+        // Istruzioni Vocali proattive naturali (Google Maps style):
+        // 1. All'inizio di ogni nuovo step ("Tra 200 m, gira a destra")
+        // 2. Quando ci si avvicina alla manovra (<= 30 m: "Ora: gira a destra")
+        if (currentStepIndex !== lastAnnouncedStepIndex) {
+            lastAnnouncedStepIndex = currentStepIndex;
+            hasAnnouncedNear = false;
+            let voiceMsg = formattedInstruction;
+            if (roundedDist > 30) {
+                voiceMsg = `${distanceText}, ${formattedInstruction}`;
+            }
+            speakInstruction(voiceMsg);
+        } else if (!hasAnnouncedNear && roundedDist <= 30 && roundedDist > 5) {
+            hasAnnouncedNear = true;
+            speakInstruction(`${tr('routing.now') || 'Ora'}: ${formattedInstruction}`);
         }
     }
 
     function handleLivePosition(pos) {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
+        const accuracy = pos.coords.accuracy || 20;
+
+        // Calcolo / Rilevamento Heading direzionale per la freccia di navigazione (Google Maps arrow)
+        if (pos.coords.heading !== null && pos.coords.heading !== undefined && !isNaN(pos.coords.heading) && pos.coords.heading >= 0) {
+            currentUserHeading = pos.coords.heading;
+        } else if (lastUserCoords) {
+            const moveDist = calcDistanceMeters(lastUserCoords.lat, lastUserCoords.lng, lat, lng);
+            if (moveDist >= 2.5) {
+                currentUserHeading = calculateBearing(lastUserCoords.lat, lastUserCoords.lng, lat, lng);
+            }
+        }
+
+        // Se navighiamo e l'heading non è ancora derivato dal moto, orienta lungo il segmento del tracciato
+        if (isLiveNavigating && (currentUserHeading === null || isNaN(currentUserHeading)) && routeCoordinates && routeCoordinates.length > 1) {
+            const closest = findClosestRoutePoint(lat, lng, routeCoordinates);
+            if (closest && closest.segmentIndex < routeCoordinates.length - 1) {
+                currentUserHeading = calculateBearing(
+                    routeCoordinates[closest.segmentIndex][0], routeCoordinates[closest.segmentIndex][1],
+                    routeCoordinates[closest.segmentIndex + 1][0], routeCoordinates[closest.segmentIndex + 1][1]
+                );
+            }
+        }
+
         lastUserCoords = { lat, lng };
 
-        // Aggiorna layer marker utente
-        if (userLocationMarker) map.removeLayer(userLocationMarker);
-        if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
-
-        userAccuracyCircle = L.circle([lat, lng], {
-            radius: Math.min(pos.coords.accuracy || 20, 300),
-            color: '#1a73e8',
-            fillColor: '#1a73e8',
-            fillOpacity: 0.15,
-            weight: 1.5,
-            interactive: false
-        }).addTo(map);
-
-        userLocationMarker = L.circleMarker([lat, lng], {
-            radius: 9,
-            fillColor: '#1a73e8',
-            color: '#ffffff',
-            weight: 3,
-            opacity: 1,
-            fillOpacity: 1
-        }).addTo(map);
+        // Aggiorna indicatore utente (freccia direzionale chevron o beacon pulsante)
+        updateUserMarker(lat, lng, currentUserHeading, accuracy);
 
         if (isLiveNavigating) {
+            // Auto-follow della telecamera in tempo reale (Google Maps camera tracking)
             if (isFollowMode) {
                 isProgrammaticMove = true;
-                map.panTo([lat, lng], { animate: true, duration: 0.8 });
-                setTimeout(() => { isProgrammaticMove = false; }, 1000);
+                const currentZoom = map.getZoom();
+                if (currentZoom < 17) {
+                    map.setView([lat, lng], 18, { animate: true, duration: 0.8 });
+                } else {
+                    map.panTo([lat, lng], { animate: true, duration: 0.6 });
+                }
+                setTimeout(() => { isProgrammaticMove = false; }, 850);
             }
 
-            // Verifica deviazione dal percorso (Off-route > 50m)
-            if (routeCoordinates && routeCoordinates.length > 0) {
-                const distOffRoute = minDistanceToPolyline(lat, lng, routeCoordinates);
+            // Rilevamento deviazione dal percorso (Off-route > 45m con ricalcolo immediato)
+            if (routeCoordinates && routeCoordinates.length > 1) {
+                const closest = findClosestRoutePoint(lat, lng, routeCoordinates);
                 const now = Date.now();
-                if (distOffRoute > 50 && (now - lastRerouteTime > 6000)) {
+                if (closest && closest.minDist > 45 && (now - lastRerouteTime > 6000)) {
                     lastRerouteTime = now;
-                    console.log(`[Routing] Rilevata deviazione (${Math.round(distOffRoute)}m). Ricalcolo percorso...`);
+                    console.log(`[Routing] Deviazione rilevata (${Math.round(closest.minDist)}m). Ricalcolo percorso...`);
                     const instEl = document.getElementById('turn-banner-instruction');
                     if (instEl) instEl.textContent = tr('routing.recalculating') || 'Ricalcolo percorso...';
+                    speakInstruction(tr('routing.recalculating') || 'Ricalcolo percorso...');
                     if (currentNavDestination) {
                         calculateAndRenderRoute(lat, lng, currentNavDestination.lat, currentNavDestination.lng, currentNavMode, true);
                     }
@@ -2646,9 +2861,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (btnRecenter) btnRecenter.classList.add('hidden'); // Rimane nascosto perché la navigazione parte già centrata
 
         if (lastUserCoords) {
+            if ((currentUserHeading === null || isNaN(currentUserHeading)) && routeCoordinates && routeCoordinates.length > 1) {
+                currentUserHeading = calculateBearing(
+                    routeCoordinates[0][0], routeCoordinates[0][1],
+                    routeCoordinates[1][0], routeCoordinates[1][1]
+                );
+            }
+            updateUserMarker(lastUserCoords.lat, lastUserCoords.lng, currentUserHeading, 15);
             isProgrammaticMove = true;
-            map.setView([lastUserCoords.lat, lastUserCoords.lng], 18, { animate: true });
-            setTimeout(() => { isProgrammaticMove = false; }, 1000);
+            map.setView([lastUserCoords.lat, lastUserCoords.lng], 18, { animate: true, duration: 0.8 });
+            setTimeout(() => { isProgrammaticMove = false; }, 850);
             updateTurnBanner(lastUserCoords.lat, lastUserCoords.lng);
         }
 
@@ -2656,7 +2878,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             liveWatchId = navigator.geolocation.watchPosition(
                 handleLivePosition,
                 (err) => console.warn('watchPosition error:', err),
-                { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 }
             );
         }
     }
@@ -2664,6 +2886,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     function stopLiveNavigation() {
         isLiveNavigating = false;
         isFollowMode = false;
+        lastAnnouncedStepIndex = -1;
+        hasAnnouncedNear = false;
 
         if (liveWatchId !== null && navigator.geolocation) {
             navigator.geolocation.clearWatch(liveWatchId);
@@ -2687,6 +2911,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (window.speechSynthesis) window.speechSynthesis.cancel();
         lastSpokenInstruction = null;
+
+        if (lastUserCoords) {
+            updateUserMarker(lastUserCoords.lat, lastUserCoords.lng, null, 25);
+        }
     }
 
     async function calculateAndRenderRoute(startLat, startLng, endLat, endLng, profile = 'cycling-regular', isReroute = false) {
@@ -2723,7 +2951,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 routeCoordinates = [];
             }
             routeSteps = feature.properties?.segments?.[0]?.steps || [];
+            totalRouteDistance = distMeters;
+            totalRouteDuration = durSeconds;
             currentStepIndex = 0;
+            lastAnnouncedStepIndex = -1;
+            hasAnnouncedNear = false;
 
             // Formattazione Distanza
             if (distEl) {
@@ -2814,6 +3046,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         routeCoordinates = [];
         routeSteps = [];
         currentStepIndex = 0;
+        totalRouteDistance = 0;
+        totalRouteDuration = 0;
+        lastAnnouncedStepIndex = -1;
+        hasAnnouncedNear = false;
 
         const panel = document.getElementById('routing-panel');
         if (panel) panel.classList.add('hidden');

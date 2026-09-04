@@ -2,6 +2,7 @@
   "nav.login": "Login",
   "nav.register": "Registrati",
   "nav.logout": "Logout",
+  "nav.logoutSuccess": "Disconnessione effettuata con successo",
   "nav.dashboard": "Dashboard",
   "nav.backToMap": "Torna alla Mappa",
   "theme.toDark": "Passa al tema scuro",
@@ -163,5 +164,6 @@
   "routing.recalculating": "Ricalcolo percorso...",
   "routing.inDistance": "Tra {dist}",
   "routing.voiceOn": "Indicazioni vocali attive",
-  "routing.voiceOff": "Indicazioni vocali disattivate"
+  "routing.voiceOff": "Indicazioni vocali disattivate",
+  "routing.now": "Ora"
 }
