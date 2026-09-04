@@ -424,8 +424,15 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 - **RF 6 (Storico Segnalazioni)**: Mostra l'elenco cronologico di tutte le segnalazioni inviate dall'utente, evidenziandone lo stato di lavorazione corrente.
 - **RF 3.4 & RF 3.5 (Cancellazione Account)**: In conformità con le normative sulla privacy, è presente una sezione di sicurezza con richiesta di conferma esplicita per la cancellazione definitiva e irreversibile del profilo e di tutti i dati correlati.
 
-<img src="design-front-end/profilo.png" alt="Dashboard" width="700">
-<img src="design-front-end/elimina_account.png" alt="Elimina account" width="700">
+<p align="center">
+<img src="design-front-end/profilo.png" alt="Dashboard" width="700"><br>
+<em>Profilo</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/elimina_account.png" alt="Elimina account" width="700"><br>
+<em>Schermata elimina account</em>
+</p>
 
 ---
 
