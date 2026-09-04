@@ -27,8 +27,6 @@ Il carico di lavoro è stato equamente distribuito tra i componenti del team, bi
 
 Come si evince dalla tabella, è stato riportato il valore `0` nella colonna relativa al **D3** per tutti i membri del gruppo. Questo perché il deliverable D3 è stato concepito come elemento opzionale ai fini dell'ottenimento di punti extra, ed il team ha strategicamente scelto di non realizzarlo per potersi focalizzare sulla qualità dei deliverable fondamentali.
 
-*La documentazione: D1, D2 e D4 comprensiva anche di un video di circa 5 minuti che descrive il progetto realizzato dovrà essere caricata su un Google Form il cui link sarà disponibile su DidatticaOnLine. La consegna di tutta la documentazione dovrà avvenire il giorno dell’appello a cui si è iscritti su Esse3 entro il giorno e l’ora dell’appello specificato su Esse3.*
-
 ## 4. Criticità
 Durante il ciclo di vita del progetto, il team ha dovuto affrontare e superare diverse criticità di natura organizzativa e tecnica:
 * **Organizzazione Iniziale:** Nelle fasi embrionali (durante il D1), la sovrapposizione delle competenze portava i membri a svolgere attività frammentate ("tutti facevano tutto"), generando inefficienze. Il problema è stato risolto attraverso un'assegnazione netta e precisa dei ruoli formali.
