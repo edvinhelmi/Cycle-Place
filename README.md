@@ -1,6 +1,6 @@
-# Trento Bike Parking 🚲
+# Cycle Place 🚲
 
-Trento Bike Parking è una Web Application interattiva e responsiva che mappa l'intera rete di rastrelliere e parcheggi sicuri (Bici Box) del Comune di Trento.
+Cycle Place è una Web Application interattiva e responsiva che mappa l'intera rete di rastrelliere e parcheggi sicuri (Bici Box) del Comune di Trento.
 Il progetto offre una mappa cartografica interattiva, funzioni di geolocalizzazione, navigazione live Turn-by-Turn in-app con guida vocale multilingua (IT/EN/DE), un sistema di ricerca spaziale, e permette agli utenti (tramite account locale o Google OAuth) di salvare i propri parcheggi preferiti e inviare segnalazioni di guasti o problemi.
 
 ## Tecnologie Utilizzate
