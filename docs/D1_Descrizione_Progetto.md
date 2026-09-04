@@ -1,7 +1,7 @@
 UNIVERSITÀ DEGLI STUDI DI TRENTO<br>
 Dipartimento di Ingegneria e Scienza dell’Informazione
 
-## Progetto: Cycle-Place
+## Progetto: Cycle Place
 ## Titolo del documento: Descrizione di Progetto
 
 ---
