@@ -1,11 +1,11 @@
-# D4 - Report Finale: Trento Bike Parking
+# D4 - Report Finale: Cycle Place
 
 | Doc. Name | Doc. Number | Description |
 | :--- | :--- | :--- |
-| D4-TrentoBikeParkingReportFinale | D4 V1.0 | Report Finale del progetto: organizzazione del lavoro, ruoli, documentazione, video, tempo complessivo e di ciascun membro dedicato al progetto, criticità, autovalutazione. |
+| D4-Cycle PlaceFinale | D4 V1.0 | Report Finale del progetto: organizzazione del lavoro, ruoli, documentazione, video, tempo complessivo e di ciascun membro dedicato al progetto, criticità, autovalutazione. |
 
 ## 1. Organizzazione del lavoro
-Per lo sviluppo dell'applicazione "Trento Bike Parking", il Gruppo G01 ha adottato una metodologia di sviluppo ispirata ai principi **Agile**, mirata a favorire un approccio incrementale e iterativo. Al fine di mantenere l'allineamento sui task e sul progresso delle attività, è stato impiegato un sistema di gestione visuale **Kanban**, che ha permesso di mappare in modo trasparente gli stati di avanzamento (To Do, In Progress, Done). Il versionamento del codice e la gestione della *codebase* sono stati centralizzati su **GitHub**, sfruttando le dinamiche di branching e pull request per garantire integrità e revisione paritaria. 
+Per lo sviluppo dell'applicazione "Cycle Place", il Gruppo G01 ha adottato una metodologia di sviluppo ispirata ai principi **Agile**, mirata a favorire un approccio incrementale e iterativo. Al fine di mantenere l'allineamento sui task e sul progresso delle attività, è stato impiegato un sistema di gestione visuale **Kanban**, che ha permesso di mappare in modo trasparente gli stati di avanzamento (To Do, In Progress, Done). Il versionamento del codice e la gestione della *codebase* sono stati centralizzati su **GitHub**, sfruttando le dinamiche di branching e pull request per garantire integrità e revisione paritaria. 
 Il team si è riunito con cadenza regolare, alternando incontri in presenza a *sync-call* telematiche, per fare il punto della situazione, risolvere blocchi operativi e rispettare le scadenze accademiche prefissate per i deliverable. In questo contesto, il Team Leader ha svolto un ruolo cruciale, coordinando le attività, facilitando le comunicazioni interne e assicurando che lo sforzo del gruppo procedesse coeso verso gli obiettivi concordati.
 
 ## 2. Ruoli e attività
