@@ -14,7 +14,7 @@ Il team si è riunito con cadenza regolare, alternando incontri in presenza a *s
 | :--- | :--- | :--- |
 | **Edvin Helmi** | Team Leader | Gestione progetto, coordinamento attività, stesura e revisione documenti (D1, D4), organizzazione dell'architettura generale. |
 | **Lorenzo Pasotti** | Progettista | Realizzazione backend/logica, pipeline di CI/CD, scrittura test con Jest (D2). |
-| **Natalina** | Analista | Fase di Design Thinking, UI/UX design, sviluppo frontend (mappa Leaflet, filtri, popup) e gestione requisiti nel D1. |
+| **Natalina Perazzolli** | Analista | Fase di Design Thinking, UI/UX design, sviluppo frontend (mappa Leaflet, filtri, popup) e gestione requisiti nel D1. |
 
 ## 3. Carico e distribuzione del lavoro
 Il carico di lavoro è stato equamente distribuito tra i componenti del team, bilanciando l'impegno in base alle rispettive competenze e responsabilità.
