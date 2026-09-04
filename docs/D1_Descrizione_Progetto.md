@@ -317,7 +317,10 @@ In questo capitolo vengono presentati i mockup delle schermate principali dell'a
 
 ### 1. Schermata Principale e Mappa Interattiva
 
+<figure style="text-align: center;">
 <img src="design-front-end/schermata_iniziale.png" alt="Schermata iniziale" width="700">
+<figcaption style="font-size: 0.9em; color: gray;">Didascalia centrata e leggermente più piccola</figcaption>
+</figure>
 
 La schermata principale rappresenta il cuore della Web App ed è progettata per offrire un accesso immediato a tutti i servizi cartografici e di mobilità sostenibile del Comune di Trento.
 - **RF 5.1 & RF 5.2 (Visualizzazione mappa e aree di sosta)**: L'interfaccia è occupata per la quasi totalità dallo spazio cartografico interattivo gestito tramite Leaflet.js e OpenStreetMap. Sulla mappa vengono renderizzati i marker geolocalizzati delle rastrelliere tradizionali, delle rastrelliere bloccatelaio e dei parcheggi protetti (Ciclobox).
@@ -351,7 +354,7 @@ La schermata di autenticazione è pensata per essere pratica e veloce: si apre d
 
 <img src="design-front-end/registrazione.png" alt="Schermata registrazione" width="700">
 
-# MANCA SCHERMATA RECUPERO PASSWORD ************************************************************************
+<img src="design-front-end/recupero_password.png" alt="Recupero password" width="700">
 
 - **RNF 2.1 & RNF 2.2 (Sicurezza)**: Le modali implementano una rigida validazione lato client e si appoggiano a comunicazioni protette via HTTPS, crittografia delle password con bcrypt e meccanismi di Rate Limiting sul backend per prevenire attacchi brute-force.
 
