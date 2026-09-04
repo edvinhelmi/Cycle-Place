@@ -23,7 +23,7 @@ Il carico di lavoro è stato equamente distribuito tra i componenti del team, bi
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Edvin Helmi** | 12 | 10 | 0 | 18 | **40** |
 | **Lorenzo Pasotti** | 8 | 22 | 0 | 10 | **40** |
-| **Natalina** | 18 | 12 | 0 | 10 | **40** |
+| **Natalina Perazzolli** | 18 | 12 | 0 | 10 | **40** |
 
 Come si evince dalla tabella, è stato riportato il valore `0` nella colonna relativa al **D3** per tutti i membri del gruppo. Questo perché il deliverable D3 è stato concepito come elemento opzionale ai fini dell'ottenimento di punti extra, ed il team ha strategicamente scelto di non realizzarlo per potersi focalizzare sulla qualità dei deliverable fondamentali.
 
