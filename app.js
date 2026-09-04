@@ -396,8 +396,8 @@ app.post('/api/v1/refresh-token', (req, res) => {
 
 const EMAIL_TEMPLATES = {
     it: {
-        subject: 'Recupero Password — Trento Bike Parking',
-        title: 'Trento Bike Parking',
+        subject: 'Recupero Password — Cycle Place',
+        title: 'Cycle Place',
         subtitle: 'Mappa rastrelliere e parcheggi protetti',
         heading: 'Reimposta la tua password',
         greeting: (name) => `Ciao <strong>${name || 'Utente'}</strong>,`,
@@ -405,13 +405,13 @@ const EMAIL_TEMPLATES = {
         button: 'Reimposta Password',
         expiry: 'Il link è valido per <strong>1 ora</strong>. Se il pulsante non funziona, copia questo link nel browser:',
         disclaimer: 'Se non hai richiesto il reset, puoi ignorare questo messaggio in tutta sicurezza: il tuo account rimane protetto.',
-        textMsg: (name, link) => `Ciao ${name || ''},\n\nHai richiesto di reimpostare la tua password per Trento Bike Parking.\nClicca sul seguente link entro 1 ora per procedere:\n\n${link}\n\nSe non hai effettuato tu questa richiesta, ignora questa email.\n\nIl team di Trento Bike Parking`,
+        textMsg: (name, link) => `Ciao ${name || ''},\n\nHai richiesto di reimpostare la tua password per Cycle Place.\nClicca sul seguente link entro 1 ora per procedere:\n\n${link}\n\nSe non hai effettuato tu questa richiesta, ignora questa email.\n\nIl team di Cycle Place`,
         apiMsg: "Se l'indirizzo email è registrato, riceverai a breve un link per reimpostare la password.",
         googleErr: "Questo account utilizza l'accesso tramite Google e non dispone di una password da reimpostare."
     },
     en: {
-        subject: 'Password Recovery — Trento Bike Parking',
-        title: 'Trento Bike Parking',
+        subject: 'Password Recovery — Cycle Place',
+        title: 'Cycle Place',
         subtitle: 'Bike racks and secure parking map',
         heading: 'Reset your password',
         greeting: (name) => `Hello <strong>${name || 'User'}</strong>,`,
@@ -419,13 +419,13 @@ const EMAIL_TEMPLATES = {
         button: 'Reset Password',
         expiry: 'This link is valid for <strong>1 hour</strong>. If the button does not work, copy this link into your browser:',
         disclaimer: 'If you did not request a password reset, you can safely ignore this email: your account remains secure.',
-        textMsg: (name, link) => `Hello ${name || ''},\n\nYou requested to reset your password for Trento Bike Parking.\nClick the following link within 1 hour to proceed:\n\n${link}\n\nIf you did not request this, please ignore this email.\n\nThe Trento Bike Parking Team`,
+        textMsg: (name, link) => `Hello ${name || ''},\n\nYou requested to reset your password for Cycle Place.\nClick the following link within 1 hour to proceed:\n\n${link}\n\nIf you did not request this, please ignore this email.\n\nThe Cycle Place Team`,
         apiMsg: "If the email address is registered, you will shortly receive a link to reset your password.",
         googleErr: "This account uses Google Sign-In and does not have a standard password to reset."
     },
     de: {
-        subject: 'Passwort wiederherstellen — Trento Bike Parking',
-        title: 'Trento Bike Parking',
+        subject: 'Passwort wiederherstellen — Cycle Place',
+        title: 'Cycle Place',
         subtitle: 'Karte der Fahrradabstellplätze und Parkhäuser',
         heading: 'Setzen Sie Ihr Passwort zurück',
         greeting: (name) => `Hallo <strong>${name || 'Benutzer'}</strong>,`,
@@ -433,7 +433,7 @@ const EMAIL_TEMPLATES = {
         button: 'Passwort zurücksetzen',
         expiry: 'Dieser Link ist <strong>1 Stunde</strong> lang gültig. Wenn die Schaltfläche nicht funktioniert, kopieren Sie diesen Link in Ihren Browser:',
         disclaimer: 'Wenn Sie das Zurücksetzen nicht angefordert haben, können Sie diese E-Mail ignorieren: Ihr Konto bleibt geschützt.',
-        textMsg: (name, link) => `Hallo ${name || ''},\n\nSie haben das Zurücksetzen Ihres Passworts für Trento Bike Parking beantragt.\nKlicken Sie innerhalb von 1 Stunde auf den folgenden Link:\n\n${link}\n\nWenn Sie dies nicht angefordert haben, ignorieren Sie bitte diese E-Mail.\n\nDas Team von Trento Bike Parking`,
+        textMsg: (name, link) => `Hallo ${name || ''},\n\nSie haben das Zurücksetzen Ihres Passworts für Cycle Place beantragt.\nKlicken Sie innerhalb von 1 Stunde auf den folgenden Link:\n\n${link}\n\nWenn Sie dies nicht angefordert haben, ignorieren Sie bitte diese E-Mail.\n\nDas Team von Cycle Place`,
         apiMsg: "Wenn die E-Mail-Adresse registriert ist, erhalten Sie in Kürze einen Link zum Zurücksetzen des Passworts.",
         googleErr: "Dieses Konto verwendet die Google-Anmeldung und verfügt über kein herkömmliches Passwort zum Zurücksetzen."
     }
