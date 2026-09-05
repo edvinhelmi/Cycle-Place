@@ -669,7 +669,7 @@ app.get('/api/v1/user/preferiti', tokenChecker, async (req, res) => {
             zona: f.zona,
             lat: f.lat,
             lng: f.lng,
-            createdAt: f.createdAt
+            savedAt: f.createdAt || f.date || new Date()
         }));
         res.json({ preferiti: formatted });
     } catch (err) {
@@ -810,7 +810,7 @@ app.post('/api/v1/segnalazioni', tokenChecker, async (req, res) => {
     }
 });
 
-app.get('/api/v1/user/segnalazioni', tokenChecker, async (req, res) => {
+app.get('/api/v1/segnalazioni/user', tokenChecker, async (req, res) => {
     try {
         const userId = req.user.sub || req.user.userId;
         const items = await Segnalazione.find({ userId }).sort({ createdAt: -1 });
@@ -822,7 +822,8 @@ app.get('/api/v1/user/segnalazioni', tokenChecker, async (req, res) => {
             note: s.note,
             lat: s.lat,
             lng: s.lng,
-            createdAt: s.createdAt
+            timestamp: s.createdAt,
+            stato: s.stato || 'inviata'
         }));
 
         res.json({ segnalazioni });
