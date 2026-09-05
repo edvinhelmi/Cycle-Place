@@ -76,15 +76,15 @@ Le funzionalità principali dell'applicazione sono state definite per risolvere 
 - **RF 2.2 - Registrazione tramite Google** con importazione automatica dei dati di base.
 
 ### RF 3 - Gestione profilo
-- **RF 3.1 - Visualizzazione del profilo** (informazioni personali, rastrelliere salvate e segnalazioni effettuate).
+- **RF 3.1 - Visualizzazione del profilo** (informazioni personali, rastrelliere salvate e segnalazioni effettuate recuperate in tempo reale da MongoDB).
 - **RF 3.2 - Modifica delle informazioni personali** 
 - **RF 3.3 - Modifica della password**.
-- **RF 3.4 - Richiesta di cancellazione definitiva dell'account e dei dati associati** (GDPR).
+- **RF 3.4 - Richiesta di cancellazione definitiva dell'account e dei dati associati** tramite eliminazione a cascata di preferiti e segnalazioni collegate all'utente su MongoDB..
 - **RF 3.5 - Cancellazione definitiva del proprio account e di tutti i dati associati** (preferiti, segnalazioni).
-- **RF 3.6 - Cancellazione rastrelliere preferite dal profilo**: L'utente registrato deve poter visualizzare l'elenco delle proprie rastrelliere o parcheggi preferiti all'interno della dashboard personale e decidere di rimuoverli in qualsiasi momento, sincronizzando la modifica in tempo reale con il database.
+- **RF 3.6 - Cancellazione rastrelliere preferite dal profilo**: L'utente registrato deve poter visualizzare l'elenco delle proprie rastrelliere o parcheggi preferiti all'interno della dashboard personale e decidere di rimuoverli in qualsiasi momento, sincronizzando la modifica in tempo reale con il database MongoDB.
 
 ### RF 4 - Backup e Ripristino
-Esecuzione di backup regolari dei dati critici per garantirne il ripristino in caso di guasti.
+Esecuzione di backup e snapshot regolari gestiti direttamente tramite i servizi nativi di MongoDB Atlas per garantire la continuità e il recupero dei dati critici.
 
 ### RF 5 - Gestione mappa e aree di sosta
 - **RF 5.1 - Visualizzazione mappa** centrata sulla posizione GPS dell'utente o sull'area selezionata.
@@ -96,7 +96,7 @@ Esecuzione di backup regolari dei dati critici per garantirne il ripristino in c
 - **RF 5.7 - Sintesi vocale in-app**: Durante la navigazione Turn-by-Turn, il sistema deve integrare la Web Speech API per riprodurre automaticamente le istruzioni di guida a voce alta, supportando la localizzazione multilingua (Italiano, Inglese e Tedesco).
 
 ### RF 6 - Gestione storico utilizzo
-Visualizzazione dello storico delle interazioni (segnalazioni inviate, aree salvate).
+Visualizzazione dello storico delle interazioni (segnalazioni inviate e aree salvate) interrogando direttamente le collection MongoDB dell'utente.
 
 ### RF 7 - Widget Meteo e Sistema di Allerta
 - **RF 7.1 - Visualizzazione meteo live**: Il sistema deve integrare un widget nella barra di navigazione che mostra in tempo reale la temperatura e le condizioni atmosferiche correnti (tramite l'API Open-Meteo).
@@ -115,15 +115,15 @@ Il sistema deve permettere all'utente di scegliere in quale lingua fruire dell'a
 ### RNF 1 - Perfomance
 - **RNF 1.1 - Velocità della mappa**: Il caricamento ed il rendering della mappa interattiva deve essere completato entro un massimo di 2 secondi, anche con una connessione mobile media (3G/4G). Nota: le performance dipendono anche dai tempi di risposta dell'API OpenStreetMap.
 - **RNF 1.2 Latenza di routing**: Il calcolo del percorso ottimizzato per bici (RF 4) tramite OpenRouteService non deve superare i 5 secondi di elaborazione server, per garantire la fruibilità in movimento.
-- **RNF 1.3 - Tempi di risposta API**: Le chiamate alle API del backend (caricamento dati GeoJSON, invio di una segnalazione o richiesta di login) devono completarsi con successo entro 500 millisecondi con un carico medio.
+- **RNF 1.3 - Tempi di risposta API**: Le chiamate asincrone alle API del backend e le query di lettura/scrittura su MongoDB Atlas devono completarsi con successo entro 500 millisecondi con un carico medio.
 - **RNF 1.4 - Gestione connessione intermittente**: L'applicazione mobile deve mantenere le funzionalità di base (es. visualizzazione di mappe cache o dati dei parcheggi già caricati) anche in assenza temporanea di connessione Internet.
 - **RNF 1.5 - Ottimizzazione del rendering cartografico**: Per garantire fluidità a 60fps e ridurre il carico sul DOM durante lo scorrimento della mappa con centinaia di punti, il sistema deve sfruttare il rendering basato su canvas (preferCanvas: true) e disattivare temporaneamente gli eventi mouse sui marker durante il movimento.
 
 ### RNF 2 - Sicurezza e crittografia
 - **RNF 2.1 - Autenticazione e Autorizzazione**: Le comunicazioni tra l'app ed il server devono essere crittografate tramite protocolli TLS/SSL (HTTPS). Solo gli utenti autenticati e registrati (verificati tramite JWT) devono essere autorizzati ad inviare segnalazioni e ad accedere allo storico personale.
-- **RNF 2.2 - Protezione dati**: Le password degli utenti devono essere archiviate nel database locale tramite hashing sicuro (utilizzando l'algoritmo bcrypt).
+- **RNF 2.2 - Protezione dati**: Le password degli utenti devono essere archiviate su MongoDB tramite hashing sicuro (utilizzando l'algoritmo bcrypt).
 - **RNF 2.3 - Protezione dati di geolocalizzazione**: I dati di geolocalizzazione necessari per il routing devono essere trattati nel rispetto della privacy e non memorizzati in modo persistente se non strettamente necessario per le segnalazioni inviate esplicitamente dall'utente.
-- **RNF 2.4 - Validazione input e Affidabilità**: Il sistema deve implementare una precisa validazione di tutti gli input utente (form di registrazione, segnalazioni) per prevenire attacchi comuni e implementare rate limiting per limitare lo spam di segnalazioni.
+- **RNF 2.4 - Validazione input e Affidabilità**: Validazione rigorosa lato server e client tramite schemi Mongoose per prevenire injection e corruzione dei dati.
 - **RNF 2.5 - Rate Limiting delle API**: Il sistema deve implementare limitazioni di frequenza (express-rate-limit) sugli endpoint critici, come le richieste di autenticazione e l'invio di segnalazioni, per prevenire abusi, attacchi brute-force e spam da parte degli utenti.
 
 ### RNF 3 - Usabilità
@@ -164,12 +164,12 @@ Come nuovo utente, voglio potermi registrare fornendo i miei dati e un indirizzo
 
 Criteri di Accettazione:
 - Il form di registrazione richiede Nome, Cognome, email valida e una password conforme ai requisiti di complessità (min 8 caratteri, 1 maiuscola, 1 numero, 1 carattere speciale).
-- Il sistema verifica l'unicità dell'email e restituisce errori descrittivi in caso di campi non validi.
+- Il sistema verifica l'unicità dell'email interrogando direttamente il database MongoDB.
 - È possibile completare la registrazione in alternativa tramite autenticazione Google con importazione automatica dei dati di base.
 
-TASKS – User Story 3:
+TASKS – User Story 2:
 - Sviluppare la UI del form di registrazione e la validazione real-time degli input lato client.
-- Implementare l'endpoint di backend per la creazione protetta dell'account con hashing bcrypt della password.
+- Implementare l'endpoint di backend per il salvataggio sicuro dell'account su MongoDB con hashing bcrypt.
 - Testare il flusso completo di registrazione locale e tramite Google SSO.
 
 #### User Story 3 – Associata a RF 1.3 / RF 1.4: Login utente e sessione
@@ -181,7 +181,7 @@ Criteri di Accettazione:
 - Tutte le comunicazioni di autenticazione sono crittografate tramite HTTPS (RNF 2.1).
 - La sessione è mantenuta attiva tramite token JWT con supporto per il refresh automatico (RF 1.7).
 
-TASKS – User Story 2:
+TASKS – User Story 3:
 - Sviluppare la logica di gestione dei token JWT (emissione e refresh automatico).
 - Integrare il protocollo OAuth 2.0 per il servizio di autenticazione Google.
 - Testare la gestione della sessione persistente.
@@ -230,10 +230,10 @@ Come utente registrato, voglio richiedere la cancellazione definitiva del mio ac
 
 Criteri di Accettazione:
 - L'utente può avviare la procedura di eliminazione account tramite un'apposita opzione nel profilo.
-- Il sistema richiede una conferma esplicita prima di procedere alla rimozione irreversibile di preferiti e segnalazioni dal database.
+- Il sistema esegue una rimozione a cascata atomica tramite Mongoose (deleteMany) su MongoDB rimuovendo utente, preferiti e segnalazioni collegate.
 
 TASKS – User Story 7:
-- Sviluppare l'endpoint API e il modale di conferma per la cancellazione definitiva dell'account.
+- Sviluppare l'endpoint API e la logica Mongoose per la cancellazione definitiva a cascata dei dati correlati.
 - Testare la corretta rimozione a cascata dei dati correlati all'utente nel database.
 
 #### User Story 8 – Associata a RF 5.1 / RF 5.4: Visualizzazione mappa e geolocalizzazione GPS
@@ -265,7 +265,7 @@ Gestione rapida delle rastrelliere preferite.<br>
 Come utente registrato, voglio salvare una rastrelliera o un parcheggio tra i miei preferiti, in modo da poterli ritrovare rapidamente nella dashboard personale.<br>
 
 Criteri di Accettazione:
-- È presente un pulsante interattivo (icona a forma di cuore) all'interno del popup di dettaglio per aggiungere o rimuovere il preferito.
+- È presente un pulsante interattivo per aggiungere il luogo tra i preferiti, inserendolo nella collection Favorites di MongoDB.
 - I preferiti salvati vengono sincronizzati nel database e sono consultabili nell'area personale.
 
 TASKS – User Story 10:
