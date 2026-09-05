@@ -1050,6 +1050,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
             saveToken(data.accessToken || data.token, data.refreshToken);
+            
             closeModal(loginModal);
             const regModal = document.getElementById('register-modal');
             if (regModal) closeModal(regModal);
@@ -1079,6 +1080,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 type: 'standard', shape: 'rectangular', theme: 'outline',
                 text: 'signin_with', size: 'large', width: 340,
                 locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
+            });
+            const regContainer = document.getElementById('google-register-btn-container');
+            if (regContainer) {
+                google.accounts.id.renderButton(regContainer, {
+                    type: 'standard', shape: 'rectangular', theme: 'outline',
+                    text: 'signup_with', size: 'large', width: 340,
+                    locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
             });
         } catch (err) { console.error('Errore Google SSO:', err); }
     }
