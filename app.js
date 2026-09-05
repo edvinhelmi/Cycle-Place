@@ -1,4 +1,20 @@
+require('dotenv').config();
+
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const path = require('path');
+const proj4 = require('proj4');
+const { OAuth2Client } = require('google-auth-library');
+const jwt = require('jsonwebtoken');
+const tokenChecker = require('./middleware/tokenChecker');
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
+
 const dataPath = path.join(__dirname, 'data');
 
 const readJsonFile = (filePath, callback) => {
@@ -47,24 +63,6 @@ const segnalazioneSchema = new mongoose.Schema({
 });
 const Segnalazione = mongoose.model('Segnalazione', segnalazioneSchema);
 
-const rateLimit = require('express-rate-limit');
-
-require('dotenv').config();
-
-const express    = require('express');
-const cors       = require('cors');
-const bodyParser = require('body-parser');
-const fs         = require('fs');
-const path       = require('path');
-const proj4      = require('proj4');
-const { OAuth2Client } = require('google-auth-library');
-const jwt        = require('jsonwebtoken');
-const tokenChecker = require('./middleware/tokenChecker');
-const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
-const crypto     = require('crypto');
-const SALT_ROUNDS = 10;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret_key';
 
 // --- Configurazione ---
 const app  = express();
