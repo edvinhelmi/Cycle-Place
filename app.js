@@ -37,7 +37,8 @@ const favoriteSchema = new mongoose.Schema({
     stalli: Number,
     zona: String,
     lat: Number,
-    lng: Number
+    lng: Number,
+    createdAt: { type: Date, default: Date.now }
 });
 const Favorite = mongoose.model('Favorite', favoriteSchema);
 
@@ -667,7 +668,8 @@ app.get('/api/v1/user/preferiti', tokenChecker, async (req, res) => {
             stalli: f.stalli,
             zona: f.zona,
             lat: f.lat,
-            lng: f.lng
+            lng: f.lng,
+            createdAt: f.createdAt
         }));
         res.json({ preferiti: formatted });
     } catch (err) {
@@ -790,8 +792,17 @@ app.delete('/api/v1/user/account', tokenChecker, async (req, res) => {
 app.post('/api/v1/segnalazioni', tokenChecker, async (req, res) => {
     try {
         const { rastrellieraId, tipo, note, lat, lng } = req.body;
-        const userId = req.user.sub || req.user.userId;
-        const nuovaSegnalazione = new Segnalazione({ userId, rastrellieraId, tipo, note, lat, lng });
+        const userId = req.user.sub || req.user.userId; // <-- Fondamentale
+
+        const nuovaSegnalazione = new Segnalazione({ 
+            userId, // <-- Deve essere salvato qui dentro
+            rastrellieraId, 
+            tipo, 
+            note, 
+            lat, 
+            lng 
+        });
+        
         await nuovaSegnalazione.save();
         res.status(201).json({ message: 'Segnalazione salvata' });
     } catch (err) {
@@ -802,7 +813,18 @@ app.post('/api/v1/segnalazioni', tokenChecker, async (req, res) => {
 app.get('/api/v1/user/segnalazioni', tokenChecker, async (req, res) => {
     try {
         const userId = req.user.sub || req.user.userId;
-        const segnalazioni = await Segnalazione.find({ userId }).sort({ createdAt: -1 });
+        const items = await Segnalazione.find({ userId }).sort({ createdAt: -1 });
+        
+        const segnalazioni = items.map(s => ({
+            id: s._id,
+            rastrellieraId: s.rastrellieraId,
+            tipo: s.tipo,
+            note: s.note,
+            lat: s.lat,
+            lng: s.lng,
+            createdAt: s.createdAt
+        }));
+
         res.json({ segnalazioni });
     } catch (err) {
         res.status(500).json({ error: 'Errore recupero segnalazioni utente: ' + err.message });
