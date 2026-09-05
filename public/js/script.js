@@ -995,49 +995,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkResetPasswordFromUrl();
 
     // Google SSO
-
-    async function initGoogleRegisterSSO() {
-        try {
-            const res = await fetch('/api/v1/config');
-            const { googleClientId } = await res.json();
-            const container = document.getElementById('google-register-btn-container');
-            if (!container) return;
-    
-            if (!googleClientId || googleClientId.includes('IL_TUO')) {
-                container.innerHTML = '<small style="color:#888">Google Login: aggiungi GOOGLE_CLIENT_ID nel file .env</small>';
-                return;
-            }
-    
-            await new Promise(resolve => {
-                if (window.google?.accounts) return resolve();
-                const t = setInterval(() => { if (window.google?.accounts) { clearInterval(t); resolve(); } }, 100);
-            });
-
-            google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential, ux_mode: 'popup' });
-    
-            const loginContainer = document.getElementById('google-btn-container');
-            if (loginContainer) {
-                google.accounts.id.renderButton(loginContainer, {
-                    type: 'standard', shape: 'rectangular', theme: 'outline',
-                    text: 'signin_with', size: 'large', width: 340,
-                    locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
-                });
-            }
-
-            // 2. Renderizza pulsante nel modale Registrazione
-            const regContainer = document.getElementById('google-register-btn-container');
-            if (regContainer) {
-                google.accounts.id.renderButton(regContainer, {
-                    type: 'standard', shape: 'rectangular', theme: 'outline',
-                    text: 'signup_with', size: 'large', width: 340,
-                    locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
-            });
-        } catch (err) { 
-            console.error('Errore Google SSO Registrazione:', err); 
-        }
-    }
-    
-    initGoogleRegisterSSO();
     
     async function handleGoogleCredential(response) {
         const googleErrorEl = document.getElementById('google-error');
@@ -1087,7 +1044,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     type: 'standard', shape: 'rectangular', theme: 'outline',
                     text: 'signup_with', size: 'large', width: 340,
                     locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
-            });
+                });
+            }
         } catch (err) { console.error('Errore Google SSO:', err); }
     }
 
