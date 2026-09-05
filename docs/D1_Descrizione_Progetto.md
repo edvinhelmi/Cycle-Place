@@ -8,7 +8,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 
 ### Document Info<br>
 **Doc. Name**: D1-cycle-place-DescrizioneProgetto<br>
-**Doc. Number**: D1 v1.3<br>
+**Doc. Number**: D1 v1.4<br>
 **Description**: Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place.
 
 ---
@@ -79,12 +79,12 @@ Le funzionalità principali dell'applicazione sono state definite per risolvere 
 - **RF 3.1 - Visualizzazione del profilo** (informazioni personali, rastrelliere salvate e segnalazioni effettuate recuperate in tempo reale da MongoDB).
 - **RF 3.2 - Modifica delle informazioni personali** 
 - **RF 3.3 - Modifica della password**.
-- **RF 3.4 - Richiesta di cancellazione definitiva dell'account e dei dati associati** tramite eliminazione a cascata di preferiti e segnalazioni collegate all'utente su MongoDB..
+- **RF 3.4 - Richiesta di cancellazione definitiva dell'account e dei dati associati** tramite eliminazione a cascata di preferiti e segnalazioni collegate all'utente su MongoDB.
 - **RF 3.5 - Cancellazione definitiva del proprio account e di tutti i dati associati** (preferiti, segnalazioni).
-- **RF 3.6 - Cancellazione rastrelliere preferite dal profilo**: L'utente registrato deve poter visualizzare l'elenco delle proprie rastrelliere o parcheggi preferiti all'interno della dashboard personale e decidere di rimuoverli in qualsiasi momento, sincronizzando la modifica in tempo reale con il database MongoDB.
+- **RF 3.6 - Cancellazione rastrelliere preferite dal profilo**: L'utente registrato deve poter visualizzare l'elenco delle proprie rastrelliere o parcheggi preferiti all'interno della profilo personale e decidere di rimuoverli in qualsiasi momento, sincronizzando la modifica in tempo reale con il database MongoDB.
 
 ### RF 4 - Backup e Ripristino
-Esecuzione di backup e snapshot regolari gestiti direttamente tramite i servizi nativi di MongoDB Atlas per garantire la continuità e il recupero dei dati critici.
+Esecuzione di backup periodici del database MongoDB e dei dati persistenti (utenti, preferiti, segnalazioni) per garantirne il ripristino rapido e la consistenza in caso di guasti o riavvio del server.
 
 ### RF 5 - Gestione mappa e aree di sosta
 - **RF 5.1 - Visualizzazione mappa** centrata sulla posizione GPS dell'utente o sull'area selezionata.
@@ -130,11 +130,12 @@ Il sistema deve permettere all'utente di scegliere in quale lingua fruire dell'a
 - **RNF 3.1 - Design coerente e Reattività**: L'interfaccia utente (UI) deve seguire le linee guida di design moderne (Material Design/Human Interface Guidelines) e rispondere ai gesti touch in modo istantaneo. Il processo di invio di una segnalazione deve essere rapido e intuitivo.
 
 ### RNF 4 - Affidabilità e Disponibilità
-- **RNF 4.1 - Disponibilità del servizio**: Il back-end e l'API devono garantire un tempo di attività (uptime) pari al 99.5% su base mensile (esclusi gli slot di manutenzione programmati).
+- **RNF 4.1 - Disponibilità del servizio**: La persistenza su cluster MongoDB assicura elevata disponibilità del dato e tolleranza ai guasti, minimizzando i rischi di lock su disco tipici della persistenza su file flat e garantendo l'uptime target del 99.5%.
 - **RNF 4.2 - Durata della sessione**: Dopo il login, l'utente autenticato deve rimanere connesso per un periodo di tempo esteso (30 giorni, gestito tramite Refresh Token JWT), richiedendo un nuovo login solo in caso di logout esplicito o scadenza prolungata.
 
 ### RNF 5 - Manutenibilità e Portabilità
 - **RNF 5.1 -Modularità, Logging e Standard dei dati**: Il codice sorgente del back-end deve essere strutturato in modo modulare. Il sistema deve implementare un logging degli errori e tutti i dati delle aree di sosta e delle segnalazioni devono essere scambiati nel formato standard GeoJSON.
+- **RNF 5.2 - Struttura Schemi Dati**: "Il backend garantisce l'integrità e la coerenza dei dati attraverso la definizione di schemi Mongoose con validazione rigorosa dei tipi (ObjectId, String, Number, Date), indici univoci (es. indice unique su email) e vincoli di consistenza."
 
 ---
 
@@ -217,11 +218,11 @@ Visualizzazione dei dati personali e modifica delle impostazioni.<br>
 Come utente registrato, voglio poter visualizzare il mio profilo e modificare le mie informazioni personali o la password, in modo da mantenere i dati aggiornati e sicuri.<br>
 
 Criteri di Accettazione:
-- La dashboard personale mostra le informazioni anagrafiche e le preferenze dell'utente.
+- Il profilo personale mostra le informazioni anagrafiche e le preferenze dell'utente.
 - È disponibile una sezione dedicata alla modifica della password e dei dati personali.
 
 TASKS – User Story 6:
-- Creare la UI della dashboard personale per la gestione dei dati anagrafici.
+- Creare la UI del profilo personale per la gestione dei dati anagrafici.
 - Sviluppare gli endpoint API per l'aggiornamento sicuro del profilo e della password.
 
 #### User Story 7 – Associata a RF 3.4 / RF 3.5: Cancellazione account (GDPR)
@@ -262,7 +263,7 @@ TASKS – User Story 9:
 
 #### User Story 10 – Associata a RF 5.5: Salvataggio preferiti
 Gestione rapida delle rastrelliere preferite.<br>
-Come utente registrato, voglio salvare una rastrelliera o un parcheggio tra i miei preferiti, in modo da poterli ritrovare rapidamente nella dashboard personale.<br>
+Come utente registrato, voglio salvare una rastrelliera o un parcheggio tra i miei preferiti, in modo da poterli ritrovare rapidamente nel profilo personale.<br>
 
 Criteri di Accettazione:
 - È presente un pulsante interattivo per aggiungere il luogo tra i preferiti, inserendolo nella collection Favorites di MongoDB.
@@ -277,12 +278,12 @@ Gestione e rimozione dei preferiti salvati dall'area personale.<br>
 Come utente registrato, voglio poter rimuovere una rastrelliera o un parcheggio dai miei preferiti direttamente dal mio profilo, in modo da mantenere aggiornato l'elenco dei luoghi di mio interesse.<br>
 
 Criteri di Accettazione:
-- Nella dashboard personale è presente un pulsante di rimozione associato a ciascun preferito salvato.
-- Cliccando sul pulsante, il luogo viene rimosso istantaneamente sia dall'elenco della dashboard che dallo stato attivo sulla mappa.
+- Nel profilo personale è presente un pulsante di rimozione associato a ciascun preferito salvato.
+- Cliccando sul pulsante, il luogo viene rimosso istantaneamente sia dall'elenco del profilo che dallo stato attivo sulla mappa.
 
 TASKS – User Story 11:
 - Sviluppare l'endpoint API DELETE per la rimozione dei preferiti dal profilo utente.
-- Aggiornare la UI della dashboard per consentire la cancellazione rapida dei preferiti salvati.
+- Aggiornare la UI del profilo per consentire la cancellazione rapida dei preferiti salvati.
 - Sincronizzare lo stato visivo dei marker a cuore sulla mappa in seguito alla rimozione.
 
 #### User Story 12 – Associata a RF 6: Modulo segnalazione guasti e problemi
@@ -415,9 +416,9 @@ Cliccando su un qualsiasi marker sulla mappa si attiva un popup strutturato in s
 <em>Form segnalazione</em>
 </p>
 
-### 5. Dashboard Personale (Area Riservata)
+### 5. Profilo Personale (Area Riservata)
 
-La dashboard è un'area protetta e accessibile unicamente agli utenti autenticati, strutturata come un pannello di controllo completo per la gestione del profilo e delle preferenze.
+Il profilo è un'area protetta e accessibile unicamente agli utenti autenticati, strutturata come un pannello di controllo completo per la gestione del profilo e delle preferenze.
 
 - **RF 3.1 & RF 3.2 (Visualizzazione e modifica profilo)**: L'utente può visualizzare i propri dati anagrafici, il provider di accesso (Locale o Google) e modificare le proprie informazioni personali o la password tramite un form dedicato con controlli di sicurezza.
 - **RF 3.6 & RF 5.5 (Storico Rastrelliere Preferite)**: Una sezione dedicata elenca tutte le rastrelliere e i parcheggi salvati nei preferiti, consentendo all'utente di consultarli o di rimuoverli rapidamente sincronizzando la modifica in tempo reale con il database.
@@ -447,14 +448,14 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 6. **Routing In-App:** L'utente consulta il numero di posti e, soddisfatto, esegue il tap sul bottone interno per avviare il calcolo del percorso guidato.
 7. **Conclusione:** Il sistema mostra a schermo la polilinea del tragitto e le indicazioni turn-by-turn per raggiungere lo stallo in bicicletta o a piedi.
 
-### Flusso 2: Autenticazione e visualizzazione Dashboard
+### Flusso 2: Autenticazione e visualizzazione Profilo
 1. **Avvio:** L'utente accede all'app e intende controllare il proprio profilo.
 2. **Accesso form:** L'utente identifica la Navbar e preme il pulsante "Login". 
 3. **Interazione modale:** Un layer semi-trasparente sfuoca la mappa di background, ed emerge al centro un box di autenticazione ibrida.
 4. **Inserimento:** L'utente digita "email" e "password" classiche nel form formattato ad-hoc, per poi inviare il *submit*.
 5. **Validazione:** Il backend verifica la conformità del payload.
-6. **Cambio di Stato UI:** L'esito è positivo. Il modale di login collassa. In modo invisibile la navbar effettua il binding reattivo e nasconde il bottone di Login/Registrazione, sostituendoli con un nuovo pulsante "Dashboard" e il saluto ("Ciao, Utente").
-7. **Conclusione:** L'utente clicca su "Dashboard" venendo reindirizzato alla gestione del profilo, ove godrà dei pieni privilegi del suo ruolo, inclusa la gestione dei preferiti e delle segnalazioni.
+6. **Cambio di Stato UI:** L'esito è positivo. Il modale di login collassa. In modo invisibile la navbar effettua il binding reattivo e nasconde il bottone di Login/Registrazione, sostituendoli con un nuovo pulsante "Profilo" e il saluto ("Ciao, Utente").
+7. **Conclusione:** L'utente clicca su "Profilo" venendo reindirizzato alla gestione del profilo, ove godrà dei pieni privilegi del suo ruolo, inclusa la gestione dei preferiti e delle segnalazioni.
 
 ### Flusso 3: Salvataggio preferiti e invio segnalazione
 1. **Avvio:** L'utente autenticato naviga sulla mappa ed individua una rastrelliera di riferimento abituale.
