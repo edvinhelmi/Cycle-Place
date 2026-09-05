@@ -54,6 +54,7 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 const segnalazioneSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, required: true },
     rastrellieraId: { type: Number, required: true },
     tipo: { type: String, required: true },
     note: String,
@@ -658,7 +659,7 @@ app.get('/api/v1/user/me', tokenChecker, (req, res) => {
 
 app.get('/api/v1/user/preferiti', tokenChecker, async (req, res) => {
     try {
-        const userId = req.user.userId;
+        const userId = req.user.sub || req.user.userId;
         const preferiti = await Favorite.find({ userId });
         const formatted = preferiti.map(f => ({
             id: f.rastrellieraId,
@@ -677,7 +678,7 @@ app.get('/api/v1/user/preferiti', tokenChecker, async (req, res) => {
 app.post('/api/v1/user/preferiti', tokenChecker, async (req, res) => {
     try {
         const { rastrellieraId, tipologia, stalli, zona, lat, lng } = req.body;
-        const userId = req.user.userId;
+        const userId = req.user.sub || req.user.userId;
 
         let fav = await Favorite.findOne({ userId, rastrellieraId });
         if (!fav) {
@@ -692,7 +693,7 @@ app.post('/api/v1/user/preferiti', tokenChecker, async (req, res) => {
 
 app.delete('/api/v1/user/preferiti/:id', tokenChecker, async (req, res) => {
     try {
-        const userId = req.user.userId;
+        const userId = req.user.sub || req.user.userId;
         const rastrellieraId = Number(req.params.id);
 
         await Favorite.findOneAndDelete({ userId, rastrellieraId });
@@ -789,11 +790,22 @@ app.delete('/api/v1/user/account', tokenChecker, async (req, res) => {
 app.post('/api/v1/segnalazioni', tokenChecker, async (req, res) => {
     try {
         const { rastrellieraId, tipo, note, lat, lng } = req.body;
-        const nuovaSegnalazione = new Segnalazione({ rastrellieraId, tipo, note, lat, lng });
+        const userId = req.user.sub || req.user.userId;
+        const nuovaSegnalazione = new Segnalazione({ userId, rastrellieraId, tipo, note, lat, lng });
         await nuovaSegnalazione.save();
         res.status(201).json({ message: 'Segnalazione salvata' });
     } catch (err) {
         res.status(500).json({ error: 'Errore salvataggio segnalazione: ' + err.message });
+    }
+});
+
+app.get('/api/v1/user/segnalazioni', tokenChecker, async (req, res) => {
+    try {
+        const userId = req.user.sub || req.user.userId;
+        const segnalazioni = await Segnalazione.find({ userId }).sort({ createdAt: -1 });
+        res.json({ segnalazioni });
+    } catch (err) {
+        res.status(500).json({ error: 'Errore recupero segnalazioni utente: ' + err.message });
     }
 });
 
