@@ -1012,15 +1012,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (window.google?.accounts) return resolve();
                 const t = setInterval(() => { if (window.google?.accounts) { clearInterval(t); resolve(); } }, 100);
             });
+
+            google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential, ux_mode: 'popup' });
     
-            google.accounts.id.renderButton(container, {
-                type: 'standard', 
-                shape: 'rectangular', 
-                theme: 'outline',
-                text: 'signup_with', // Mostra "Registrati con Google"
-                size: 'large', 
-                width: 340,
-                locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
+            const loginContainer = document.getElementById('google-btn-container');
+            if (loginContainer) {
+                google.accounts.id.renderButton(loginContainer, {
+                    type: 'standard', shape: 'rectangular', theme: 'outline',
+                    text: 'signin_with', size: 'large', width: 340,
+                    locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
+                });
+            }
+
+            // 2. Renderizza pulsante nel modale Registrazione
+            const regContainer = document.getElementById('google-register-btn-container');
+            if (regContainer) {
+                google.accounts.id.renderButton(regContainer, {
+                    type: 'standard', shape: 'rectangular', theme: 'outline',
+                    text: 'signup_with', size: 'large', width: 340,
+                    locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
             });
         } catch (err) { 
             console.error('Errore Google SSO Registrazione:', err); 
