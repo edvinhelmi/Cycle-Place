@@ -549,7 +549,7 @@ app.post('/api/v1/forgot-password', authLimiter, async (req, res) => {
 });
 
 
-app.get('/api/v1/verify-reset-token', (req, res) => {
+app.get('/api/v1/verify-reset-token', async (req, res) => {
     const { token } = req.query;
     if (!token) {
         return res.status(400).json({ valid: false, error: 'Token mancante' });
@@ -572,7 +572,7 @@ app.get('/api/v1/verify-reset-token', (req, res) => {
     }
 });
 
-app.post('/api/v1/reset-password', authLimiter, (req, res) => {
+app.post('/api/v1/reset-password', authLimiter, async (req, res) => {
     const { token, newPassword, lang } = req.body;
     const userLang = ['it', 'en', 'de'].includes(lang) ? lang : 'it';
     const rMsg = RESET_RESPONSES[userLang];
@@ -656,7 +656,7 @@ app.get('/api/v1/user/me', tokenChecker, (req, res) => {
 
 // --- Preferiti ---
 
-app.get('/api/v1/user/preferiti', authenticateToken, async (req, res) => {
+app.get('/api/v1/user/preferiti', tokenChecker, async (req, res) => {
     try {
         const userId = req.user.userId;
         const preferiti = await Favorite.find({ userId });
@@ -674,7 +674,7 @@ app.get('/api/v1/user/preferiti', authenticateToken, async (req, res) => {
     }
 });
 
-app.post('/api/v1/user/preferiti', authenticateToken, async (req, res) => {
+app.post('/api/v1/user/preferiti', tokenChecker, async (req, res) => {
     try {
         const { rastrellieraId, tipologia, stalli, zona, lat, lng } = req.body;
         const userId = req.user.userId;
@@ -690,7 +690,7 @@ app.post('/api/v1/user/preferiti', authenticateToken, async (req, res) => {
     }
 });
 
-app.delete('/api/v1/user/preferiti/:id', authenticateToken, async (req, res) => {
+app.delete('/api/v1/user/preferiti/:id', tokenChecker, async (req, res) => {
     try {
         const userId = req.user.userId;
         const rastrellieraId = Number(req.params.id);
@@ -786,7 +786,7 @@ app.delete('/api/v1/user/account', tokenChecker, async (req, res) => {
 // API: Segnalazioni (protette da JWT)
 // =======================================================
 
-app.post('/api/v1/segnalazioni', authenticateToken, async (req, res) => {
+app.post('/api/v1/segnalazioni', tokenChecker, async (req, res) => {
     try {
         const { rastrellieraId, tipo, note, lat, lng } = req.body;
         const nuovaSegnalazione = new Segnalazione({ rastrellieraId, tipo, note, lat, lng });
