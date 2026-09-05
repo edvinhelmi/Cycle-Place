@@ -6,6 +6,15 @@
 const TOKEN_KEY = 'tbp_jwt';
 const REFRESH_TOKEN_KEY = 'tbp_refresh_jwt';
 
+function updateGreeting() {
+    const dashGreetingText = document.getElementById('dash-greeting-text');
+    if (dashGreetingText) {
+        const token = getToken();
+        const user = token ? decodeToken(token) : {};
+        dashGreetingText.innerHTML = tr('greeting', { name: `<strong style="color: #3b82f6 !important;">${user.name || 'Utente'}</strong>` });
+    }
+}
+
 // =======================================================
 // JWT Helpers
 // =======================================================
@@ -72,14 +81,6 @@ async function init() {
     }
 
     const user = decodeToken(token);
-
-    // Navbar & Saluto utente
-    function updateGreeting() {
-        const dashGreetingText = document.getElementById('dash-greeting-text');
-        if (dashGreetingText) {
-            dashGreetingText.innerHTML = tr('greeting', { name: `<strong style="color: #3b82f6 !important;">${user.name || 'Utente'}</strong>` });
-        }
-    }
     
     updateGreeting();
 
