@@ -1,6 +1,6 @@
 /**
  * script.js — Cycle Place
- * Task 1: Dashboard + Preferiti (❤️)
+ * Task 1: Profilo + Preferiti (❤️)
  * Task 2: Filtri additivi per layer
  * Task 3: Segnalazioni guasti
  * Task 4: Multilingua IT / EN / DE
@@ -995,6 +995,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkResetPasswordFromUrl();
 
     // Google SSO
+
+    async function initGoogleRegisterSSO() {
+        try {
+            const res = await fetch('/api/v1/config');
+            const { googleClientId } = await res.json();
+            const container = document.getElementById('google-register-btn-container');
+            if (!container) return;
+    
+            if (!googleClientId || googleClientId.includes('IL_TUO')) {
+                container.innerHTML = '<small style="color:#888">Google Login: aggiungi GOOGLE_CLIENT_ID nel file .env</small>';
+                return;
+            }
+    
+            await new Promise(resolve => {
+                if (window.google?.accounts) return resolve();
+                const t = setInterval(() => { if (window.google?.accounts) { clearInterval(t); resolve(); } }, 100);
+            });
+    
+            google.accounts.id.renderButton(container, {
+                type: 'standard', 
+                shape: 'rectangular', 
+                theme: 'outline',
+                text: 'signup_with', // Mostra "Registrati con Google"
+                size: 'large', 
+                width: 340,
+                locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
+            });
+        } catch (err) { 
+            console.error('Errore Google SSO Registrazione:', err); 
+        }
+    }
+    
+    initGoogleRegisterSSO();
+    
     async function handleGoogleCredential(response) {
         const googleErrorEl = document.getElementById('google-error');
         if (googleErrorEl) googleErrorEl.textContent = '';
@@ -1007,6 +1041,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!res.ok) throw new Error(data.error);
             saveToken(data.accessToken || data.token, data.refreshToken);
             closeModal(loginModal);
+            const regModal = document.getElementById('register-modal');
+            if (regModal) closeModal(regModal);
             loginSuccess(data.user);
             setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
         } catch (err) {
