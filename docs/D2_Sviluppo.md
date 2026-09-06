@@ -282,6 +282,7 @@ https://github.com/edvinhelmi/Cycle-Place.git<br>
 
 La struttura delle cartelle e dei file sorgente è così organizzata:
 
+```text
 CyclePlace/
 ├── data/
 │   ├── parcheggi.geojson        
@@ -337,6 +338,7 @@ CyclePlace/
 ├── oas3.yaml                   
 ├── package.json                
 └── README.md                   
+```
 
 ### 2.2 Branching strategy e organizzazione del lavoro
 La gestione del ciclo di vita del codice ha utilizzato un repository Git ospitato in cloud (GitHub) mediante la metodologia Agile. La strategia di branching scelta si basa sul GitHub Flow: il ramo `main` riflette unicamente lo stato *deployable* (production-ready) del software. Ogni sviluppatore del team ha operato isolatamente in branch secondari ramificati per *Feature* (es. `feature/google-login`, `fix/mobile-z-index`), e il processo di fusione verso il tronco primario avveniva esclusivamente via Pull Request (PR), sottomesse a validazione e Code Review incrociata.
