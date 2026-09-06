@@ -8,7 +8,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 | Parametro | Dettaglio |
 | :--- | :--- |
 | **Doc. Name** | D2_CyclePlace_Sviluppo |
-| **Doc. Number** | D2 V1.0 |
+| **Doc. Number** | D2 V1.2 |
 | **Data Rilascio** | A.A. 2025/2026 |
 | **Stato** | Rilasciato / Conforme specifiche UniTN |
 | **Autori** | Gruppo Sviluppo Cycle Place |
@@ -336,15 +336,17 @@ CyclePlace/
 ├── .gitignore                   
 ├── app.js                      
 ├── oas3.yaml                   
-├── package.json                
+├── package.json
+├── tailwind.config.js              
 └── README.md                   
 ```
 
 ### 2.2 Branching strategy e organizzazione del lavoro
-La gestione del ciclo di vita del codice ha utilizzato un repository Git ospitato in cloud (GitHub) mediante la metodologia Agile. La strategia di branching scelta si basa sul GitHub Flow: il ramo `main` riflette unicamente lo stato *deployable* (production-ready) del software. Ogni sviluppatore del team ha operato isolatamente in branch secondari ramificati per *Feature* (es. `feature/google-login`, `fix/mobile-z-index`), e il processo di fusione verso il tronco primario avveniva esclusivamente via Pull Request (PR), sottomesse a validazione e Code Review incrociata.
+La gestione del ciclo di vita del codice ha utilizzato un repository Git ospitato in cloud (GitHub) mediante la metodologia Agile. La strategia di branching scelta si basa sul GitHub Flow: il ramo `main` riflette unicamente lo stato *deployable* (production-ready) del software.
+La ripartizione dei contributi e dei commit è tracciata sulla piattaforma GitHub. Le eventuali asimmetrie nel computo numerico dei commit tra i componenti derivano da differenti approcci di raggruppamento (molti commit piccoli per modifiche UI/CSS e modifiche ai documenti a fronte di commit corposi per l'infrastruttura backend e i casi di test).
 
 ### 2.3 Dependencies
-Le librerie principali che hanno consentito lo sviluppo rapido e sicuro del sistema sono (evinte dal file `package.json` e header client):
+Il backend del progetto si basa sulle seguenti dipendenze runtime caricate tramite npm:
 *   **express**: (Backend) Framework minimalista e flessibile per la creazione del Web Server e il routing logico delle chiamate.
 *   **jsonwebtoken**: (Backend) Permette la serializzazione, validazione e scadenza (`exp`) dei token JWT in modo *stateless*.
 *   **google-auth-library**: (Backend) Libreria crittografica ufficiale di Google impiegata per il decoding del ticket SSO del login ibrido.
@@ -353,34 +355,53 @@ Le librerie principali che hanno consentito lo sviluppo rapido e sicuro del sist
 *   **Tailwind CSS**: (Frontend) Framework utility-first utilizzato per definire rapidamente stili responsivi direttamente nel markup, garantendo consistenza e una codebase CSS minima.
 *   **DaisyUI**: (Frontend) Libreria di componenti per Tailwind CSS, utilizzata per lo scaffolding rapido di elementi UI (bottoni, modali, card) preservando pulizia del codice e semantica.
 *   **Leaflet.js**: (Frontend) Framework cartografico client-side integrato nativamente su CDN. Consente l'innesto della View Map in HTML5, la gestione del pan/zoom dinamico, e l'overlay dei custom marker e geo-layer.
+*   **nodemailer**: Modulo di gestione SMTP per l'inoltro delle comunicazioni transazionali (es. reset password utente).
 
 ### 2.4 Database
-A causa del ridottissimo I/O rate temporale, il progetto rifiuta il sovradimensionamento di DBMS complessi, prediligendo un approccio leggero orientato agli standard aperti. Le infrastrutture geografiche sono serializzate in formati GeoJSON caricati dal file-system su richiesta dell'Express Server. La persistenza dei dati utente correlati (profilo, preferiti e segnalazioni) sfrutta endpoint backend dedicati con storage strutturato su file system, garantendo latenze azzerate e la massima portabilità del prototipo.
+A causa del ridottissimo I/O rate temporale, il progetto rifiuta il sovradimensionamento di DBMS complessi, prediligendo un approccio leggero orientato agli standard aperti. Le infrastrutture geografiche sono serializzate in formati GeoJSON caricati dal file-system su richiesta dell'Express Server. Per preservare la massima portabilità del prototipo, azzerare le latenze di runtime ed evitare l'overhead di un DBMS esterno dedicato, il sistema memorizza le entità applicative all'interno di file JSON/GeoJSON strutturati:
+
+- **Users** (users.json): Mantiene l'anagrafica utente, il digest della password crittografata con bcrypt, i token di sessione e recupero credenziali.
+
+- **Preferiti** (preferiti.json): Mappatura bidirezionale indicizzata per ID utente (sub) contenente l'elenco dei punti d'interesse salvati
+
+- **Segnalazioni** (segnalazioni.json): Registro delle anomalie territoriali comunicate dalla community con relativo stato di avanzamento..
+
 
 ### 2.5 Testing (FONDAMENTALE)
-A garanzia dell'affidabilità del sistema, è stata effettuata un'Analisi Funzionale del layer applicativo secondo il paradigma logico di ispezione **Black Box Testing**, non curandosi della logica interna ma validando il perimetro tra l'input e l'output generato dal sistema.
+Il piano di verifica e validazione della piattaforma integra una suite di collaudo automatizzata unita a test funzionali di tipo Black Box, orientati alla verifica puntuale di input, output e stati di sistema.
 
 | Numero | Test Case | Descrizione Test Case | Test Data | Precondizioni | Dipendenze | Risultato Atteso | Risultato Riscontrato |
 |:---:|---|---|---|---|---|---|:---:|
-| **TC-01** | *Login formale valido* | Verifica che le credenziali locali formattate correttamente autorizzino il login. | email: "test@local.it", pwd: "123" | L'utente è inserito nel record store. | - | Il server risponde con `200 OK` + Token JWT. Il frontend esegue un re-render della navbar (stato: loggato). | Positivo |
-| **TC-02** | *Login errato (Test Negativo)* | Verifica che il sistema prevenga tentativi di furto di identità con credenziali errate. | email: "test@local.it", pwd: "err" | L'utente è registrato e il file è attivo. | - | Il backend ferma la transazione con Status `401 Unauthorized` e notifica l'UI dell'errore. | Positivo |
-| **TC-03** | *Filtraggio dinamico layer* | Verifica disattivazione e ricalcolo parziale della mappa (stalli Tradizionali). | Switch: Checkbox disattivata (stato `false`) | La mappa Leaflet è esposta, gli API data sono inglobati. | Servizio Leaflet | I marker `STILI.tradizionale` spariscono all'istante dall'overlay senza dover fare reload della pagina. | Positivo |
-| **TC-04** | *Autolocalizzazione GPS* | Verifica la funzionalità del bottone Floating GPS sulla UI Mobile/Desktop. | Azione: Click su bottone "🎯" | Browser HTML5 Geolocation API e consensi utente. | Hardware GPS/Rete | La Viewport esegue un fly-pan morbido, focalizzando le coordinate geolocalizzate al centro esatto dello schermo. | Positivo |
-| **TC-05** | *Protezione Segnalazioni (Bound. Case)*| Verifica che un Utente Anonimo non possa spammare segnalazioni. | Payload dummy di segnalazione | Stato Utente: Logout / Non autorizzato. | API Router `/api/v1/segnalazioni` | Il Middleware intercetta assenza di token Bearer e blocca (drop) il pacchetto con HTTP 401. | Positivo |
-| **TC-06** | *Ricerca toponomastica spaziale* | Verifica che l'immissione testuale si leghi in modo corretto allo spostamento vettoriale della View. | Input Testo: "Via Roma" | Marker serializzati nel LayerGroup. | OpenStreetMap Nominatim/Geocode | Lo script interpola l'input e lancia una bounding-box sulla zona di "Via Roma", mostrando le sole rastrelliere ivi contenute. | Positivo |
-| **TC-07** | *Rimozione rastrelliera preferita* | Verifica la cancellazione di un preferito dall'area profilo utente. | ID Rastrelliera target | Utente autenticato con almeno un preferito attivo. | Endpoint `DELETE /api/v1/user/preferiti/:id` | Il server risponde con `200 OK`, il record viene rimosso dal database e i marker sulla mappa si aggiornano rimuovendo lo stato attivo. | Positivo |
+| **TC-01** | Creazione account con campi anagrafici vuoti | `name`: "", `email`: "test@local.it", `password`: "123" | Nessuna | Form di registrazione client e backend | Rigetto della transazione con HTTP `400 Bad Request` e feedback d'errore su input. | Positivo | Controllo consistenza minima dati |
+| **TC-02** | Creazione account con email duplicata | `email`: "test@local.it", credenziali formattate | Utente già presente nel sistema | Endpoint `POST /api/v1/register` | Il backend intercetta il duplicato, non altera i record e restituisce `409 Conflict`. | Positivo | Verifica vincolo di unicità |
+| **TC-03** | Creazione account con violazione policy password | `password`: "123" (minore di 8 caratteri, senza maiuscole o simboli) | Nessuna | Regex sicurezza password | Blocco sottomissione con HTTP `400` ed evidenziazione dei requisiti mancanti. | Positivo | Protezione contro password deboli |
+| **TC-04** | *Login formale valido* | Verifica che le credenziali locali formattate correttamente autorizzino il login. | email: "test@local.it", pwd: "123" | L'utente è inserito nel record store. | - | Il server risponde con `200 OK` + Token JWT. Il frontend esegue un re-render della navbar (stato: loggato). | Positivo |
+| **TC-05** | *Login errato (Test Negativo)* | Verifica che il sistema prevenga tentativi di furto di identità con credenziali errate. | email: "test@local.it", pwd: "err" | L'utente è registrato e il file è attivo. | - | Il backend ferma la transazione con Status `401 Unauthorized` e notifica l'UI dell'errore. | Positivo |
+| **TC-06** | Autenticazione federata tramite Google Sign-In (SSO) | Payload contenente `credential` (Google ID Token firmato) | Google Client ID configurato | Endpoint `POST /api/v1/auth/google` | Decodifica del ticket Google, creazione/riconoscimento utente e rilascio di JWT valido (`200 OK`). | Positivo | Accesso terzo senza password locale |
+| **TC-07** | Rinnovo automatico sessione scaduta tramite Refresh Token | Payload: `{ refreshToken attivo nel database | Endpoint `POST /api/v1/refresh-token` | Rilascio di un nuovo Access Token valido per 15 minuti senza forzare il re-login dell'utente (`200 OK`). | Positivo | Persistenza fluida della sessione (RF 1.7) |
+| **TC-08** | Richiesta link di recupero password | `email`: "mario.test@unitn.it", `lang`: "it" | Account locale esistente | Endpoint `POST /api/v1/forgot-password` | Generazione token monouso sicuro a 64 caratteri, invio email di ripristino e risposta `200 OK`. | Positivo | Flusso self-service recupero password (RF 1.4) |
+| **TC-09** | Impostazione nuova password con token valido | `token`: "<token_esadecimale>", `newPassword`: "Nuova!2026" | Token di reset non scaduto (< 1 ora) | Endpoint `POST /api/v1/reset-password` | Aggiornamento hash bcrypt su `users.json`, invalidazione token usato e risposta `200 OK`. | Positivo | Completamento ciclo ripristino credenziali |
+| **TC-10** | Modifica dati anagrafici e cambio password da Dashboard | Payload con nuovo nome, password attuale e nuova password valida | Utente autenticato con Bearer token locale | Endpoint `PUT /api/v1/user/profile` | Verifica password corrente, re-hashing nuova password, emissione JWT aggiornato e risposta `200 OK`. | Positivo | Gestione profilo e sicurezza (RF 3.2, RF 3.3) |
+| **TC-11** | Cancellazione definitiva account utente (Diritto all'Oblio GDPR) | Richiesta autenticata con Bearer Token utente | Utente autenticato con preferiti e segnalazioni attive | Endpoint `DELETE /api/v1/user/account` | Rimozione fisica dell'utente da `users.json` e bonifica a cascata di preferiti e segnalazioni collegate (`200 OK`). | Positivo | Conformità normativa GDPR (RF 3.4) |
+| **TC-12** | *Filtraggio dinamico layer cartografici* | Verifica disattivazione e ricalcolo parziale della mappa (stalli Tradizionali). | Switch: Checkbox disattivata (stato `false`) | La mappa Leaflet è esposta, gli API data sono inglobati. | Servizio Leaflet | I marker `STILI.tradizionale` spariscono all'istante dall'overlay senza dover fare reload della pagina. | Positivo |
+| **TC-13** | *Autolocalizzazione GPS* | Verifica la funzionalità del bottone Floating GPS sulla UI Mobile/Desktop. | Azione: Click su bottone "🎯" | Browser HTML5 Geolocation API e consensi utente. | Hardware GPS/Rete | La Viewport esegue un fly-pan morbido, focalizzando le coordinate geolocalizzate al centro esatto dello schermo. | Positivo |
+| **TC-14** | Protezione invio segnalazioni da utenti anonimi | Sottomissione payload segnalazione guasto | Utente anonimo (nessun Bearer token) | Middleware `tokenChecker` | Intercettazione richiesta non autenticata e blocco immediato con codice HTTP `401`. | Positivo | Controllo accessi e integrità community |
+| **TC-15** | *Ricerca toponomastica spaziale* | Verifica che l'immissione testuale si leghi in modo corretto allo spostamento vettoriale della View. | Input Testo: "Via Roma" | Marker serializzati nel LayerGroup. | OpenStreetMap Nominatim/Geocode | Lo script interpola l'input e lancia una bounding-box sulla zona di "Via Roma", mostrando le sole rastrelliere ivi contenute. | Positivo |
+| **TC-16** | Protezione endpoint contro attacchi di forza bruta (Rate Limiter) | Più di 10 tentativi di login consecutivi in meno di 15 minuti | Nessuna | Middleware `express-rate-limit` | Intercettazione delle richieste eccedenti con blocco temporaneo e risposta HTTP `429 Too Many Requests`. | Positivo | Robustezza e sicurezza applicativa (RNF 2.5) |
+| **TC-17** | Aggiunta e persistenza preferito | ID stallo: `142`, tipologia: "Bloccatelaio" | Utente autenticato con JWT valido | Endpoint `POST /api/v1/user/preferiti` | HTTP `201`, salvataggio su database e cambio di stato visivo dell'icona (cuore pieno). | Positivo | Sincronizzazione profilo |
+| **TC-18** | *Rimozione rastrelliera preferita* | Verifica la cancellazione di un preferito dall'area profilo utente. | ID Rastrelliera target | Utente autenticato con almeno un preferito attivo. | Endpoint `DELETE /api/v1/user/preferiti/:id` | Il server risponde con `200 OK`, il record viene rimosso dal database e i marker sulla mappa si aggiornano rimuovendo lo stato attivo. | Positivo |
 
 ---
 
 ## 3. FrontEnd
 
-Il front-end è stato architettato come un ibrido ad elevate prestazioni nel panorama **Web 2.0 SPA**. A livello strutturale e logico (file `script.js`), l'ingegnerizzazione emula il pattern **MVC (Model-View-Controller)** client-side: le richieste fetch/XHR formano il Model (costruendo array di dizionari JS), l'albero del DOM funge da View e l'Event Loop dei file JS (gestendo toggle e form-handler) risiede nella carica di Controller.
+L'interfaccia utente è stata concepita come una Single Page Application (SPA) reattiva, orientata ai principi del design Mobile-First e all'alta leggibilità delle informazioni cartografiche. La logica dell'interfaccia, organizzata all'interno del file public/js/script.js, implementa un'architettura MVC (Model-View-Controller) client-side:
 
-Sul fronte Design System, la Web App attinge ai dogmi UI **Mobile-first** mediante un'integrazione radicale e nativa di **Tailwind CSS e DaisyUI**. Per scongiurare conflitti di spazio o problemi di rendering multi-risoluzione (tipico fattore limitante su mobile viewport), la Navbar migra organicamente verso un Hamburger Menu integrato, le card d'informazione adottano posizionamenti relativi governati dallo Z-Index e la barra di ricerca sfrutta il pattern componentistico "Join" per compattare gli input utente. 
-La logica delle finestre modali è gestita programmaticamente manipolando le classi di stato di DaisyUI (es. toggle tra `.hidden` e `.modal-open`). L'intero ecosistema grafico abbraccia la filosofia del *Glassmorphism* (filtri di sfocatura dello sfondo e trasparenze).
+- Model: I dati GeoJSON delle rastrelliere e dei parcheggi, uniti allo stato in memoria della sessione, dei preferiti e delle coordinate dell'utente.
+- View: La composizione del DOM HTML5, integrata con il layer grafico responsive fornito da Tailwind CSS, i componenti di DaisyUI e i contenitori mappa generati dinamicamente da Leaflet.js.
+- Controller: La gestione degli Event Listener (click, submit, touch events), l'orchestrazione delle chiamate asincrone (fetch), la manipolazione delle modali e la geolocalizzazione turn-by-turn.
 
-Il core cartografico, affidato interamente a **Leaflet**, vanta l'iniezione programmatica di marker vettoriali dinamici: all'evento `onClick`, scaturisce il rendering di un *popup UI* intelligente, dotato di bottoni interattivi (inserimento preferiti, form di segnalazione problemi) e di una "Call-To-Action" per il calcolo avanzato del Routing geo-spaziale in-app tramite l'integrazione di **OpenRouteService**. 
-I controlli stessi della mappa sono reattivi (UI responsive): su desktop sono renderizzati con temi Glassmorphism, mentre su mobile sono interamente off-screen per massimizzare la percezione touch (Pinch-to-zoom).
+Il front-end include inoltre un motore dedicato di internazionalizzazione client-side (i18n.js) che supporta il passaggio istantaneo e sincrono tra tre lingue: Italiano (IT), Inglese (EN) e Tedesco (DE).
 
 ---
 
