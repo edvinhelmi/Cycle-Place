@@ -1,0 +1,55 @@
+CyclePlace/
+├── data/
+│   ├── parcheggi.geojson        
+│   ├── rastrelliere.geojson      
+│   ├── preferiti.json           
+│   ├── segnalazioni.json        
+│   └── users.json               
+├── docs/
+│   ├── design-front-end/
+│   │   ├── bloccatelaio.png
+│   │   ├── dark_mode.png
+│   │   ├── elimina_account.png
+│   │   ├── form_segnalazione.png
+│   │   ├── loggato.png
+│   │   ├── login.png
+│   │   ├── navigazione.png
+│   │   ├── popup_meteo.jpeg
+│   │   ├── popup_nagivazione.png
+│   │   ├── profilo.png
+│   │   ├── rastrelliera.png
+│   │   ├── recupero_password.png
+│   │   ├── registrazione.png
+│   │   ├── ricerca_negativa.png
+│   │   ├── ricerca_positiva.png
+│   │   ├── schermata_iniziale.png
+│   │   └── segnalazione.png
+│   ├── 1.jpg
+│   ├── 2.jpg
+│   ├── 3.jpg
+│   ├── 4.jpg
+│   ├── D1_Descrizione_Progetto.md
+│   ├── D2_Sviluppo.md
+│   └── D4_Report_Finale.md
+├── middleware/
+│   └── tokenChecker.js          
+├── public/                     
+│   ├── css/
+│   │   ├── dashboard.css       
+│   │   ├── style.css            
+│   │   └── tailwind.css       
+│   ├── js/
+│   │   ├── dashboard.js         
+│   │   ├── i18n.js             
+│   │   └── script.js           
+│   ├── dashboard.html          
+│   └── index.html              
+├── tests/
+│   ├── auth.test.js            
+│   └── api.test.js              
+├── .env.example                 
+├── .gitignore                   
+├── app.js                      
+├── oas3.yaml                   
+├── package.json                
+└── README.md                   
