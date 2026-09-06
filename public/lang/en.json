@@ -4,6 +4,7 @@
   "nav.logout": "Logout",
   "nav.logoutSuccess": "Successfully logged out",
   "nav.dashboard": "Dashboard",
+  "nav.profile": "Profile",
   "nav.backToMap": "Back to Map",
   "theme.toDark": "Switch to dark mode",
   "theme.toLight": "Switch to light mode",

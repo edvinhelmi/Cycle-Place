@@ -4,6 +4,7 @@
   "nav.logout": "Abmelden",
   "nav.logoutSuccess": "Erfolgreich abgemeldet",
   "nav.dashboard": "Dashboard",
+  "nav.profile": "Profil",
   "nav.backToMap": "Zurück zur Karte",
   "theme.toDark": "Zum dunklen Modus wechseln",
   "theme.toLight": "Zum hellen Modus wechseln",

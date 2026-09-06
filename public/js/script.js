@@ -573,22 +573,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Stato utente — login / logout
+    let currentUserData = null;
+
+    function updateUserGreeting() {
+        if (!userGreeting) return;
+        const u = currentUserData || (isTokenValid(getToken()) ? (decodeToken(getToken()) || decodeToken(getRefreshToken())) : null);
+        if (u && u.name) {
+            userGreeting.classList.remove('hidden');
+            const safeName = u.name || 'Utente';
+            userGreeting.innerHTML = `<i class="fa-solid fa-circle-user text-sm"></i><span class="whitespace-nowrap leading-none">${tr('greeting', { name: `<strong class="text-primary">${safeName}</strong>` })}</span>`;
+            const profileText = tr('dash.profile') || tr('nav.profile') || 'Profilo';
+            userGreeting.title = profileText;
+            userGreeting.setAttribute('aria-label', profileText);
+        } else {
+            userGreeting.classList.add('hidden');
+            userGreeting.textContent = '';
+        }
+        if (btnDashboard) {
+            const span = btnDashboard.querySelector('span:not(.fi):not([class*="fa-"])');
+            if (span) {
+                span.textContent = tr('dash.profile') || tr('nav.profile') || 'Profilo';
+            }
+        }
+    }
+
+    if (userGreeting) {
+        userGreeting.addEventListener('click', () => {
+            window.location.href = '/dashboard.html';
+        });
+    }
+
     async function loginSuccess(user) {
+        currentUserData = user;
         document.documentElement.classList.remove('is-logged-out');
         document.documentElement.classList.add('is-logged-in');
         if (btnLoginModal)    btnLoginModal.classList.add('hidden');
         if (btnRegisterModal) btnRegisterModal.classList.add('hidden');
         if (btnDashboard)     btnDashboard.classList.remove('hidden');
         if (btnLogout)        btnLogout.classList.remove('hidden');
-        if (userGreeting) {
-            userGreeting.classList.remove('hidden');
-            userGreeting.innerHTML = `<i class="fa-solid fa-circle-user text-sm"></i><span class="whitespace-nowrap leading-none">${tr('greeting', { name: `<strong class="text-primary">${user.name}</strong>` })}</span>`;
-        }
+        updateUserGreeting();
         await loadUserPreferiti();
         applyFiltersAndSearch(false);
     }
 
     function logoutUser() {
+        currentUserData = null;
         removeToken();
         userFavoritiIds.clear();
         if (window.google?.accounts) google.accounts.id.disableAutoSelect();
@@ -600,10 +629,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (btnRegisterModal) btnRegisterModal.classList.remove('hidden');
         if (btnDashboard)     btnDashboard.classList.add('hidden');
         if (btnLogout)        btnLogout.classList.add('hidden');
-        if (userGreeting) {
-            userGreeting.classList.add('hidden');
-            userGreeting.textContent = '';
-        }
+        updateUserGreeting();
         if (window.map) map.closePopup();
         closeMobileMenu();
         applyFiltersAndSearch(false);
@@ -3194,6 +3220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadMapData();
     I18n.onLanguageChange(() => {
+        updateUserGreeting();
         applyFiltersAndSearch(false);
         updateThemeUI(currentTheme);
         updateWeatherUI();
