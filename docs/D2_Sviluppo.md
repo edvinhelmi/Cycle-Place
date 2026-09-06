@@ -272,14 +272,74 @@ components:
 
 ## 2. Implementation
 
+L'applicazione è stata sviluppata sfruttando le seguenti tecnologie primarie: Node.js ed Express per il layer di backend e persistenza, HTML5/CSS3/JavaScript ES6 per il client SPA, abbinato a Tailwind CSS, DaisyUI e Leaflet.js per la componente UI e geospaziale. La scelta dello stack è maturata dall'esigenza di massimizzare le prestazioni del rendering mappa su dispositivi mobili, evitare overhead infrastrutturali e sfruttare standard cartografici aperti.
+
 ### 2.1 Repository Organization
-La codebase del progetto abbraccia il principio base della segregazione delle responsabilità (SoC):
-- Il kernel del server (`app.js`), i configuration file (es. `package.json`, `.env`) popolano la root directory e governano l'inizializzazione del software.
-- Tutti i moduli funzionali di supporto sono archiviati logicamente (es. folder `/middleware/` per la validazione token, `/data/` per lo storage passivo).
-- L'intera SPA (Single Page Application) frontend (asset, HTML, fogli di stile CSS, moduli DOM interattivi) risiede all'interno della cartella segregata `public/`, agendo unicamente come cartella di esposizione (static serving) per il client.
+
+Il codice sorgente del progetto è archiviato nel repository ufficiale GitHub:<br>
+
+https://github.com/edvinhelmi/Cycle-Place.git<br>
+
+La struttura delle cartelle e dei file sorgente è così organizzata:
+
+CyclePlace/
+├── data/
+│   ├── parcheggi.geojson        
+│   ├── rastrelliere.geojson      
+│   ├── preferiti.json           
+│   ├── segnalazioni.json        
+│   └── users.json               
+├── docs/
+│   ├── design-front-end/
+│   │   ├── bloccatelaio.png
+│   │   ├── dark_mode.png
+│   │   ├── elimina_account.png
+│   │   ├── form_segnalazione.png
+│   │   ├── loggato.png
+│   │   ├── login.png
+│   │   ├── navigazione.png
+│   │   ├── popup_meteo.jpeg
+│   │   ├── popup_nagivazione.png
+│   │   ├── profilo.png
+│   │   ├── rastrelliera.png
+│   │   ├── recupero_password.png
+│   │   ├── registrazione.png
+│   │   ├── ricerca_negativa.png
+│   │   ├── ricerca_positiva.png
+│   │   ├── schermata_iniziale.png
+│   │   └── segnalazione.png
+│   ├── 1.jpg
+│   ├── 2.jpg
+│   ├── 3.jpg
+│   ├── 4.jpg
+│   ├── D1_Descrizione_Progetto.md
+│   ├── D2_Sviluppo.md
+│   └── D4_Report_Finale.md
+├── middleware/
+│   └── tokenChecker.js          
+├── public/                     
+│   ├── css/
+│   │   ├── dashboard.css       
+│   │   ├── style.css            
+│   │   └── tailwind.css       
+│   ├── js/
+│   │   ├── dashboard.js         
+│   │   ├── i18n.js             
+│   │   └── script.js           
+│   ├── dashboard.html          
+│   └── index.html              
+├── tests/
+│   ├── auth.test.js            
+│   └── api.test.js              
+├── .env.example                 
+├── .gitignore                   
+├── app.js                      
+├── oas3.yaml                   
+├── package.json                
+└── README.md                   
 
 ### 2.2 Branching strategy e organizzazione del lavoro
-La gestione del ciclo di vita del codice ha utilizzato un repository Git ospitato in cloud (GitHub) mediante la metodologia **Agile**. La strategia di branching scelta si basa sul **GitHub Flow**: il ramo `main` riflette unicamente lo stato *deployable* (production-ready) del software. Ogni sviluppatore del team ha operato isolatamente in branch secondari ramificati per *Feature* (es. `feature/google-login`, `fix/mobile-z-index`), e il processo di fusione verso il tronco primario avveniva esclusivamente via Pull Request (PR), sottomesse a validazione e Code Review incrociata.
+La gestione del ciclo di vita del codice ha utilizzato un repository Git ospitato in cloud (GitHub) mediante la metodologia Agile. La strategia di branching scelta si basa sul GitHub Flow: il ramo `main` riflette unicamente lo stato *deployable* (production-ready) del software. Ogni sviluppatore del team ha operato isolatamente in branch secondari ramificati per *Feature* (es. `feature/google-login`, `fix/mobile-z-index`), e il processo di fusione verso il tronco primario avveniva esclusivamente via Pull Request (PR), sottomesse a validazione e Code Review incrociata.
 
 ### 2.3 Dependencies
 Le librerie principali che hanno consentito lo sviluppo rapido e sicuro del sistema sono (evinte dal file `package.json` e header client):
