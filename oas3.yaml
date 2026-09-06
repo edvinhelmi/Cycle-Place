@@ -51,5 +51,6 @@ CyclePlace/
 ├── .gitignore                   
 ├── app.js                      
 ├── oas3.yaml                   
-├── package.json                
+├── package.json  
+├── tailwind.config.js
 └── README.md                   
