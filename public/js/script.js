@@ -392,7 +392,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================
     const btnLoginModal       = document.getElementById('btn-login-modal');
     const btnRegisterModal    = document.getElementById('btn-register-modal');
-    const btnDashboard        = document.getElementById('btn-dashboard');
     const btnLogout           = document.getElementById('btn-logout');
     const userGreeting        = document.getElementById('user-greeting');
     const loginModal          = document.getElementById('login-modal');
@@ -560,7 +559,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    [btnLoginModal, btnRegisterModal, btnDashboard, btnLogout].forEach(btn => {
+    [btnLoginModal, btnRegisterModal, userGreeting, btnLogout].forEach(btn => {
         if (btn) btn.addEventListener('click', closeMobileMenu);
     });
 
@@ -589,18 +588,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             userGreeting.classList.add('hidden');
             userGreeting.textContent = '';
         }
-        if (btnDashboard) {
-            const span = btnDashboard.querySelector('span:not(.fi):not([class*="fa-"])');
-            if (span) {
-                span.textContent = tr('dash.profile') || tr('nav.profile') || 'Profilo';
-            }
-        }
-    }
-
-    if (userGreeting) {
-        userGreeting.addEventListener('click', () => {
-            window.location.href = '/dashboard.html';
-        });
     }
 
     async function loginSuccess(user) {
@@ -609,7 +596,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.documentElement.classList.add('is-logged-in');
         if (btnLoginModal)    btnLoginModal.classList.add('hidden');
         if (btnRegisterModal) btnRegisterModal.classList.add('hidden');
-        if (btnDashboard)     btnDashboard.classList.remove('hidden');
         if (btnLogout)        btnLogout.classList.remove('hidden');
         updateUserGreeting();
         await loadUserPreferiti();
@@ -627,7 +613,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (btnLoginModal)    btnLoginModal.classList.remove('hidden');
         if (btnRegisterModal) btnRegisterModal.classList.remove('hidden');
-        if (btnDashboard)     btnDashboard.classList.add('hidden');
         if (btnLogout)        btnLogout.classList.add('hidden');
         updateUserGreeting();
         if (window.map) map.closePopup();

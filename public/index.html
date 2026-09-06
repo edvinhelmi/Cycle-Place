@@ -95,14 +95,11 @@
 
         <!-- Contenitore controlli utente -->
         <div class="user-controls flex items-center gap-2.5" id="user-controls">
-            <span id="user-greeting" class="user-greeting hidden badge bg-primary/10 text-primary border-primary/20 h-auto min-h-[2.25rem] py-1.5 px-3.5 gap-2 font-semibold whitespace-nowrap inline-flex items-center cursor-pointer transition-opacity hover:opacity-80" data-i18n-title="dash.profile" title="Profilo">
+            <a id="user-greeting" class="user-greeting hidden badge bg-primary/10 text-primary border-primary/20 h-auto min-h-[2.25rem] py-1.5 px-3.5 gap-2 font-semibold whitespace-nowrap inline-flex items-center cursor-pointer transition-all hover:bg-primary/20 hover:border-primary/40 shadow-xs active:scale-95 no-underline" href="/dashboard.html" data-i18n-title="dash.profile" title="Profilo">
                 <i class="fa-solid fa-circle-user"></i> <span id="user-name-text"></span>
-            </span>
+            </a>
             <button id="btn-login-modal" class="btn btn-primary btn-sm rounded-xl font-semibold shadow-sm text-white hidden" data-i18n="nav.login">Login</button>
             <button id="btn-register-modal" class="btn btn-secondary btn-sm rounded-xl font-semibold shadow-sm text-white hidden" data-i18n="nav.register">Registrati</button>
-            <a id="btn-dashboard" class="btn btn-info btn-sm rounded-xl font-semibold shadow-sm text-white hidden" href="/dashboard.html" data-i18n="dash.profile">
-                <i class="fa-solid fa-gauge"></i> <span>Profilo</span>
-            </a>
             <button id="btn-logout" class="btn btn-outline btn-error btn-sm rounded-xl font-semibold hidden" data-i18n="nav.logout">
                 <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
             </button>

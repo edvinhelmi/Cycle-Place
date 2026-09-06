@@ -1381,7 +1381,7 @@ html.is-logged-in #btn-register-modal {
     display: none !important;
 }
 
-html.is-logged-in #btn-dashboard,
+html.is-logged-in #user-greeting,
 html.is-logged-in #btn-logout {
     display: inline-flex !important;
 }
@@ -1402,7 +1402,7 @@ html.is-logged-out #btn-register-modal {
 .map-moving .custom-marker-icon-wrapper {
     pointer-events: none !important;
 }
-html.is-logged-out #btn-dashboard,
+html.is-logged-out #user-greeting,
 html.is-logged-out #btn-logout {
     display: none !important;
 }
