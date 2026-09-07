@@ -138,7 +138,17 @@ Il sistema deve permettere all'utente di scegliere in quale lingua fruire dell'a
 
 ---
 
-## 4. Use Case Diagram ***************************************** AGGIUNGERE
+## 4. Use Case Diagram 
+
+<img src="RF1_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="RF2_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="RF3_Diagram-drawio.png" alt="Titolo" width="700" />
+<img src="RF4.drawio.png" alt="Titolo" width="700" />
+<img src="RF5_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="RF6_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="RF7_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="RF8_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="RF9_Diagram.drawio.png" alt="Titolo" width="700" />
 
 ---
 
