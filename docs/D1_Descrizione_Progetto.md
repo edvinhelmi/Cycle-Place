@@ -483,6 +483,8 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 6. **Routing In-App:** L'utente consulta il numero di posti e, soddisfatto, esegue il tap sul bottone interno per avviare il calcolo del percorso guidato.
 7. **Conclusione:** Il sistema mostra a schermo la polilinea del tragitto e le indicazioni turn-by-turn per raggiungere lo stallo in bicicletta o a piedi.
 
+<img src="UserFlow1.drawio.png" width="700">
+
 ### Flusso 2: Autenticazione e visualizzazione Dashboard
 1. **Avvio:** L'utente accede all'app e intende controllare il proprio profilo.
 2. **Accesso form:** L'utente identifica la Navbar e preme il pulsante "Login". 
@@ -492,6 +494,8 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 6. **Cambio di Stato UI:** L'esito è positivo. Il modale di login collassa. In modo invisibile la navbar effettua il binding reattivo e nasconde il bottone di Login/Registrazione, sostituendoli con un nuovo pulsante "Dashboard" e il saluto ("Ciao, Utente").
 7. **Conclusione:** L'utente clicca su "Dashboard" venendo reindirizzato alla gestione del profilo, ove godrà dei pieni privilegi del suo ruolo, inclusa la gestione dei preferiti e delle segnalazioni.
 
+<img src="UserFlow2.drawio.png" width="700">
+
 ### Flusso 3: Salvataggio preferiti e invio segnalazione
 1. **Avvio:** L'utente autenticato naviga sulla mappa ed individua una rastrelliera di riferimento abituale.
 2. **Interazione pin:** Clicca sul marker aprendo il popup descrittivo in stile Glassmorphism.
@@ -499,3 +503,5 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 4. **Segnalazione criticità:** Accedendo allo stesso popup, l'utente nota un danno strutturale e clicca su "Segnala problema".
 5. **Compilazione form:** Si apre il modulo di segnalazione in cui seleziona il tipo di problematica e inserisce una breve nota descrittiva.
 6. **Conclusione:** All'invio, la segnalazione viene memorizzata nel sistema per il supporto alla mobilità e l'avviso della community.
+
+<img src="UserFlow3.drawio.png" width="700">
