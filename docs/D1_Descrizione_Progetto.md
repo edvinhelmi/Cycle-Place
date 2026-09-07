@@ -140,14 +140,23 @@ Il sistema deve permettere all'utente di scegliere in quale lingua fruire dell'a
 
 ## 4. Use Case Diagram 
 
+### Use Case RF1: Gestione Autenticazione e privilegi utente registrato
 <img src="RF1_Diagram.drawio.png" alt="Titolo" width="700" />
+### Use Case RF2: Registrazione e Accesso utente
 <img src="RF2_Diagram.drawio.png" alt="Titolo" width="700" />
+### Use Case RF3: Gestione Profilo
 <img src="RF3_Diagram-drawio.png" alt="Titolo" width="700" />
+### Use Case RF4: Backup e Ripristino
 <img src="RF4.drawio.png" alt="Titolo" width="700" />
+### Use Case RF5: Gestione mappa e aree di sosta
 <img src="RF5_Diagram.drawio.png" alt="Titolo" width="700" />
+### Use Case RF6: Gestione storico utilizzo
 <img src="RF6_Diagram.drawio.png" alt="Titolo" width="700" />
+### Use Case RF7: Widget Meteo e Sistema di Allerta
 <img src="RF7_Diagram.drawio.png" alt="Titolo" width="700" />
+### Use Case RF8: Personalizzazione del Tema Grafico
 <img src="RF8_Diagram.drawio.png" alt="Titolo" width="700" />
+### Use Case RF9: Scelta della lingua
 <img src="RF9_Diagram.drawio.png" alt="Titolo" width="700" />
 
 ---
