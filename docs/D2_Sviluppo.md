@@ -8,7 +8,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 | Parametro | Dettaglio |
 | :--- | :--- |
 | **Doc. Name** | D2_Sviluppo |
-| **Doc. Number** | D2 V1.4 |
+| **Doc. Number** | D2 V1.5 |
 | **Data Rilascio** | A.A. 2025/2026 |
 | **Stato** | Rilasciato / Conforme specifiche UniTN |
 | **Autori** | Edvin Helmi, Lorenzo Pasotti, Natalina Perazzolli |
@@ -691,12 +691,14 @@ CyclePlace/
 │   └── users.json               
 ├── docs/
 │   ├── design-front-end/
+│   │   ├── ciclobox.png
 │   │   ├── bloccatelaio.png
 │   │   ├── dark_mode.png
 │   │   ├── elimina_account.png
 │   │   ├── form_segnalazione.png
 │   │   ├── loggato.png
 │   │   ├── login.png
+│   │   ├── modifica_dati.png
 │   │   ├── navigazione.png
 │   │   ├── popup_meteo.jpeg
 │   │   ├── popup_nagivazione.png
@@ -897,6 +899,11 @@ Il Front-End fornisce le funzionalità di visualizzazione interattiva, gestione 
 <em>Recupero password</em>
 </p>
 
+<p align="center">
+<img src="design-front-end/loggato.png" alt="Loggato" width="700"><br>
+<em>Schermata visibile dopo aver effettuato il login</em>
+</p>
+
 * **Navigazione Turn-by-Turn in-app (Routing)**: Modulo attivabile selezionando una destinazione sulla mappa:
   * Sfrutta l'integrazione con l'API di **OpenRouteService** per il calcolo dei percorsi ciclabili o pedonali.
   * Integra un banner superiore con indicazioni di marcia, distanze e la **Web Speech API (TTS)** per la riproduzione vocale automatica delle istruzioni di guida multilingua, unitamente ai controlli per recentrare la mappa o terminare la sessione.
@@ -918,6 +925,11 @@ Il Front-End fornisce le funzionalità di visualizzazione interattiva, gestione 
 <p align="center">
 <img src="design-front-end/rastrelliera.png" alt="R" width="700"><br>
 <em>Rastrelliera</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/ciclobox.png" alt="C" width="700"><br>
+<em>Ciclobox</em>
 </p>
 
 <p align="center">

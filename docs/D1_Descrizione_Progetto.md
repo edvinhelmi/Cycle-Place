@@ -549,8 +549,8 @@ Cliccando su un qualsiasi marker sulla mappa si attiva un popup strutturato in s
 </p>
 
 <p align="center">
-<img src="design-front-end/bloccatelaio.png" alt="Popup bloccatelaio" width="700"><br>
-<em>Popup bloccatelaio</em>
+<img src="design-front-end/ciclobox.png" alt="Ciclobox" width="700"><br>
+<em>Popup Ciclobox</em>
 </p>
 
 - **RF 3.6 & RF 5.5 (Gestione Preferiti)**: Il popup include un pulsante interattivo con l'icona di un cuore per aggiungere o rimuovere il luogo dai preferiti personali con un singolo click, aggiornando istantaneamente l'aspetto grafico del pin sulla mappa.
@@ -559,6 +559,11 @@ Cliccando su un qualsiasi marker sulla mappa si attiva un popup strutturato in s
 <p align="center">
 <img src="design-front-end/form_segnalazione.png" alt="Segnalazione problemi" width="700"><br>
 <em>Form segnalazione</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/segnalazione.png" alt="Segnalazione" width="700"><br>
+<em>Avviso segnalazioni effettuale nelle ore precedenti</em>
 </p>
 
 ### 5. Dashboard Personale (Area Riservata)
@@ -573,6 +578,11 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 <p align="center">
 <img src="design-front-end/profilo.png" alt="Dashboard" width="700"><br>
 <em>Profilo</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/modifica_profilo.png" alt="Modifica profilo" width="700"><br>
+<em>Modifica profilo</em>
 </p>
 
 <p align="center">
