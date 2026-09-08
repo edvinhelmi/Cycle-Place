@@ -1,8 +1,21 @@
-# D4 - Report Finale: Cycle Place
+UNIVERSITÀ DEGLI STUDI DI TRENTO<br>
+Dipartimento di Ingegneria e Scienza dell’Informazione
 
-| Doc. Name | Doc. Number | Description |
-| :--- | :--- | :--- |
-| D4-Cycle PlaceFinale | D4 V1.1 | Report Finale del progetto: organizzazione del lavoro, ruoli, documentazione, video, tempo complessivo e di ciascun membro dedicato al progetto, criticità, autovalutazione. |
+# **Progetto:** Cycle Place  
+**Titolo del documento:** D4  - Report finale (Organizzazione del lavoro, ruoli, documentazione, video, tempo complessivo e di ciascun membro dedicato al progetto, criticità, autovalutazione)
+
+---
+
+### Document Info
+| Parametro | Dettaglio |
+| :--- | :--- |
+| **Doc. Name** | D4_Sviluppo_Finale |
+| **Doc. Number** | D4 V1.5 |
+| **Data Rilascio** | A.A. 2025/2026 |
+| **Stato** | Rilasciato / Conforme specifiche UniTN |
+| **Autori** | Edvin Helmi, Lorenzo Pasotti, Natalina Perazzolli |
+
+---
 
 ## 1. Organizzazione del lavoro
 
@@ -13,17 +26,18 @@ Il team si è principalmente incontrato in presenza, ma ha lasciato spazio allo 
 Questo approccio è risultato vincente in particolare durante i blocchi riscontrati durante il lavoro individuale, quando un problema bloccava troppo a lungo un membro, la risoluzione di esso diventava prioritaria per ogni membro, in modo da progredire in modo più bilanciato con il lavoro.
 La divisione è avvenuta principalmente per competenze, in modo da verticalizzare la conoscenza di un argomento di interesse per ogni membro.
 
+---
+
 ## 2. Ruoli e attività
 
 
 | Componente del team     | Ruolo                | Principali attività                                                                                                                                                                                                   | Derivable Manager |
 | :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| **Edvin Helmi**         | Full-Stack developer | Principale programmatore, back-end, front-end, gestione database, contributo principale alla stesura del D2. Aiuto essenziale nelle scelte Use Case Diagram del D1, Ha partecipato alla stesura di tutti i derivable. | D2                |
-| **Lorenzo Pasotti**     | Team Leader          | Gestione dell'organizzazione del lavoro e dei "Derivable Managers", stesura buisness model, slides pitch, ha contribuito principalmente alla stesura di D3 e D4, ha contribuito alla stesura di tutti i derivable.    | D4                |
-| **Natalina Perazzolli** | Analista             | Design Thinking, integrazione funzionalità, front-end, struttura ad alto livello dell'applicazione, ha contribuito principalmente alla stesura del D1. Ha partecipato alla stesura di tutti i derivable               | D1                |
+| **Edvin Helmi**         | Full-Stack developer | Principale programmatore, back-end, front-end, gestione database, ha contribuito attivamente alla stesura di tutti i documenti e nello specifico alla stesura del D2.  | D2                |
+| **Lorenzo Pasotti**     | Team Leader          | Gestione dell'organizzazione del lavoro e dei "Derivable Managers", stesura buisness model, slides pitch, ha contribuito alla stesura di tutti i documenti, ed in particolare a quella di quest'ultimo.    | D4                |
+| **Natalina Perazzolli** | Analista             | Design Thinking, integrazione funzionalità, front-end, ui-ux design, ha partecipato alla stesura di tutti i derivable e nello specifico a quella del documento D1.               | D1                |
 
-*l'organizzazione del D3 è stata gestita in modo condiviso, senza l'utilizzo di un Derivable Manager*
-
+---
 
 ## 3. Carico e distribuzione del lavoro
 
@@ -36,6 +50,8 @@ Il carico di lavoro è stato bilanciato con una buona verticalità nelle varie a
 | **Natalina Perazzolli** | 35  | 30  | 15  |     20     | **100** |
 | TOT                     | 65  | 130 | 45  |     60     |   305   |
 
+---
+
 ## 4. Criticità
 
 - Durante le prime fasi del lavoro abbiamo riscontrato molte criticità a causa di una scarsa organizzazione del lavoro, punto di svolta è arrivato quando abbiamo applicato in modo più rigido le metodologie AGILE e abbiamo iniziato ad assegnare i ruoli di "Derivable Managers".
@@ -43,7 +59,8 @@ Il carico di lavoro è stato bilanciato con una buona verticalità nelle varie a
 - Durante lo sviluppo del codice e nelle altre fasi del lavoro sono state incontrate molte criticità, ma attraverso il processo precedentemente citato siamo riusciti a risolverle interrompendo i lavori individuali e concentrandoci sul problema come gruppo.
 - Altre criticità sono state legate ad una focalizzazione eccessiva su elementi secondari dell'applicazione, questi ostacoli sono stati risolti utilizzando utilizzando con sempre più rigore le priorità indicate sul Kanban.
 
-   
+---
+
 ## 5. Autovalutazione
 
 
@@ -53,7 +70,6 @@ Questo è stato il punto di forza del gruppo, nonostante un inizio complesso son
 Date le precedenti considerazioni e le parti facoltative svolte la nostra autovalutazione è la seguente:
 
 | Edvin Helmi         | 30  |
-| ------------------- | --- |
 | Pasotti Lorenzo     | 30  |
 | Natalina Perazzolli | 30  |
 
