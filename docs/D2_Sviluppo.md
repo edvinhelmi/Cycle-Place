@@ -8,7 +8,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 | Parametro | Dettaglio |
 | :--- | :--- |
 | **Doc. Name** | D2_Sviluppo |
-| **Doc. Number** | D2 V1.3 |
+| **Doc. Number** | D2 V1.4 |
 | **Data Rilascio** | A.A. 2025/2026 |
 | **Stato** | Rilasciato / Conforme specifiche UniTN |
 | **Autori** | Edvin Helmi, Lorenzo Pasotti, Natalina Perazzolli |
@@ -805,7 +805,9 @@ Le API e il relativo codice presentano una test-suite che consente di verificarn
 
 L’implementazione dei test è organizzata in file .test.js raccolti all’interno della cartella dedicata tests/.  
 
-Dei 46 casi di test complessivi che sono stati definiti (suddivisi tra test di contratto OpenAPI, autenticazione, gestione utente, preferiti, segnalazioni e routing), 46 sono stati interamente implementati ed eseguiti con successo.
+Sebbene la tabella riportata in seguito preveda una copertura di soli 29 macro-scenari di collaudo, l'implementazione effettiva della test-suite in ambiente Jest/Supertest si articola su 46 test case distinti. Questo è dovuto alla scomposizione dei macro-requisiti in molteplici test case di unità e di integrazione mirati a verificare sistematicamente tutti i rami di errore e i relativi casi limite, quali la gestione dei campi obbligatori mancanti, la validazione delle espressioni regolari per password ed email, i controlli di unicità dei dati ecc...
+
+Riportiamo quindi qui sotto l'esito dei test effettuati:
 
 | Numero | Test Case | Descrizione Test Case | Test Data | Precondizioni | Dipendenze | Risultato Atteso | Risultato Riscontrato |
 |:---:|---|---|---|---|---|---|:---:|
@@ -853,6 +855,35 @@ Il front-end include inoltre un motore dedicato di internazionalizzazione client
 
 ---
 
-## 4. Deployment & CI-CD
+## 4. Deployment 
 
-???????????????????
+L'architettura del backend e del frontend di Cycle-Place è concepita per l'esecuzione in ambiente locale di sviluppo, garantendo il pieno controllo sui file di persistenza JSON e l'isolamento dei test.
+
+### Motivazione dell'Esecuzione Locale 
+Si è scelto deliberatamente di **non effettuare il deployment del backend su piattaforme di cloud hosting terze** (quali Render, Railway o simili) per ragioni di sicurezza, privacy e natura dei dati gestiti:
+- **Persistenza su File System**: Il backend utilizza file JSON locali per la memorizzazione persistente degli utenti, dei preferiti e delle segnalazioni. L'hosting su server cloud stateless o "serverless" comporterebbe la perdita o la volatilità dei dati a ogni riavvio o ridistribuzione dei container (a meno di configurare volumi di storage persistenti esterni).
+- **Protezione dei Dati Sensibili**: L'assenza di un database remoto gestito da terzi previene l'esposizione accidentale o non autorizzata dei dati personali degli utenti in chiaro sul cloud pubblico, garantendo un controllo rigoroso sul perimetro di esecuzione locale.
+
+### Modalità di Esecuzione e Fruizione
+Per la consultazione e la verifica del sistema da parte dei valutatori, il progetto adotta un approccio duplice:
+1. **Ambiente Backend**: L'applicazione server è concepita per l'esecuzione in ambiente locale di sviluppo, corredata da script di avvio automatizzati e validata integralmente tramite una test-suite dedicata.
+2. **Documentazione e Interfaccia API (Static Deployment)**: La documentazione formale delle specifiche tecniche e del contratto di interfaccia (OpenAPI 3.0.3) è stata resa accessibile pubblicamente e in modalità statica tramite GitHub Pages, consentendo la consultazione interattiva immediata della struttura delle API senza la necessità di mantenere attivo un server backend in produzione.
+
+Per completezza riportiamo qui la modalità di avvio dell'applicazione: 
+
+**1. Clonare il repository e posizionarsi nella cartella di lavoro:**<br>
+git clone https://github.com/edvinhelmi/Cycle-Place.git
+cd Cycle-Place
+
+**2. Installare le dipendenze di Node.js:**<br>
+npm install
+
+**3. Avviare il server backend:**<br>
+npm start
+
+### Modalità di Esecuzione e Test
+
+Il sistema non prevede un deploy permanente su piattaforme cloud esterne, per cui una volta clonato il repository ed installate le dipendenze di node.js è sufficiente eseguire i test attraverso il seguente comando:
+
+**Esecuzione Test Suite:**<br>
+npm test (per la verifica automatica dei 46 test case tramite Jest e Supertest).
