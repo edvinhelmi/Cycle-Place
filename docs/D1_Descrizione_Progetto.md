@@ -2,7 +2,7 @@ UNIVERSITÀ DEGLI STUDI DI TRENTO<br>
 Dipartimento di Ingegneria e Scienza dell’Informazione
 
 # **Progetto**: Cycle Place
-**Titolo del documento: Descrizione di Progetto** (Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place)
+**Titolo del documento:** D1 - Descrizione di Progetto (Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place)
 
 ---
 
