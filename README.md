@@ -7,6 +7,7 @@ Il progetto offre una mappa cartografica interattiva, funzioni di geolocalizzazi
 *   **Backend:** Node.js, Express, JSON Web Token (JWT) con meccanismo di Refresh Token, bcrypt (hashing password), express-rate-limit (protezione anti-abuso), OpenRouteService Proxy.
 *   **Frontend:** HTML5, JavaScript (Vanilla), Tailwind CSS, DaisyUI, Web Speech API (TTS)
 *   **Mappa & Dati:** Leaflet.js, OpenStreetMap, GeoJSON, proj4
+*   **Testing & Sviluppo**: Jest, Supertest.
 
 ---
 
