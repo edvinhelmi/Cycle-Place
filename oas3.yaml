@@ -281,6 +281,13 @@ paths:
       responses:
         '200':
           description: Dati profilo recuperati con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserSummary'
         '401':
           description: Non autorizzato
 
@@ -348,6 +355,12 @@ paths:
       responses:
         '200':
           description: Lista preferiti recuperata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Preferito'
         '401':
           description: Non autorizzato
     post:
@@ -463,6 +476,12 @@ paths:
       responses:
         '200':
           description: Storico segnalazioni recuperato
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segnalazione'
         '401':
           description: Non autorizzato
 
@@ -474,6 +493,12 @@ paths:
       responses:
         '200':
           description: Lista segnalazioni recenti
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segnalazione'
 
   /api/v1/routing:
     get:
