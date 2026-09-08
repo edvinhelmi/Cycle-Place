@@ -38,7 +38,10 @@ Il carico di lavoro è stato bilanciato con una buona verticalità nelle varie a
 
 ## 4. Criticità
 
-Durante le prime fasi del lavoro abbiamo riscontrato molte criticità a causa di una scarsa organizzazione del lavoro, punto di svolta è arrivato quando abbiamo applicato in modo più rigido le metodologie AGILE e abbiamo iniziato ad assegnare i ruoli di "Derivable Managers".
+- Durante le prime fasi del lavoro abbiamo riscontrato molte criticità a causa di una scarsa organizzazione del lavoro, punto di svolta è arrivato quando abbiamo applicato in modo più rigido le metodologie AGILE e abbiamo iniziato ad assegnare i ruoli di "Derivable Managers".
+- Durante lo sviluppo del D1 abbiamo incontrato molte difficoltà nell'individuare User Stories concrete e nella creazione di Use Case Diagrams coerenti con i requisiti funzionali. Questo primo blocco ci ha però permesso di sviluppare il processo citato nella sezione iniziale, quando un rallentamento dura troppo a lungo tutti i membri si concentrano su quel problema fino alla sua risoluzione, ci siamo così concentrati in blocco sulla risoluzione di entrambi questi problemi in modo sequenziale.
+- Durante lo sviluppo del codice e nelle altre fasi del lavoro sono state incontrate molte criticità, ma attraverso il processo precedentemente citato siamo riusciti a risolverle interrompendo i lavori individuali e concentrandoci sul problema come gruppo.
+- Altre criticità sono state legate ad una focalizzazione eccessiva su elementi secondari dell'applicazione, questi ostacoli sono stati risolti utilizzando utilizzando con sempre più rigore le priorità indicate sul Kanban.
 
    
 ## 5. Autovalutazione
