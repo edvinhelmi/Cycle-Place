@@ -159,34 +159,102 @@ Autenticazione Esterna: Il flusso di login standard può essere esteso scegliend
 
 <img src="RF2_Diagram.drawio.png" alt="Titolo" width="700" />
 
+**Riassunto:** L'utente anonimo crea un nuovo account sulla piattaforma utilizzando un form standard oppure delegando l'iscrizione all'account Google.
+**Descrizione:**
+- L'Utente Anonimo avvia la registrazione scegliendo l'opzione "Registrazione con Credenziali Locali" o "Registrazione tramite Google".
+- Nel caso delle credenziali locali, il sistema include l'obbligo di "Validazione Form" per i dati anagrafici e la "Validazione Password" per garantire il rispetto dei criteri minimi di sicurezza (8 caratteri, numero, maiuscola, speciale).
+- Nel caso di registrazione social, il sistema comunica con il Provider Google e include automaticamente l'"Importazione Dati di Base" per compilare il profilo.
+
 ### Use Case RF3: Gestione Profilo
 
 <img src="RF3_Diagram-drawio.png" alt="Titolo" width="700" />
+
+**Riassunto:** L'utente registrato amministra i propri dati personali, consulta le proprie interazioni storiche e gestisce lo stato dell'account.
+**Descrizione:**
+- L'Utente Registrato accede alla "Visualizzazione Profilo". Questa azione include sempre il caricamento della "Visualizzazione Rastrelliere Salvate" e della "Visualizzazione Segnalazioni Effettuate".
+- L'utente può procedere alla "Modifica Informazioni Personali" o alla "Modifica Password".
+- L'utente gestisce i propri preferiti tramite la "Cancellazione Rastrelliere Preferite", operazione che include obbligatoriamente la "Sincronizzazione in Tempo Reale con Database".
+- L'utente può avviare la "Richiesta Cancellazione Account".
+
+**Estensioni:**
+Cancellazione Definitiva Account: L'operazione di richiesta può estendersi alla cancellazione irreversibile, interfacciandosi con il Sistema GDPR esterno per garantire la compliance normativa.
 
 ### Use Case RF4: Backup e Ripristino
 
 <img src="RF4.drawio.png" alt="Titolo" width="700" />
 
+**Riassunto:** L'Amministratore e il Sistema automatizzato gestiscono la messa in sicurezza dei dati e il loro eventuale ripristino per garantire la continuità del servizio.
+**Descrizione:**
+- L'Amministratore o il Sistema eseguono il "Backup Regolare Dati Critici", operazione che include la "Pianificazione Backup" automatizzata.
+- In caso di criticità, l'Amministratore esegue il "Ripristino Dati in caso di Guasto", processo che include sempre la "Verifica Integrità Backup" prima dell'esecuzione.
+**Estensioni:**
+Backup Regolare Dati Critici: A seguito di un ripristino, il flusso può estendersi richiamando un nuovo backup per consolidare la base dati ripristinata.
+
 ### Use Case RF5: Gestione mappa e aree di sosta
 
 <img src="RF5_Diagram.drawio.png" alt="Titolo" width="700" />
+
+**Riassunto:** L'utente interagisce con la Mappa per navigare verso una rastrelliera, gestire preferiti, segnalazioni e ottenere informazioni riguardo ad aree di sosta indicate sulla mappa.
+Descrizione:
+- L'utente (Anonimo o Registrato) naviga nella "Visualizzazione Mappa".
+
+- L'utente utilizza la "Visualizzazione Aree di Sosta per Tipologia" applicando l'azione di "Filtraggio per Tipologia".
+
+- Cliccando su un pin, si apre il "Dettaglio Area di Sosta", il quale include di default la "Visualizzazione Segnalazioni Utenti".
+
+- L'utente lancia il "Calcolo Percorso", per il quale il sistema si interfaccia con l'API OpenRouteService.
+
+- Solo l'Utente Registrato può azionare il "Salvataggio Aree Preferite".
+**Estesioni: **
+- L'Utente Registrato può utilizzare la "Sintesi Vocale Turn-by-Turn" (comunicando con la Web Speech API), che include la "Localizzazione Istruzioni" (IT, EN, DE).
+Estensioni:
+- La mappa può estendere il suo comportamento azionando la "Centratura su Posizione GPS" o la "Centratura su Area Selezionata".
+- Il dettaglio dell'area può estendersi con la "Visualizzazione Stato Ciclobox", applicabile unicamente ai parcheggi digitali.
+- Il "Calcolo Percorso" può estendersi offrendo l'attivazione della "Sintesi Vocale Turn-by-Turn" durante la navigazione.
 
 ### Use Case RF6: Gestione storico utilizzo
 
 <img src="RF6_Diagram.drawio.png" alt="Titolo" width="700" />
 
+**Riassunto:** L'utente registrato consulta l'archivio delle proprie attività passate all'interno del sistema.
+**Descrizione:**
+- L'Utente Registrato richiede la "Visualizzazione Storico Interazioni".
+- Il sistema risponde includendo obbligatoriamente l'estrazione dello "Storico Segnalazioni Inviate" e dello "Storico Aree Salvate".
+**Estensioni:**
+- Filtro Storico per Tipo Interazione: L'utente può estendere la ricerca generale applicando dei filtri categorici per trovare informazioni specifiche.
+
 ### Use Case RF7: Widget Meteo e Sistema di Allerta
 
 <img src="RF7_Diagram.drawio.png" alt="Titolo" width="700" />
+
+**Riassunto:** Il sistema informa gli utenti sulle condizioni meteorologiche in tempo reale ed emette allerte automatiche basate sul monitoraggio ambientale.
+
+**Descrizione:**
+- L'utente (Anonimo o Registrato) utilizza la "Visualizzazione Meteo Live", interfacciata all'API Open-Meteo. Questa vista include l'esposizione del "Widget Temperatura e Condizioni nella Barra di Navigazione".
+- L'utente riceve il "Banner di Allerta Meteo".
+- L'attivazione del banner è vincolata e include l'attività del Sistema di Monitoraggio automatizzato ("Monitoraggio Condizioni Avverse"), che a sua volta comunica con Open-Meteo, includendo il dispatch della "Notifica Pre-partenza" (piogge, neve, temporali).
 
 ### Use Case RF8: Personalizzazione del Tema Grafico
 
 <img src="RF8_Diagram.drawio.png" alt="Titolo" width="700" />
 
+**Riassunto:** L'utente configura l'aspetto dell'interfaccia utente impostando la combinazione di colori preferita.
+**Descrizione:**
+- L'utente (Anonimo o Registrato) interagisce con il "Toggle Tema Chiaro/Scuro".
+- Il passaggio da un tema all'altro include sempre la "Persistenza Preferenza Tema", incaricata di salvare l'impostazione comunicando con il LocalStorage Browser.
+
+**Estensioni:**
+- L'azione del toggle si estende applicando fisicamente le logiche CSS dell'"Applicazione Tema Chiaro" (default) o dell'"Applicazione Tema Scuro".
+
 ### Use Case RF9: Scelta della lingua
 
 <img src="RF9_Diagram.drawio.png" alt="Titolo" width="700" />
-
+**Riassunto:** L'utente cambia la lingua della piattaforma assicurandosi che la preferenza venga mantenuta nel tempo.
+**Descrizione:**
+- L'utente (Anonimo o Registrato) attiva la "Selezione Lingua Applicazione".
+- Ogni variazione linguistica include la procedura di "Persistenza Preferenza Lingua" per salvare il dato per la sessione corrente e quelle future.
+**Estensioni:**
+- Il caso d'uso si estende attuando il set di dizionari corrispondente alla scelta: "Impostazione Lingua Italiano", "Impostazione Lingua Inglese" o "Impostazione Lingua Tedesco".
 ---
 
 ## 5. User Stories
