@@ -10,7 +10,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 | Parametro | Dettaglio |
 | :--- | :--- |
 | **Doc. Name** | D2_Sviluppo |
-| **Doc. Number** | D2 V1.7 |
+| **Doc. Number** | D2 V1.8 |
 | **Data Rilascio** | A.A. 2025/2026 |
 | **Stato** | Rilasciato / Conforme specifiche UniTN |
 | **Autori** | Edvin Helmi, Lorenzo Pasotti, Natalina Perazzolli |
@@ -874,7 +874,7 @@ Il Front-End fornisce le funzionalità di visualizzazione interattiva, gestione 
 </p>
 
 <p align="center">
-<img src="design-front-end/popup_meteo.png" alt="Meteo" width="700"><br>
+<img src="design-front-end/popup_meteo.jpeg" alt="Meteo" width="700"><br>
 <em>Popup meteo</em>
 </p>
 
