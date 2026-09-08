@@ -186,9 +186,11 @@ Cancellazione Definitiva Account: L'operazione di richiesta può estendersi alla
 <img src="RF4.drawio.png" alt="Titolo" width="700" />
 
 **Riassunto:** L'Amministratore e il Sistema automatizzato gestiscono la messa in sicurezza dei dati e il loro eventuale ripristino per garantire la continuità del servizio.
+
 **Descrizione:**
 - L'Amministratore o il Sistema eseguono il "Backup Regolare Dati Critici", operazione che include la "Pianificazione Backup" automatizzata.
 - In caso di criticità, l'Amministratore esegue il "Ripristino Dati in caso di Guasto", processo che include sempre la "Verifica Integrità Backup" prima dell'esecuzione.
+
 **Estensioni:**
 Backup Regolare Dati Critici: A seguito di un ripristino, il flusso può estendersi richiamando un nuovo backup per consolidare la base dati ripristinata.
 
@@ -197,16 +199,14 @@ Backup Regolare Dati Critici: A seguito di un ripristino, il flusso può estende
 <img src="RF5_Diagram.drawio.png" alt="Titolo" width="700" />
 
 **Riassunto:** L'utente interagisce con la Mappa per navigare verso una rastrelliera, gestire preferiti, segnalazioni e ottenere informazioni riguardo ad aree di sosta indicate sulla mappa.
-Descrizione:
+
+**Descrizione:**
 - L'utente (Anonimo o Registrato) naviga nella "Visualizzazione Mappa".
-
 - L'utente utilizza la "Visualizzazione Aree di Sosta per Tipologia" applicando l'azione di "Filtraggio per Tipologia".
-
 - Cliccando su un pin, si apre il "Dettaglio Area di Sosta", il quale include di default la "Visualizzazione Segnalazioni Utenti".
-
 - L'utente lancia il "Calcolo Percorso", per il quale il sistema si interfaccia con l'API OpenRouteService.
-
 - Solo l'Utente Registrato può azionare il "Salvataggio Aree Preferite".
+
 **Estesioni: **
 - L'Utente Registrato può utilizzare la "Sintesi Vocale Turn-by-Turn" (comunicando con la Web Speech API), che include la "Localizzazione Istruzioni" (IT, EN, DE).
 Estensioni:
@@ -219,9 +219,11 @@ Estensioni:
 <img src="RF6_Diagram.drawio.png" alt="Titolo" width="700" />
 
 **Riassunto:** L'utente registrato consulta l'archivio delle proprie attività passate all'interno del sistema.
+
 **Descrizione:**
 - L'Utente Registrato richiede la "Visualizzazione Storico Interazioni".
 - Il sistema risponde includendo obbligatoriamente l'estrazione dello "Storico Segnalazioni Inviate" e dello "Storico Aree Salvate".
+
 **Estensioni:**
 - Filtro Storico per Tipo Interazione: L'utente può estendere la ricerca generale applicando dei filtri categorici per trovare informazioni specifiche.
 
@@ -241,6 +243,7 @@ Estensioni:
 <img src="RF8_Diagram.drawio.png" alt="Titolo" width="700" />
 
 **Riassunto:** L'utente configura l'aspetto dell'interfaccia utente impostando la combinazione di colori preferita.
+
 **Descrizione:**
 - L'utente (Anonimo o Registrato) interagisce con il "Toggle Tema Chiaro/Scuro".
 - Il passaggio da un tema all'altro include sempre la "Persistenza Preferenza Tema", incaricata di salvare l'impostazione comunicando con il LocalStorage Browser.
