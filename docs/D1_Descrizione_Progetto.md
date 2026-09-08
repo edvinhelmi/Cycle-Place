@@ -160,6 +160,7 @@ Autenticazione Esterna: Il flusso di login standard può essere esteso scegliend
 <img src="RF2_Diagram.drawio.png" alt="Titolo" width="700" />
 
 **Riassunto:** L'utente anonimo crea un nuovo account sulla piattaforma utilizzando un form standard oppure delegando l'iscrizione all'account Google.
+
 **Descrizione:**
 - L'Utente Anonimo avvia la registrazione scegliendo l'opzione "Registrazione con Credenziali Locali" o "Registrazione tramite Google".
 - Nel caso delle credenziali locali, il sistema include l'obbligo di "Validazione Form" per i dati anagrafici e la "Validazione Password" per garantire il rispetto dei criteri minimi di sicurezza (8 caratteri, numero, maiuscola, speciale).
@@ -170,6 +171,7 @@ Autenticazione Esterna: Il flusso di login standard può essere esteso scegliend
 <img src="RF3_Diagram-drawio.png" alt="Titolo" width="700" />
 
 **Riassunto:** L'utente registrato amministra i propri dati personali, consulta le proprie interazioni storiche e gestisce lo stato dell'account.
+
 **Descrizione:**
 - L'Utente Registrato accede alla "Visualizzazione Profilo". Questa azione include sempre il caricamento della "Visualizzazione Rastrelliere Salvate" e della "Visualizzazione Segnalazioni Effettuate".
 - L'utente può procedere alla "Modifica Informazioni Personali" o alla "Modifica Password".
