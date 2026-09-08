@@ -1,7 +1,7 @@
 UNIVERSITÀ DEGLI STUDI DI TRENTO  
 Dipartimento di Ingegneria e Scienza dell’Informazione
 
-# **Progetto:** Cycle Place  
+# **Progetto:** Cycle-Place  
 **Titolo del documento:** D4 - Report finale (Organizzazione del lavoro, ruoli, documentazione, video, tempo complessivo e di ciascun membro dedicato al progetto, criticità, autovalutazione)
 
 ---
@@ -20,7 +20,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 
 ## 1. Organizzazione del lavoro
 
-Per lo sviluppo dell'applicazione "Cycle Place", il Gruppo G52 ha adottato una metodologia ispirata ai principi **Agile**, mirata a favorire un approccio incrementale e iterativo. Al fine di mantenere l'allineamento sui task e sul progresso delle attività, è stato impiegato un sistema di gestione visuale **Kanban**, che ha permesso di mappare in modo trasparente gli stati di avanzamento e assegnare l'adeguata priorità ad ogni compito.
+Per lo sviluppo dell'applicazione "Cycle-Place", il Gruppo G52 ha adottato una metodologia ispirata ai principi **Agile**, mirata a favorire un approccio incrementale e iterativo. Al fine di mantenere l'allineamento sui task e sul progresso delle attività, è stato impiegato un sistema di gestione visuale **Kanban**, che ha permesso di mappare in modo trasparente gli stati di avanzamento e assegnare l'adeguata priorità ad ogni compito.
 
 Per ottimizzare il coordinamento, è stato adottato l'approccio dei *"Deliverable Managers"*: ogni membro del gruppo ha assunto il ruolo organizzativo per un singolo deliverable, in modo da poter riportare al Team Leader uno stato di avanzamento preciso e costante.
 
