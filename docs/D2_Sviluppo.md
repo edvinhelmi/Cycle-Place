@@ -746,9 +746,7 @@ CyclePlace/
 │   ├── dashboard.html          
 │   └── index.html              
 ├── tests/
-│   ├── api_responses.text.js
 │   ├── oas.test.js
-│   ├── auth.test.js            
 │   └── api.test.js              
 ├── .env.example                 
 ├── .gitignore                   
