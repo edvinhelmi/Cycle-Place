@@ -152,6 +152,7 @@
   "routing.modeBike": "By bike",
   "routing.modeWalk": "Walking",
   "routing.calculating": "Calculating route...",
+  "routing.timeout": "Route calculation took too long. Please try again.",
   "routing.error": "Unable to calculate route. Check your location or API key.",
   "routing.geoRequired": "GPS geolocation permission is required to calculate the route.",
   "routing.min": "min",

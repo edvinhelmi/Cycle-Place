@@ -152,6 +152,7 @@
   "routing.modeBike": "In bici",
   "routing.modeWalk": "A piedi",
   "routing.calculating": "Calcolo percorso...",
+  "routing.timeout": "Il calcolo del percorso ha impiegato troppo tempo. Riprova.",
   "routing.error": "Impossibile calcolare il percorso. Verifica la posizione o la chiave API.",
   "routing.geoRequired": "È necessario consentire la posizione GPS per calcolare il percorso.",
   "routing.min": "min",

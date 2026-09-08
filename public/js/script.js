@@ -2942,16 +2942,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function calculateAndRenderRoute(startLat, startLng, endLat, endLng, profile = 'cycling-regular', isReroute = false) {
         const loadingOverlay = document.getElementById('nav-loading-overlay');
+        const loadingText    = document.getElementById('nav-loading-text');
         const distEl         = document.getElementById('nav-stat-distance');
         const durEl          = document.getElementById('nav-stat-duration');
 
-        if (loadingOverlay && !isReroute) loadingOverlay.classList.remove('hidden');
+        if (loadingOverlay && !isReroute) {
+            if (loadingText) loadingText.textContent = tr('routing.calculating') || 'Calcolo percorso...';
+            loadingOverlay.classList.remove('hidden');
+        }
         updateNavUIState(profile);
+
+        const abortController = new AbortController();
+        const fetchTimeout = setTimeout(() => abortController.abort(), 6000);
 
         try {
             const lang = I18n.getLanguage() || 'it';
             const url = `/api/v1/routing?startLat=${startLat}&startLng=${startLng}&endLat=${endLat}&endLng=${endLng}&profile=${profile}&language=${lang}`;
-            const res = await fetch(url);
+            const res = await fetch(url, { signal: abortController.signal });
+            clearTimeout(fetchTimeout);
             const data = await res.json();
 
             if (!res.ok) {
@@ -3045,11 +3053,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
         } catch (err) {
+            clearTimeout(fetchTimeout);
             console.error('[Routing Error]', err);
             if (!isReroute) {
-                alert(err.message || tr('routing.error'));
+                const isTimeout = err.name === 'AbortError';
+                const msg = isTimeout
+                    ? (tr('routing.timeout') || 'Il calcolo del percorso ha impiegato troppo tempo. Riprova.')
+                    : (err.message || tr('routing.error'));
+                alert(msg);
             }
         } finally {
+            clearTimeout(fetchTimeout);
             if (loadingOverlay) loadingOverlay.classList.add('hidden');
         }
     }
@@ -3099,30 +3113,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (lastUserCoords) {
             calculateAndRenderRoute(lastUserCoords.lat, lastUserCoords.lng, destLat, destLng, currentNavMode);
         } else {
+            const loadingOverlay = document.getElementById('nav-loading-overlay');
+            const loadingText = document.getElementById('nav-loading-text');
+
             if (!navigator.geolocation) {
-                if (panel) panel.classList.add('hidden');
-                alert(tr('geo.notSupported') || 'Geolocalizzazione non supportata');
+                const defaultLat = 46.0697, defaultLng = 11.1211;
+                updateUserMarker(defaultLat, defaultLng, null, 25);
+                calculateAndRenderRoute(defaultLat, defaultLng, destLat, destLng, currentNavMode);
                 return;
             }
 
-            const loadingOverlay = document.getElementById('nav-loading-overlay');
+            if (loadingText) loadingText.textContent = tr('geo.locating') || 'Rilevamento in corso...';
             if (loadingOverlay) loadingOverlay.classList.remove('hidden');
 
+            const handlePosSuccess = (pos) => {
+                handleLivePosition(pos);
+                calculateAndRenderRoute(pos.coords.latitude, pos.coords.longitude, destLat, destLng, currentNavMode);
+            };
+
+            const handlePosFallback = () => {
+                const defaultLat = 46.0697, defaultLng = 11.1211;
+                updateUserMarker(defaultLat, defaultLng, null, 25);
+                calculateAndRenderRoute(defaultLat, defaultLng, destLat, destLng, currentNavMode);
+            };
+
             navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    handleLivePosition(pos);
-                    calculateAndRenderRoute(pos.coords.latitude, pos.coords.longitude, destLat, destLng, currentNavMode);
-                },
+                handlePosSuccess,
                 (err) => {
-                    if (loadingOverlay) loadingOverlay.classList.add('hidden');
-                    if (panel) panel.classList.add('hidden');
-                    let errMsg = tr('routing.geoRequired') || tr('geo.errorUnavailable');
-                    if (err.code === err.PERMISSION_DENIED) {
-                        errMsg = tr('geo.errorPermission');
+                    if (err.code === err.TIMEOUT || err.code === err.POSITION_UNAVAILABLE) {
+                        navigator.geolocation.getCurrentPosition(
+                            handlePosSuccess,
+                            () => handlePosFallback(),
+                            { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+                        );
+                    } else {
+                        handlePosFallback();
                     }
-                    alert(errMsg);
                 },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 6000, maximumAge: 30000 }
             );
         }
     };

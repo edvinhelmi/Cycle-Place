@@ -152,6 +152,7 @@
   "routing.modeBike": "Mit dem Rad",
   "routing.modeWalk": "Zu Fuß",
   "routing.calculating": "Route wird berechnet...",
+  "routing.timeout": "Die Routenberechnung hat zu lange gedauert. Bitte versuchen Sie es erneut.",
   "routing.error": "Route konnte nicht berechnet werden. Überprüfen Sie Standort oder API-Schlüssel.",
   "routing.geoRequired": "GPS-Standortberechtigung ist erforderlich, um die Route zu berechnen.",
   "routing.min": "Min.",
