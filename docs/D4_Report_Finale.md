@@ -26,7 +26,7 @@ Per ottimizzare il coordinamento, è stato adottato l'approccio dei *"Deliverabl
 
 Il versionamento del codice e la gestione della *codebase* sono stati centralizzati su **GitHub**, sfruttando le dinamiche di branching e pull request per garantire integrità e revisione paritaria. 
 
-Il team si è incontrato principalmente in presenza, lasciando comunque spazio allo sviluppo individuale e svolgendo meeting settimanali online per gestire al meglio le scadenze e riportare eventuali problematiche. Questo approccio è risultato vincente in particolare di fronte ai blocchi riscontrati durante il lavoro individuale: quando un problema bloccava troppo a lungo un membro, la sua risoluzione diventava prioritaria per tutto il team, permettendo di progredire in modo più bilanciato. La divisione dei compiti è avvenuta principalmente per competenze, al fine di verticalizzare la conoscenza sugli argomenti di maggior interesse per ciascun componente.
+Il team si è incontrato principalmente in presenza, lasciando comunque spazio allo sviluppo individuale e svolgendo meeting settimanali online per gestire al meglio le scadenze e riportare eventuali problematiche, mentre nelle fasi finali abbiamo lavorato in modo prettamente asincrono. Questo approccio è risultato vincente in particolare di fronte ai blocchi riscontrati durante il lavoro individuale: quando un problema bloccava troppo a lungo un membro, la sua risoluzione diventava prioritaria per tutto il team, permettendo di progredire in modo più bilanciato. La divisione dei compiti è avvenuta principalmente per competenze, al fine di verticalizzare la conoscenza sugli argomenti di maggior interesse per ciascun componente.
 
 ---
 
