@@ -645,23 +645,63 @@ app.post('/api/v1/auth/google', async (req, res) => {
         const ticket = await client.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
         const payload = ticket.getPayload();
 
-        const token = jwt.sign({
-            sub: payload['sub'],
-            email: payload['email'],
-            name: payload['given_name'] || payload['name'],
-            surname: payload['family_name'] || '',
-            picture: payload['picture'],
-            provider: 'google'
-        }, JWT_SECRET, { expiresIn: '24h' });
+        const googleId = payload['sub'];
+        const email = (payload['email'] || '').toLowerCase().trim();
+        const name = payload['given_name'] || payload['name'] || '';
+        const surname = payload['family_name'] || '';
+        const picture = payload['picture'] || '';
 
-        res.status(200).json({
-            token,
-            user: {
-                name: payload['given_name'] || payload['name'],
-                surname: payload['family_name'] || '',
-                email: payload['email'],
-                picture: payload['picture']
+        readJsonFile(usersFile, (err, users) => {
+            if (err) users = [];
+
+            // Cerca utente esistente per googleId o email
+            let user = users.find(u => (u.googleId && u.googleId === googleId) || (u.email && u.email.toLowerCase() === email));
+
+            if (user) {
+                // Collega googleId se non presente e aggiorna informazioni profilo
+                user.googleId = googleId;
+                if (!user.name && name) user.name = name;
+                if (!user.surname && surname) user.surname = surname;
+                if (picture) user.picture = picture;
+            } else {
+                // Crea nuovo profilo utente federato Google
+                user = {
+                    id: Date.now().toString(),
+                    googleId: googleId,
+                    name: name,
+                    surname: surname,
+                    email: email,
+                    picture: picture
+                };
+                users.push(user);
             }
+
+            writeJsonFile(usersFile, users, (werr) => {
+                if (werr) {
+                    console.error('[Google SSO] Errore salvataggio utente:', werr);
+                    return res.status(500).json({ error: 'Errore durante il salvataggio dei dati utente' });
+                }
+
+                const token = jwt.sign({
+                    sub: user.id,
+                    googleId: googleId,
+                    email: user.email,
+                    name: user.name,
+                    surname: user.surname,
+                    picture: user.picture || picture,
+                    provider: 'google'
+                }, JWT_SECRET, { expiresIn: '24h' });
+
+                res.status(200).json({
+                    token,
+                    user: {
+                        name: user.name,
+                        surname: user.surname,
+                        email: user.email,
+                        picture: user.picture || picture
+                    }
+                });
+            });
         });
     } catch (error) {
         console.error('[Google SSO] Errore verifica token:', error.message);
@@ -686,7 +726,8 @@ app.get('/api/v1/user/me', tokenChecker, (req, res) => {
 app.get('/api/v1/user/preferiti', tokenChecker, (req, res) => {
     readJsonFile(preferitiFile, (err, data) => {
         if (err) data = {};
-        res.status(200).json({ preferiti: data[req.user.sub] || [] });
+        const preferiti = data[req.user.sub] || (req.user.googleId && data[req.user.googleId]) || [];
+        res.status(200).json({ preferiti });
     });
 });
 
@@ -730,11 +771,17 @@ app.delete('/api/v1/user/preferiti/:id', tokenChecker, (req, res) => {
 app.put('/api/v1/user/profile', tokenChecker, (req, res) => {
     const { name, surname, currentPassword, newPassword, notificheEmail} = req.body;
     const userId = req.user.sub;
+    const userEmail = req.user.email ? req.user.email.toLowerCase().trim() : null;
+    const userGoogleId = req.user.googleId || (req.user.provider === 'google' ? req.user.sub : null);
 
     readJsonFile(usersFile, async (err, users) => {
         if (err) return res.status(500).json({ error: 'Errore nella lettura del database utenti' });
         
-        const userIndex = users.findIndex(u => u.id === userId);
+        const userIndex = users.findIndex(u => 
+            u.id === userId || 
+            (u.googleId && (u.googleId === userId || (userGoogleId && u.googleId === userGoogleId))) ||
+            (userEmail && u.email && u.email.toLowerCase() === userEmail)
+        );
         if (userIndex === -1) {
             return res.status(404).json({ error: 'Utente non trovato' });
         }
@@ -818,14 +865,30 @@ app.put('/api/v1/user/profile', tokenChecker, (req, res) => {
  */
 app.delete('/api/v1/user/account', tokenChecker, (req, res) => {
     const userId = req.user.sub;
+    const userEmail = req.user.email ? req.user.email.toLowerCase().trim() : null;
+    const userGoogleId = req.user.googleId || (req.user.provider === 'google' ? req.user.sub : null);
 
     readJsonFile(usersFile, (err, users) => {
         if (err) return res.status(500).json({ error: 'Errore durante la lettura del database utenti' });
 
-        const userIndex = users.findIndex(u => u.id === userId);
+        // Cerca l'utente per id primario, googleId, o email
+        const userIndex = users.findIndex(u => 
+            u.id === userId || 
+            (u.googleId && (u.googleId === userId || (userGoogleId && u.googleId === userGoogleId))) ||
+            (userEmail && u.email && u.email.toLowerCase() === userEmail)
+        );
+
         if (userIndex === -1) {
             return res.status(404).json({ error: 'Utente non trovato' });
         }
+
+        const targetUser = users[userIndex];
+        const associatedIds = new Set([
+            userId,
+            targetUser.id,
+            targetUser.googleId,
+            userGoogleId
+        ].filter(Boolean));
 
         // Rimuovi l'utente dall'array
         users.splice(userIndex, 1);
@@ -833,20 +896,26 @@ app.delete('/api/v1/user/account', tokenChecker, (req, res) => {
         writeJsonFile(usersFile, users, (writeErr) => {
             if (writeErr) return res.status(500).json({ error: 'Errore durante l\'eliminazione dell\'account' });
 
-            // GDPR Cleanup 1: Rimuovi le segnalazioni associate all'utente
+            // GDPR Cleanup 1: Rimuovi le segnalazioni associate all'utente (per id, googleId ed email)
             const segnalazioniFile = path.join(__dirname, 'data', 'segnalazioni.json');
             readJsonFile(segnalazioniFile, (segErr, segnalazioni) => {
                 if (!segErr && Array.isArray(segnalazioni)) {
-                    const cleanSegnalazioni = segnalazioni.filter(s => s.userId !== userId);
+                    const cleanSegnalazioni = segnalazioni.filter(s => {
+                        const matchesId = associatedIds.has(s.userId);
+                        const matchesEmail = targetUser.email && s.userEmail && s.userEmail.toLowerCase() === targetUser.email.toLowerCase();
+                        return !matchesId && !matchesEmail;
+                    });
                     writeJsonFile(segnalazioniFile, cleanSegnalazioni, () => {});
                 }
             });
 
-            // GDPR Cleanup 2: Rimuovi le posizioni preferite associate all'utente (FIX)
+            // GDPR Cleanup 2: Rimuovi le posizioni preferite associate all'utente (per tutti gli ID associati)
             const preferitiFile = path.join(__dirname, 'data', 'preferiti.json');
             readJsonFile(preferitiFile, (prefErr, preferitiData) => {
-                if (!prefErr && preferitiData[userId]) {
-                    delete preferitiData[userId];
+                if (!prefErr && preferitiData) {
+                    associatedIds.forEach(id => {
+                        delete preferitiData[id];
+                    });
                     writeJsonFile(preferitiFile, preferitiData, () => {});
                 }
             });
@@ -890,7 +959,7 @@ app.post('/api/v1/segnalazioni', segnalazioniLimiter, tokenChecker, (req, res) =
 app.get('/api/v1/segnalazioni/user', tokenChecker, (req, res) => {
     readJsonFile(segFile, (err, data) => {
         if (err) data = [];
-        res.status(200).json({ segnalazioni: data.filter(s => s.userId === req.user.sub) });
+        res.status(200).json({ segnalazioni: data.filter(s => s.userId === req.user.sub || (req.user.googleId && s.userId === req.user.googleId)) });
     });
 });
 
