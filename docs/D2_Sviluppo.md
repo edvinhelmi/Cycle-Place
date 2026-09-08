@@ -20,7 +20,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 ### INDICE
 - **Scopo del documento**
 - **1. Web APIs**
-  - *1.1 Specifica OpenAPI 3.0 (YAML)*
+  - *1.1 Specifica OpenAPI 3.0.3 (YAML)*
 - **2. Implementation**
   - *2.1 Repository Organization*
   - *2.2 Organizzazione del lavoro*
@@ -48,8 +48,8 @@ Le API sono state formalizzate secondo le specifiche **OpenAPI 3.0.3**. La docum
 
 https://editor.swagger.io/?url=https://raw.githubusercontent.com/edvinhelmi/Cycle-Place/main/oas3.yaml
 
-### 1.1 Specifica OpenAPI 3.0 (YAML)
-Il contenuto del file di specifica contrattuale `oas3.yaml`, depositato nella directory principale del repository, è riportato per esteso di seguito:
+### 1.1 Specifica OpenAPI 3.0.3 (YAML)
+Il contenuto del file di specifica contrattuale `oas3.yaml`, situato nella directory principale del repository, è riportato per esteso di seguito:
 
 
 ```yaml
