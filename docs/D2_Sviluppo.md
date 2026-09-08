@@ -10,7 +10,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 | Parametro | Dettaglio |
 | :--- | :--- |
 | **Doc. Name** | D2_Sviluppo |
-| **Doc. Number** | D2 V1.5 |
+| **Doc. Number** | D2 V1.6 |
 | **Data Rilascio** | A.A. 2025/2026 |
 | **Stato** | Rilasciato / Conforme specifiche UniTN |
 | **Autori** | Edvin Helmi, Lorenzo Pasotti, Natalina Perazzolli |
@@ -20,21 +20,19 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 ### INDICE
 - **Scopo del documento**
 - **1. Web APIs**
-  - *1.1 Scelte di design e specifiche OAS3*
-  - *1.2 Specifica OpenAPI 3.0 (YAML)*
+  - *1.1 Specifica OpenAPI 3.0 (YAML)*
 - **2. Implementation**
   - *2.1 Repository Organization*
   - *2.2 Branching strategy e organizzazione del lavoro*
   - *2.3 Dependencies*
-  - *2.4 Database e Strutture Dati*
+  - *2.4 Database*
   - *2.5 Testing*
 - **3. FrontEnd**
-  - *3.1 Architettura e Componenti UI*
-  - *3.2 Schermate dell'Applicativo (Figure 1, 2, 3)*
-- **4. Deployment e CI/CD**
-  - *4.1 Hosting e Pipeline Automatizzata*
-  - *4.2 Credenziali di Accesso e Contatti di Supporto*
- 
+- **4. Deployment**
+  - *4.1 Motivazione dell'Esecuzione Locale*
+  - *4.2 Modalità di Esecuzione e Fruizione*
+  - *4.3 Modalità di Esecuzione e Test*
+
 ---
 
 ## Scopo del documento
