@@ -899,9 +899,98 @@ app.get('/api/v1/segnalazioni/recenti', (req, res) => {
     });
 });
 
+// Helper per tradurre le manovre OSRM nei vari linguaggi supportati
+function translateOsrmManeuver(type, modifier, name, lang) {
+    const isIt = lang === 'it';
+    const isDe = lang === 'de';
+
+    let action = '';
+    switch (modifier) {
+        case 'uturn': action = isIt ? 'Fai inversione a U' : (isDe ? 'Bitte wenden' : 'Make a U-turn'); break;
+        case 'sharp right': action = isIt ? 'Svolta a destra decisa' : (isDe ? 'Scharf rechts abbiegen' : 'Turn sharp right'); break;
+        case 'right': action = isIt ? 'Svolta a destra' : (isDe ? 'Rechts abbiegen' : 'Turn right'); break;
+        case 'slight right': action = isIt ? 'Tieni la destra' : (isDe ? 'Halb rechts halten' : 'Keep right'); break;
+        case 'straight': action = isIt ? 'Prosegui dritto' : (isDe ? 'Geradeaus weiter' : 'Continue straight'); break;
+        case 'slight left': action = isIt ? 'Tieni la sinistra' : (isDe ? 'Halb links halten' : 'Keep left'); break;
+        case 'left': action = isIt ? 'Svolta a sinistra' : (isDe ? 'Links abbiegen' : 'Turn left'); break;
+        case 'sharp left': action = isIt ? 'Svolta a sinistra decisa' : (isDe ? 'Scharf links abbiegen' : 'Turn sharp left'); break;
+        default:
+            if (type === 'depart') action = isIt ? 'Parti' : (isDe ? 'Starten' : 'Head out');
+            else if (type === 'arrive') action = isIt ? 'Sei arrivato a destinazione' : (isDe ? 'Ziel erreicht' : 'Arrive at destination');
+            else action = isIt ? 'Continua' : (isDe ? 'Weiter' : 'Continue');
+    }
+
+    if (type === 'arrive') return action;
+    if (name && name !== '-') {
+        return isIt ? `${action} su ${name}` : (isDe ? `${action} auf ${name}` : `${action} onto ${name}`);
+    }
+    return action;
+}
+
 // =======================================================
-// API: Routing In-App con OpenRouteService (RF 3.4)
+// API: Routing In-App con OpenRouteService e Failover OSRM (RF 3.4)
 // =======================================================
+async function fetchOsrmRoute(osrmMode, sLng, sLat, eLng, eLat, lang) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3500);
+
+    const osrmUrl = `https://router.project-osrm.org/route/v1/${osrmMode}/${sLng},${sLat};${eLng},${eLat}?overview=full&geometries=geojson&steps=true`;
+    const response = await fetch(osrmUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    if (!response.ok) throw new Error(`OSRM HTTP ${response.status}`);
+    const osrmData = await response.json();
+
+    if (!osrmData.routes || osrmData.routes.length === 0) {
+        throw new Error('Nessun percorso calcolabile');
+    }
+
+    const route = osrmData.routes[0];
+    const coordinates = route.geometry?.coordinates || [];
+
+    let currentCoordIdx = 0;
+    const steps = (route.legs?.[0]?.steps || []).map(s => {
+        const stepCoordCount = s.geometry?.coordinates?.length || 0;
+        const startIdx = currentCoordIdx;
+        const endIdx = Math.min(coordinates.length - 1, startIdx + Math.max(0, stepCoordCount - 1));
+        currentCoordIdx = endIdx;
+
+        const name = s.name || '';
+        const instruction = translateOsrmManeuver(s.maneuver?.type, s.maneuver?.modifier, name, lang);
+
+        return {
+            distance: s.distance || 0,
+            duration: s.duration || 0,
+            name: name,
+            instruction: instruction,
+            type: s.maneuver?.type || '',
+            way_points: [startIdx, endIdx]
+        };
+    });
+
+    return {
+        type: 'FeatureCollection',
+        features: [{
+            type: 'Feature',
+            properties: {
+                summary: {
+                    distance: route.distance || 0,
+                    duration: route.duration || 0
+                },
+                segments: [{
+                    distance: route.distance || 0,
+                    duration: route.duration || 0,
+                    steps: steps
+                }]
+            },
+            geometry: route.geometry
+        }],
+        metadata: {
+            source: 'OSRM-Fallback'
+        }
+    };
+}
+
 app.get('/api/v1/routing', async (req, res) => {
     const { startLat, startLng, endLat, endLng, profile } = req.query;
 
@@ -918,50 +1007,79 @@ app.get('/api/v1/routing', async (req, res) => {
         return res.status(400).json({ error: 'Coordinate fornite non valide' });
     }
 
-    // Profili consentiti: cycling-regular (default) o foot-walking
-    const validProfiles = ['cycling-regular', 'foot-walking', 'driving-car'];
-    const chosenProfile = validProfiles.includes(profile) ? profile : 'cycling-regular';
-
+    const lang = ['it', 'en', 'de'].includes(req.query.language) ? req.query.language : 'it';
     const apiKey = (process.env.ORS_API_KEY ? process.env.ORS_API_KEY.trim() : '') || ORS_API_KEY;
-    if (!apiKey) {
-        return res.status(503).json({
-            error: 'OpenRouteService API key non configurata sul server. Aggiungere ORS_API_KEY nel file .env.'
-        });
-    }
 
-    try {
-        const lang = ['it', 'en', 'de'].includes(req.query.language) ? req.query.language : 'it';
-        const orsUrl = `https://api.openrouteservice.org/v2/directions/${chosenProfile}/geojson`;
-        const response = await fetch(orsUrl, {
+    const isFoot = (profile === 'foot-walking');
+    const isCar = (profile === 'driving-car');
+    // Per le biciclette usiamo cycling-road come profilo primario: è ultra-veloce (~200ms)
+    // mentre cycling-regular su ORS soffre di frequenti blocchi/timeout lato cluster
+    const orsProfile = isFoot ? 'foot-walking' : (isCar ? 'driving-car' : 'cycling-road');
+    const osrmMode = isFoot ? 'foot' : (isCar ? 'driving' : 'cycling');
+
+    let isHandled = false;
+    const orsController = new AbortController();
+
+    const sendResponse = (data) => {
+        if (isHandled) return;
+        isHandled = true;
+        try { orsController.abort(); } catch (e) {}
+        res.status(200).json(data);
+    };
+
+    // 1. Chiamata a OpenRouteService
+    if (apiKey) {
+        fetch(`https://api.openrouteservice.org/v2/directions/${orsProfile}/geojson`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': apiKey
             },
             body: JSON.stringify({
-                coordinates: [
-                    [sLng, sLat],
-                    [eLng, eLat]
-                ],
+                coordinates: [[sLng, sLat], [eLng, eLat]],
                 language: lang,
                 instructions: true
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error('[Routing Error ORS]', data);
-            return res.status(response.status).json({
-                error: data.error?.message || 'Errore durante il calcolo del percorso da OpenRouteService'
-            });
-        }
-
-        res.status(200).json(data);
-    } catch (err) {
-        console.error('[Routing Server Exception]', err);
-        res.status(500).json({ error: 'Errore interno durante la richiesta di percorso' });
+            }),
+            signal: orsController.signal
+        })
+        .then(async response => {
+            if (response.ok) {
+                const data = await response.json();
+                if (data.features && data.features.length > 0) {
+                    sendResponse(data);
+                }
+            } else {
+                // Se ORS risponde con errore o quota esaurita, attiva subito il fallback OSRM
+                if (!isHandled) {
+                    try {
+                        const osrmData = await fetchOsrmRoute(osrmMode, sLng, sLat, eLng, eLat, lang);
+                        sendResponse(osrmData);
+                    } catch (e) {}
+                }
+            }
+        })
+        .catch(() => {});
     }
+
+    // 2. Se ORS non risponde entro 1200ms (latenza anomala o blocco server), avvia OSRM in parallelo
+    setTimeout(async () => {
+        if (isHandled) return;
+        try {
+            const osrmData = await fetchOsrmRoute(osrmMode, sLng, sLat, eLng, eLat, lang);
+            sendResponse(osrmData);
+        } catch (e) {
+            console.warn('[Routing OSRM fallback error]:', e.message);
+        }
+    }, apiKey ? 1200 : 0);
+
+    // 3. Timeout finale di sicurezza (4.5 secondi)
+    setTimeout(() => {
+        if (!isHandled) {
+            isHandled = true;
+            try { orsController.abort(); } catch (e) {}
+            res.status(504).json({ error: 'Tempo scaduto per il calcolo del percorso' });
+        }
+    }, 4500);
 });
 
 // SPA fallback
