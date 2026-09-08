@@ -505,11 +505,20 @@ La schermata di autenticazione è pensata per essere pratica e veloce: si apre d
 
 Quando l'utente seleziona una rastrelliera o un parcheggio dalla mappa e richiede le indicazioni stradali, l'applicazione attiva il modulo di navigazione assistita.
 
+
 - **RF 5.6 (Calcolo del percorso efficiente e sicuro)**: Sfruttando l'integrazione con l'API di OpenRouteService, il sistema calcola la rotta ottimale scegliendo tra il profilo ciclabile o pedonale.
 
-# MANCA SCHERMATA ******************************************************
+<p align="center">
+<img src="imgP.png" alt="Titolo" width="700" />
+</p>
+
 
 - **Banner Turn-by-Turn e Guida Vocale (TTS) (RF 5.7)**: Durante la navigazione attiva, compare in alto un banner scuro che indica la distanza residua alla prossima manovra, l'icona direzionale e il testo dell'istruzione. Grazie alla Web Speech API, l'applicazione pronuncia automaticamente le indicazioni a voce nella lingua selezionata dall'utente.
+
+<p align="center">
+<img src="imgN.png" alt="Titolo" width="700" />
+</p>
+
 - **Funzionalità di controllo**: L'interfaccia gestisce i pulsanti per recentrare la mappa sulla posizione GPS corrente, disattivare o attivare l'audio e terminare la sessione di navigazione in qualsiasi momento.
 
 ### 4. Popup Interattivi delle Aree di Sosta
