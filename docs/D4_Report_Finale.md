@@ -10,7 +10,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 
 | Parametro | Dettaglio |
 | :--- | :--- |
-| **Doc. Name** | D4_Sviluppo_Finale |
+| **Doc. Name** | D4_Report_Finale |
 | **Doc. Number** | D4 V1.7 |
 | **Data Rilascio** | A.A. 2025/2026 |
 | **Stato** | Rilasciato / Conforme specifiche UniTN |
