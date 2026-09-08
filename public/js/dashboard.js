@@ -329,7 +329,7 @@ function renderSegnalazioni(items) {
 window.rimuoviPreferito = rimuoviPreferito;
 
 // =======================================================
-// GESTIONE MODIFICA PROFILO, PASSWORD & NOTIFICHE (RF 3.2, RF 3.3)
+// GESTIONE MODIFICA PROFILO & PASSWORD (RF 3.2, RF 3.3)
 // =======================================================
 const btnToggleEdit = document.getElementById('btn-toggle-edit-profile');
 const profileViewMode = document.getElementById('profile-view-mode');
@@ -401,7 +401,6 @@ if (profileEditForm) {
 
         const name = document.getElementById('edit-name').value.trim();
         const surname = document.getElementById('edit-surname').value.trim();
-        const notificheEmail = document.getElementById('edit-notif-email').checked;
 
         const currentPassword = document.getElementById('edit-curr-pass').value;
         const newPassword = document.getElementById('edit-new-pass').value;
@@ -433,7 +432,6 @@ if (profileEditForm) {
                 body: JSON.stringify({
                     name,
                     surname,
-                    notificheEmail,
                     currentPassword: currentPassword || undefined,
                     newPassword: newPassword || undefined
                 })
