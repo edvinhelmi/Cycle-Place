@@ -581,7 +581,7 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 </p>
 
 <p align="center">
-<img src="design-front-end/modifica_profilo.png" alt="Modifica profilo" width="700"><br>
+<img src="design-front-end/modifica_dati.png" alt="Modifica profilo" width="700"><br>
 <em>Modifica profilo</em>
 </p>
 
