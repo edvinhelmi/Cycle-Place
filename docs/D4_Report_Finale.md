@@ -10,7 +10,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 | Parametro | Dettaglio |
 | :--- | :--- |
 | **Doc. Name** | D4_Sviluppo_Finale |
-| **Doc. Number** | D4 V1.5 |
+| **Doc. Number** | D4 V1.6 |
 | **Data Rilascio** | A.A. 2025/2026 |
 | **Stato** | Rilasciato / Conforme specifiche UniTN |
 | **Autori** | Edvin Helmi, Lorenzo Pasotti, Natalina Perazzolli |
@@ -34,8 +34,8 @@ La divisione è avvenuta principalmente per competenze, in modo da verticalizzar
 | Componente del team     | Ruolo                | Principali attività                                                                                                                                                                                                   | Derivable Manager |
 | :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
 | **Edvin Helmi**         | Full-Stack developer | Principale programmatore, back-end, front-end, gestione database, ha contribuito attivamente alla stesura di tutti i documenti e nello specifico alla stesura del D2.  | D2                |
-| **Lorenzo Pasotti**     | Team Leader          | Gestione dell'organizzazione del lavoro e dei "Derivable Managers", stesura buisness model, slides pitch, ha contribuito alla stesura di tutti i documenti, ed in particolare a quella di quest'ultimo.    | D4                |
-| **Natalina Perazzolli** | Analista             | Design Thinking, integrazione funzionalità, front-end, ui-ux design, ha partecipato alla stesura di tutti i derivable e nello specifico a quella del documento D1.               | D1                |
+| **Lorenzo Pasotti**     | Team Leader          | Gestione dell'organizzazione del lavoro e dei "Derivable Managers", stesura business model, slides pitch, ha contribuito alla stesura di tutti i documenti, ed in particolare a quella di quest'ultimo.    | D4                |
+| **Natalina Perazzolli** | Analista             | Design Thinking, integrazione funzionalità, front-end, UI-UX design, ha partecipato alla stesura di tutti i derivable e nello specifico a quella del documento D1.               | D1                |
 
 ---
 
@@ -69,7 +69,9 @@ Questo è stato il punto di forza del gruppo, nonostante un inizio complesso son
 
 Date le precedenti considerazioni e le parti facoltative svolte la nostra autovalutazione è la seguente:
 
-| Edvin Helmi         | 30  |
-| Pasotti Lorenzo     | 30  |
-| Natalina Perazzolli | 30  |
+| Membro del Team         | Voto / Valutazione |
+| :---------------------- | :----------------: |
+| **Edvin Helmi**         | **30**             |
+| **Lorenzo Pasotti**     | **30**             |
+| **Natalina Perazzolli** | **30**             |
 
