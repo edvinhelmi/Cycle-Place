@@ -254,6 +254,7 @@ Estensioni:
 ### Use Case RF9: Scelta della lingua
 
 <img src="RF9_Diagram.drawio.png" alt="Titolo" width="700" />
+
 **Riassunto:** L'utente cambia la lingua della piattaforma assicurandosi che la preferenza venga mantenuta nel tempo.
 **Descrizione:**
 - L'utente (Anonimo o Registrato) attiva la "Selezione Lingua Applicazione".
