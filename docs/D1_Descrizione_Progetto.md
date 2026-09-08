@@ -16,7 +16,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 
 ---
 
-**INDICE**
+### INDICE
 1. Il progetto Cycle-Place
 2. Requisiti Funzionali
 3. Requisiti Non Funzionali
