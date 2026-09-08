@@ -24,7 +24,7 @@ Per lo sviluppo dell'applicazione "Cycle-Place", il Gruppo G52 ha adottato una m
 
 Per ottimizzare il coordinamento, è stato adottato l'approccio dei *"Deliverable Managers"*: ogni membro del gruppo ha assunto il ruolo organizzativo per un singolo deliverable, in modo da poter riportare al Team Leader uno stato di avanzamento preciso e costante.
 
-Il versionamento del codice e la gestione della *codebase* sono stati centralizzati su **GitHub**, sfruttando le dinamiche di branching e pull request per garantire integrità e revisione paritaria. 
+Il versionamento del codice e la gestione della *codebase* sono stati centralizzati su **GitHub**. Lo sviluppo del progetto si è svolto lavorando direttamente sul ramo principale del repository remoto, in modo da ottenere un flusso di lavoro rapido e senza passaggi intermedi di revisione.
 
 Il team si è incontrato principalmente in presenza, lasciando comunque spazio allo sviluppo individuale e svolgendo meeting settimanali online per gestire al meglio le scadenze e riportare eventuali problematiche, mentre nelle fasi finali abbiamo lavorato in modo prettamente asincrono. Questo approccio è risultato vincente in particolare di fronte ai blocchi riscontrati durante il lavoro individuale: quando un problema bloccava troppo a lungo un membro, la sua risoluzione diventava prioritaria per tutto il team, permettendo di progredire in modo più bilanciato. La divisione dei compiti è avvenuta principalmente per competenze, al fine di verticalizzare la conoscenza sugli argomenti di maggior interesse per ciascun componente.
 
@@ -34,9 +34,9 @@ Il team si è incontrato principalmente in presenza, lasciando comunque spazio a
 
 | Componente del team | Ruolo | Principali attività | Deliverable Manager |
 | :--- | :--- | :--- | :---: |
-| **Edvin Helmi** | Full-Stack Developer | Principale programmatore, back-end, front-end, gestione database. Ha contribuito attivamente alla stesura di tutti i documenti e, nello specifico, alla redazione del D2. | D2 |
+| **Edvin Helmi** | Full-Stack Developer | Principale programmatore, back-end, front-end, gestione database (file .json), integrazione di Jest per lo sviluppo dei test. Ha contribuito attivamente alla stesura di tutti i documenti e, nello specifico, alla redazione del D2. | D2 |
 | **Lorenzo Pasotti** | Team Leader | Gestione dell'organizzazione del lavoro e dei "Deliverable Managers", stesura business model e slide pitch. Ha contribuito alla stesura di tutti i documenti, con focus particolare su quest'ultimo. | D4 |
-| **Natalina Perazzolli** | Analista | Design Thinking, integrazione funzionalità, front-end, UI/UX design. Ha partecipato alla stesura di tutti i deliverable e, nello specifico, a quella del documento D1. | D1 |
+| **Natalina Perazzolli** | Analista | Design Thinking, integrazione funzionalità, front-end, UI/UX design, realizzazione dei test automatizzati (Jest). Ha partecipato alla stesura di tutti i deliverable e, nello specifico, a quella del documento D1. | D1 |
 
 ---
 
