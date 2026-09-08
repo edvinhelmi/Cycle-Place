@@ -7,7 +7,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 ---
 
 ### Document Info<br>
-**Doc. Name**: D1-cycle-place-DescrizioneProgetto<br>
+**Doc. Name**: D1_Descrizione_Progetto<br>
 **Doc. Number**: D1 v1.4<br>
 **Description**: Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place.
 
@@ -153,6 +153,7 @@ Il sistema deve permettere all'utente di scegliere in quale lingua fruire dell'a
 - Durante il "Login Credenziali Locali", il sistema esegue passaggi obbligatori: applica il "Rate Limiting" per prevenire abusi, genera la "Gestione Sessione JWT" e procede all'"Invalidazione Sessione" precedente per ragioni di sicurezza.
 - L'Utente Anonimo può richiedere il "Recupero Password".
 - L'Utente Registrato può effettuare il "Logout", azione che include sempre l'"Invalidazione Sessione" attiva.
+
 **Estensioni:**
 Autenticazione Esterna: Il flusso di login standard può essere esteso scegliendo l'accesso tramite un sistema esterno (Provider Google - OAuth 2.0).
 
@@ -211,7 +212,7 @@ Backup Regolare Dati Critici: A seguito di un ripristino, il flusso può estende
 - L'utente lancia il "Calcolo Percorso", per il quale il sistema si interfaccia con l'API OpenRouteService.
 - Solo l'Utente Registrato può azionare il "Salvataggio Aree Preferite".
 
-**Estesioni: **
+**Estesioni:**
 - L'Utente Registrato può utilizzare la "Sintesi Vocale Turn-by-Turn" (comunicando con la Web Speech API), che include la "Localizzazione Istruzioni" (IT, EN, DE).
 Estensioni:
 - La mappa può estendere il suo comportamento azionando la "Centratura su Posizione GPS" o la "Centratura su Area Selezionata".
@@ -263,11 +264,14 @@ Estensioni:
 
 
 **Riassunto:** L'utente cambia la lingua della piattaforma assicurandosi che la preferenza venga mantenuta nel tempo.
+
 **Descrizione:**
 - L'utente (Anonimo o Registrato) attiva la "Selezione Lingua Applicazione".
 - Ogni variazione linguistica include la procedura di "Persistenza Preferenza Lingua" per salvare il dato per la sessione corrente e quelle future.
+
 **Estensioni:**
 - Il caso d'uso si estende attuando il set di dizionari corrispondente alla scelta: "Impostazione Lingua Italiano", "Impostazione Lingua Inglese" o "Impostazione Lingua Tedesco".
+
 ---
 
 ## 5. User Stories
@@ -516,7 +520,7 @@ Quando l'utente seleziona una rastrelliera o un parcheggio dalla mappa e richied
 - **RF 5.6 (Calcolo del percorso efficiente e sicuro)**: Sfruttando l'integrazione con l'API di OpenRouteService, il sistema calcola la rotta ottimale scegliendo tra il profilo ciclabile o pedonale.
 
 <p align="center">
-<img src="design-front-end/popup_navigazione.png" alt="Titolo" width="700" />
+<img src="design-front-end/popup_navigazione.png" alt="Titolo" width="700" /><br>
 <em>Popup navigazione</em>
 </p>
 
@@ -524,7 +528,7 @@ Quando l'utente seleziona una rastrelliera o un parcheggio dalla mappa e richied
 - **Banner Turn-by-Turn e Guida Vocale (TTS) (RF 5.7)**: Durante la navigazione attiva, compare in alto un banner scuro che indica la distanza residua alla prossima manovra, l'icona direzionale e il testo dell'istruzione. Grazie alla Web Speech API, l'applicazione pronuncia automaticamente le indicazioni a voce nella lingua selezionata dall'utente.
 
 <p align="center">
-<img src="design-front-end/navigazione.png" alt="Titolo" width="700" />
+<img src="design-front-end/navigazione.png" alt="Titolo" width="700" /><br>
 <em>Navigazione</em>
 </p>
 
