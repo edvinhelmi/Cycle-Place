@@ -7,11 +7,11 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 ### Document Info
 | Parametro | Dettaglio |
 | :--- | :--- |
-| **Doc. Name** | D2_CyclePlace_Sviluppo |
-| **Doc. Number** | D2 V1.2 |
+| **Doc. Name** | D2_Sviluppo |
+| **Doc. Number** | D2 V1.3 |
 | **Data Rilascio** | A.A. 2025/2026 |
 | **Stato** | Rilasciato / Conforme specifiche UniTN |
-| **Autori** | Gruppo Sviluppo Cycle Place |
+| **Autori** | Edvin Helmi, Lorenzo Pasotti, Natalina Perazzolli |
 
 ---
 
@@ -342,6 +342,13 @@ paths:
       responses:
         '200':
           description: Dati profilo recuperati con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserSummary'
         '401':
           description: Non autorizzato
 
@@ -409,6 +416,12 @@ paths:
       responses:
         '200':
           description: Lista preferiti recuperata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Preferito'
         '401':
           description: Non autorizzato
     post:
@@ -524,6 +537,12 @@ paths:
       responses:
         '200':
           description: Storico segnalazioni recuperato
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segnalazione'
         '401':
           description: Non autorizzato
 
@@ -535,6 +554,12 @@ paths:
       responses:
         '200':
           description: Lista segnalazioni recenti
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segnalazione'
 
   /api/v1/routing:
     get:
@@ -727,6 +752,8 @@ CyclePlace/
 │   ├── dashboard.html          
 │   └── index.html              
 ├── tests/
+│   ├── api_responses.text.js
+│   ├── oas.test.js
 │   ├── auth.test.js            
 │   └── api.test.js              
 ├── .env.example                 
@@ -739,8 +766,17 @@ CyclePlace/
 ```
 
 ### 2.2 Branching strategy e organizzazione del lavoro
-La gestione del ciclo di vita del codice ha utilizzato un repository Git ospitato in cloud (GitHub) mediante la metodologia Agile. La strategia di branching scelta si basa sul GitHub Flow: il ramo `main` riflette unicamente lo stato *deployable* (production-ready) del software.
+La gestione del ciclo di vita del codice ha utilizzato un repository Git ospitato in cloud (GitHub) mediante la metodologia Agile. Nello sviluppo del progetto abbiamo collaborato attivamente in modo prevalentemente asincrono, scelta dovuta a particolari esigenze del gruppo, e ci siamo divisi il lavoro nel seguente modo: 
+
+- Edvin ha pensato prevalentemente allo sviluppo di back-end, front-end, alla creazione dei file .json usati come database ed all'integrazione di jest per lo sviluppo dei test. Inoltre ha contribuito attivamente alla scrittura di tutti i documenti, ed in particolare alla stesura del D2. 
+
+- Lorenzo ha gestito l'organizzazione del lavoro, la creazione delle slides di presentazione del progetto, è stato il principale autore del video di presentazione del progetto, del business model ed ha contribuito attivamente alla stesura di tutti i documenti, in particolare D3 e D4. 
+
+- Natalina ha pensato principalmente ad integrare funzionalità utili all'applicazione, si è occupata del design-thinking, ui-ux design, ha effettuato una suite di test automatizzati ed ha contribuito attivamente alla stesura di tutti i documenti, in modo particolare il D1.
+
 La ripartizione dei contributi e dei commit è tracciata sulla piattaforma GitHub. Le eventuali asimmetrie nel computo numerico dei commit tra i componenti derivano da differenti approcci di raggruppamento (molti commit piccoli per modifiche UI/CSS e modifiche ai documenti a fronte di commit corposi per l'infrastruttura backend e i casi di test).
+
+Il ciclo di sviluppo del progetto è stato effettuato operando direttamente sul ramo principale (main) del repository remoto su GitHub, senza l'adozione di rami di sviluppo (branching) isolati o flussi di revisione tramite Pull Request, privilegiando un approccio di integrazione continua diretto e snello.
 
 ### 2.3 Dependencies
 Il backend del progetto si basa sulle seguenti dipendenze runtime caricate tramite npm:
@@ -765,7 +801,11 @@ A causa del ridottissimo I/O rate temporale, il progetto rifiuta il sovradimensi
 
 
 ### 2.5 Testing 
-Il piano di verifica e validazione della piattaforma integra una suite di collaudo automatizzata unita a test funzionali di tipo Black Box, orientati alla verifica puntuale di input, output e stati di sistema.
+Le API e il relativo codice presentano una test-suite che consente di verificarne il corretto funzionamento. I test sono utilizzati all’interno della configurazione di CI/CD.  
+
+L’implementazione dei test è organizzata in file .test.js raccolti all’interno della cartella dedicata tests/.  
+
+Dei 46 casi di test complessivi che sono stati definiti (suddivisi tra test di contratto OpenAPI, autenticazione, gestione utente, preferiti, segnalazioni e routing), 46 sono stati interamente implementati ed eseguiti con successo.
 
 | Numero | Test Case | Descrizione Test Case | Test Data | Precondizioni | Dipendenze | Risultato Atteso | Risultato Riscontrato |
 |:---:|---|---|---|---|---|---|:---:|
@@ -815,6 +855,4 @@ Il front-end include inoltre un motore dedicato di internazionalizzazione client
 
 ## 4. Deployment & CI-CD
 
-L'impianto software poggia su uno stack automatizzato di **Continuous Integration e Continuous Deployment (CI/CD)** essenziale per abbattere l'attrito dei rilasci manuali e garantire standard qualitativi rigidi. 
-La colonna portante della CI è delegata a **GitHub Actions**: all'apertura di ogni Pull Request ed a ogni Push formale sul branch `main`, il sistema innesca una pipeline virtualizzata. Essa intercetta preventivamente le *regression* eseguendo gli **Unit Test** formali creati mediante il motore *Jest*. 
-Una volta evasi tutti i task verdi della CI, entra in gioco il processo di Delivery. Lo strumento di infrastruttura cloud PaaS selezionato dal team (es. **Render** o **Heroku**) è ancorato al repository git via Webhook. Intercettata la build sana, il cloud-node orchestra internamente il task isolando un container in esecuzione Linux, avvia il processo di fetching via `npm install`, lancia il main daemon Node.js e rende operativi i certificati SSL per esporre all'esterno, in HTTPS, la Web App in modo completamente automatizzato.
+???????????????????
