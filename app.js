@@ -342,8 +342,9 @@ app.post('/api/v1/login', authLimiter, (req, res) => {
                 { expiresIn: '30d' }
             );
             
-            // 4. Salva il refresh token su file (RF 1.7)
-            user.refreshToken = refreshToken;
+            // 4. Salva il refresh token su file formattato come hash SHA-256 (FIX)
+            const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+            user.refreshToken = hashedRefreshToken;
             writeJsonFile(usersFile, users, (werr) => {
                 if (werr) return res.status(500).json({ error: 'Errore nel salvataggio della sessione' });
             
@@ -373,7 +374,13 @@ app.post('/api/v1/refresh-token', (req, res) => {
             if (uErr) return res.status(500).json({ error: "Errore lettura database utenti" });
 
             const user = users.find(u => u.id === decoded.id);
-            if (!user || user.refreshToken !== refreshToken) {
+            if (!user || !user.refreshToken) {
+                return res.status(403).json({ error: "Nessuna sessione attiva o sessione invalidata" });
+            }
+
+            // Applica l'hashing al token in ingresso e confrontalo con quello salvato
+            const hashedInput = crypto.createHash('sha256').update(refreshToken).digest('hex');
+            if (user.refreshToken !== hashedInput) {
                 return res.status(403).json({ error: "Sessione invalidata da un nuovo login" });
             }
 
@@ -826,12 +833,21 @@ app.delete('/api/v1/user/account', tokenChecker, (req, res) => {
         writeJsonFile(usersFile, users, (writeErr) => {
             if (writeErr) return res.status(500).json({ error: 'Errore durante l\'eliminazione dell\'account' });
 
-            // GDPR Cleanup: Rimuovi anche le segnalazioni associate all'utente
+            // GDPR Cleanup 1: Rimuovi le segnalazioni associate all'utente
             const segnalazioniFile = path.join(__dirname, 'data', 'segnalazioni.json');
             readJsonFile(segnalazioniFile, (segErr, segnalazioni) => {
                 if (!segErr && Array.isArray(segnalazioni)) {
                     const cleanSegnalazioni = segnalazioni.filter(s => s.userId !== userId);
                     writeJsonFile(segnalazioniFile, cleanSegnalazioni, () => {});
+                }
+            });
+
+            // GDPR Cleanup 2: Rimuovi le posizioni preferite associate all'utente (FIX)
+            const preferitiFile = path.join(__dirname, 'data', 'preferiti.json');
+            readJsonFile(preferitiFile, (prefErr, preferitiData) => {
+                if (!prefErr && preferitiData[userId]) {
+                    delete preferitiData[userId];
+                    writeJsonFile(preferitiFile, preferitiData, () => {});
                 }
             });
 
