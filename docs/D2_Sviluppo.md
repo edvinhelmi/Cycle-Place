@@ -10,7 +10,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 | Parametro | Dettaglio |
 | :--- | :--- |
 | **Doc. Name** | D2_Sviluppo |
-| **Doc. Number** | D2 V1.6 |
+| **Doc. Number** | D2 V1.7 |
 | **Data Rilascio** | A.A. 2025/2026 |
 | **Stato** | Rilasciato / Conforme specifiche UniTN |
 | **Autori** | Edvin Helmi, Lorenzo Pasotti, Natalina Perazzolli |
@@ -804,7 +804,7 @@ Le API e il relativo codice presentano una test-suite che consente di verificarn
 
 L’implementazione dei test è organizzata in file .test.js raccolti all’interno della cartella dedicata tests/.  
 
-Sebbene la tabella riportata in seguito preveda una copertura di soli 29 macro-scenari di collaudo, l'implementazione effettiva della test-suite in ambiente Jest/Supertest si articola su 46 test case distinti. Questo è dovuto alla scomposizione dei macro-requisiti in molteplici test case di unità e di integrazione mirati a verificare sistematicamente tutti i rami di errore e i relativi casi limite, quali la gestione dei campi obbligatori mancanti, la validazione delle espressioni regolari per password ed email, i controlli di unicità dei dati ecc...
+Sebbene la tabella riportata in seguito preveda una copertura di soli 29 macro-scenari di collaudo, l'implementazione effettiva della test-suite in ambiente Jest/Supertest si articola su 39 test case distinti. Questo è dovuto alla scomposizione dei macro-requisiti in molteplici test case di unità e di integrazione mirati a verificare tutti i rami di errore e i relativi casi limite (gestione campi obbligatori, validazione regex per password ed email, controlli di unicità dei dati ed altri), mentre le restanti verifiche visive e di interazione client-side (come geolocalizzazione e layer cartografici) sono state validate tramite collaudo funzionale ed interattivo.
 
 Riportiamo quindi qui sotto l'esito dei test effettuati:
 
