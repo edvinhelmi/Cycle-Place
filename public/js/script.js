@@ -1831,48 +1831,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             tutteRastrelliere = await resRastr.json();
             tuttiParcheggi    = await resPark.json();
 
-            // Normalizzazione e sincronizzazione deterministica
+            // Normalizzazione rastrelliere: nessuna simulazione capienza (solo parcheggi protetti)
             if (tutteRastrelliere && tutteRastrelliere.features) {
                 tutteRastrelliere.features.forEach(feature => {
                     const props = feature.properties;
-                    const id = props.id || 0;
-                    const isBlocca = (props.Tipo_generale === 'Rastr_bloccatelaio');
                     const tot = parseInt(props.tot_bici || props.n_posti || 6, 10);
                     props.tot_bici = tot;
                     props.n_posti = tot;
-
-                    if (props.posti_liberi === undefined || props.posti_occupati === undefined) {
-                        if (isBlocca) {
-                            const hash = Math.abs(Math.sin(id * 12.9898 + 78.233) * 43758.5453);
-                            const normalized = hash - Math.floor(hash);
-                            let occupati;
-                            if (normalized < 0.08) {
-                                occupati = 0;
-                            } else if (normalized > 0.90) {
-                                occupati = tot;
-                            } else {
-                                const fraction = 0.20 + (normalized * 0.60);
-                                occupati = Math.round(fraction * tot);
-                                if (tot > 1) occupati = Math.min(tot - 1, Math.max(1, occupati));
-                            }
-                            const liberi = Math.max(0, tot - occupati);
-                            props.smart_iot = true;
-                            props.posti_totali = tot;
-                            props.posti_occupati = occupati;
-                            props.posti_liberi = liberi;
-                            props.percentuale_occupazione = Math.round((occupati / tot) * 100);
-                            props.piena = (liberi === 0);
-                        } else {
-                            props.smart_iot = false;
-                            props.posti_totali = tot;
-                            props.posti_occupati = undefined;
-                            props.posti_liberi = undefined;
-                            props.percentuale_occupazione = undefined;
-                            props.piena = false;
-                        }
-                    } else {
-                        props.piena = isBlocca ? (props.posti_liberi === 0) : false;
-                    }
+                    props.smart_iot = false;
+                    props.piena = false;
                 });
             }
             console.log('[API] Dati mappa caricati in parallelo con successo');
@@ -2038,39 +2005,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const stalli   = props.n_posti ?? props.tot_bici ?? 'N/D';
         const isFav    = userFavoritiIds.has(Number(props.id));
 
-        // Calcolo e risoluzione telemetria IoT realistica
-        let freeSlots = props.posti_liberi;
-        let occSlots  = props.posti_occupati;
-        let occPerc   = props.percentuale_occupazione;
-
-        if (isBlocca && (freeSlots === undefined || occSlots === undefined)) {
-            const totNum = parseInt(stalli, 10) || 6;
-            const hash = Math.abs(Math.sin((props.id || 1) * 12.9898 + 78.233) * 43758.5453);
-            const norm = hash - Math.floor(hash);
-            if (norm < 0.08) {
-                occSlots = 0;
-            } else if (norm > 0.90) {
-                occSlots = totNum;
-            } else {
-                occSlots = Math.round((0.20 + norm * 0.60) * totNum);
-                if (totNum > 1) occSlots = Math.min(totNum - 1, Math.max(1, occSlots));
-            }
-            freeSlots = Math.max(0, totNum - occSlots);
-            occPerc   = Math.round((occSlots / totNum) * 100);
-        }
-
-        const isPiena = isBlocca && ((props.piena === true) || (freeSlots === 0));
-
-        let themeClass = 'theme-ok';
-        let progressColor = 'progress-success';
-        if (isPiena || (isBlocca && freeSlots === 0)) {
-            themeClass = 'theme-full';
-            progressColor = 'progress-error';
-        } else if ((occPerc ?? 0) >= 75) {
-            themeClass = 'theme-warn';
-            progressColor = 'progress-warning';
-        }
-
         const badgeHTML = isBlocca ? '<span class="badge badge-sm badge-accent text-white font-extrabold tracking-wider">BLOCCATELAIO</span>' : '';
         const numStalli = parseInt(stalli, 10) || 6;
         const tipoStr = (props.Tipo_generale || 'Rastr_tradizionale').replace(/['"\\]/g, ' ');
@@ -2139,35 +2073,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </h3>
                     ${badgeHTML}
                 </div>
-                ${alertSegnalazioneHTML}
-                ${isBlocca ? `
-                <div class="popup-iot-card ${themeClass} rounded-2xl p-3 shadow-xs space-y-2.5">
-                    <div class="popup-iot-header flex items-center justify-between text-xs">
-                        <div class="flex items-center gap-2">
-                            <span class="iot-pulse-dot"></span>
-                            <strong class="iot-title font-bold">${tr('popup.smartLive')}</strong>
-                        </div>
-                        <span class="iot-chip badge badge-sm font-black">${occPerc ?? 0}%</span>
-                    </div>
-                    <div class="iot-progress-bar w-full">
-                        <progress class="progress ${progressColor} w-full h-2.5 rounded-full" value="${occPerc ?? 0}" max="100"></progress>
-                    </div>
-                    <div class="iot-stats-row flex items-center justify-around rounded-xl p-2.5 shadow-xs">
-                        <div class="iot-stat-item free text-center flex-1">
-                            <span class="iot-stat-num font-black text-lg text-emerald-600 flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-circle-check text-xs"></i> <span>${freeSlots ?? 0}</span>
-                            </span>
-                            <div class="iot-stat-lbl text-[11px] font-extrabold uppercase mt-0.5 tracking-wide">${tr('popup.freeSlots')}</div>
-                        </div>
-                        <div class="iot-stat-divider w-[1px] h-7"></div>
-                        <div class="iot-stat-item occupied text-center flex-1">
-                            <span class="iot-stat-num font-black text-lg text-rose-600 flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-lock text-xs"></i> <span>${occSlots ?? 0}</span>
-                            </span>
-                            <div class="iot-stat-lbl text-[11px] font-extrabold uppercase mt-0.5 tracking-wide">${tr('popup.occupiedSlots')}</div>
-                        </div>
-                    </div>
-                </div>` : ''}
+                 ${alertSegnalazioneHTML}
 
                 <div class="popup-body bg-base-100/80 border border-base-200/80 rounded-2xl p-3 space-y-1.5 text-xs">
                     ${!isBlocca ? `
@@ -2193,14 +2099,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <span class="popup-label text-slate-500 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-building"></i> ${tr('popup.building')}</span>
                         <span class="popup-val font-bold text-slate-800">${props.edificio}</span>
                     </div>` : ''}
-                    ${isBlocca ? `
-                    <div class="popup-row flex items-center justify-between py-1">
-                        <span class="popup-label text-slate-500 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-globe"></i> ${tr('popup.gisInfo')}</span>
-                        <span class="popup-val">
-                            <a href="https://gis.comune.trento.it/it/map/mobilita-sostenibile/"
-                               target="_blank" rel="noopener noreferrer" class="link link-primary font-bold">${tr('popup.gisLink')}</a>
-                        </span>
-                    </div>` : ''}
                 </div>
                 <div class="popup-actions flex gap-2">
                     ${favBtn}
@@ -2214,8 +2112,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const parkId = Number(props.id || 10001);
         const isFav = userFavoritiIds.has(parkId);
         const stalli = parseInt(props.posti || 10, 10);
-        const parkName = (props.park || 'Parcheggio Protetto').replace(/['"\\]/g, ' ');
-        const viaName = (props.via || parkName).replace(/['"\\]/g, ' ');
+        const parkName = (props.park || 'Parcheggio Protetto').replace(/['\"\\]/g, ' ');
+        const viaName = (props.via || parkName).replace(/['\"\\]/g, ' ');
 
         const favIcon = isFav ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>';
         const favBtn = `<button id="fav-btn-${parkId}" class="popup-btn btn btn-sm ${isFav ? 'btn-error text-white' : 'btn-outline btn-error'} rounded-xl font-bold flex-1 min-w-0 text-xs px-2 shadow-xs whitespace-normal text-center leading-tight py-1.5 h-auto min-h-[2.4rem] flex items-center justify-center gap-1.5"
@@ -2236,6 +2134,38 @@ document.addEventListener('DOMContentLoaded', async () => {
                 onclick="window.startNavigation(${lat}, ${lng}, '${parkName}')">
                 <i class="fa-solid fa-route text-white"></i> <span class="text-white">${tr('routing.directions') || tr('popup.directions')}</span>
             </button>`;
+
+        // Simulazione IoT capienza dal backend (o fallback deterministico)
+        let freeSlots = props.posti_liberi;
+        let occSlots  = props.posti_occupati;
+        let occPerc   = props.percentuale_occupazione;
+
+        if (freeSlots === undefined || occSlots === undefined) {
+            const totNum = parseInt(props.posti || 10, 10);
+            const hash = Math.abs(Math.sin((props.id || 1) * 12.9898 + 78.233) * 43758.5453);
+            const norm = hash - Math.floor(hash);
+            if (norm < 0.08) {
+                occSlots = 0;
+            } else if (norm > 0.90) {
+                occSlots = totNum;
+            } else {
+                occSlots = Math.round((0.20 + norm * 0.60) * totNum);
+                if (totNum > 1) occSlots = Math.min(totNum - 1, Math.max(1, occSlots));
+            }
+            freeSlots = Math.max(0, totNum - occSlots);
+            occPerc   = Math.round((occSlots / totNum) * 100);
+        }
+
+        const isPiena = (props.piena === true) || (freeSlots === 0);
+        let themeClass = 'theme-ok';
+        let progressColor = 'progress-success';
+        if (isPiena) {
+            themeClass = 'theme-full';
+            progressColor = 'progress-error';
+        } else if ((occPerc ?? 0) >= 75) {
+            themeClass = 'theme-warn';
+            progressColor = 'progress-warning';
+        }
 
         // Calcolo avviso segnalazioni recenti per parcheggi protetti
         const segListPark = segnalazioniRecentiMap.get(parkId) || [];
@@ -2279,6 +2209,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </h3>
                 </div>
                 ${alertParkHTML}
+                <div class="popup-iot-card ${themeClass} rounded-2xl p-3 shadow-xs space-y-2.5">
+                    <div class="popup-iot-header flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="iot-pulse-dot"></span>
+                            <strong class="iot-title font-bold">${tr('popup.smartLive')}</strong>
+                        </div>
+                        <span class="iot-chip badge badge-sm font-black">${occPerc ?? 0}%</span>
+                    </div>
+                    <div class="iot-progress-bar w-full">
+                        <progress class="progress ${progressColor} w-full h-2.5 rounded-full" value="${occPerc ?? 0}" max="100"></progress>
+                    </div>
+                    <div class="iot-stats-row flex items-center justify-around rounded-xl p-2.5 shadow-xs">
+                        <div class="iot-stat-item free text-center flex-1">
+                            <span class="iot-stat-num font-black text-lg text-emerald-600 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-circle-check text-xs"></i> <span>${freeSlots ?? 0}</span>
+                            </span>
+                            <div class="iot-stat-lbl text-[11px] font-extrabold uppercase mt-0.5 tracking-wide">${tr('popup.freeSlots')}</div>
+                        </div>
+                        <div class="iot-stat-divider w-[1px] h-7"></div>
+                        <div class="iot-stat-item occupied text-center flex-1">
+                            <span class="iot-stat-num font-black text-lg text-rose-600 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-lock text-xs"></i> <span>${occSlots ?? 0}</span>
+                            </span>
+                            <div class="iot-stat-lbl text-[11px] font-extrabold uppercase mt-0.5 tracking-wide">${tr('popup.occupiedSlots')}</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="popup-body bg-base-100/80 border border-base-200/80 rounded-2xl p-3 space-y-1.5 text-xs">
                     <div class="popup-row flex items-center justify-between py-1 border-b border-base-200/60">
                         <span class="popup-label text-slate-500 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-location-dot"></i> ${tr('popup.address')}</span>
@@ -2295,8 +2252,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="popup-row flex items-center justify-between py-1">
                         <span class="popup-label text-slate-500 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-key"></i> ${tr('popup.access')}</span>
                         <span class="popup-val">
-                            <a href="https://mitt.provincia.tn.it/home/MittOnLineHome.rails"
-                               target="_blank" rel="noopener noreferrer" class="link link-primary font-bold">${tr('popup.mittLink')}</a>
+                            <a href="https://www.trentinomobilita.it/servizi/comune/trento/servizi-bici-trento/ciclobox/"
+                               target="_blank" rel="noopener noreferrer" class="link link-primary font-bold">${tr('popup.cicloboxLink') || 'CicloBox ↗'}</a>
                         </span>
                     </div>
                 </div>

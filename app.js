@@ -154,46 +154,13 @@ app.get('/api/v1/rastrelliere', (req, res) => {
             return res.status(500).json({ error: 'Errore nella lettura delle rastrelliere: ' + err.message });
         }
         try {
-            // Simulazione telemetria IoT Smart City in tempo reale per rastrelliere bloccatelaio
+            // Rastrelliere: nessuna simulazione IoT (la simulazione è sui parcheggi protetti)
             const transformed = transformToWGS84(data, feature => {
-                const id = feature.properties.id || 0;
-                const isBlocca = (feature.properties.Tipo_generale === 'Rastr_bloccatelaio');
                 const tot = parseInt(feature.properties.tot_bici || feature.properties.n_posti || 6, 10);
                 feature.properties.tot_bici = tot;
-
-                if (isBlocca) {
-                    // Simulazione deterministica verosimile con distribuzione granulare continua
-                    const hash = Math.abs(Math.sin(id * 12.9898 + 78.233) * 43758.5453);
-                    const normalized = hash - Math.floor(hash); // Valore pseudo-casuale uniforme [0, 1)
-
-                    let occupati;
-                    if (normalized < 0.08) {
-                        occupati = 0; // ~8% completamente vuote
-                    } else if (normalized > 0.90) {
-                        occupati = tot; // ~10% completamente piene
-                    } else {
-                        // Distribuzione realistica mista tra 20% e 80%
-                        const fraction = 0.20 + (normalized * 0.60);
-                        occupati = Math.round(fraction * tot);
-                        if (tot > 1) {
-                            occupati = Math.min(tot - 1, Math.max(1, occupati));
-                        }
-                    }
-
-                    const liberi = Math.max(0, tot - occupati);
-                    const occupPercent = Math.round((occupati / tot) * 100);
-
-                    feature.properties.smart_iot = true;
-                    feature.properties.posti_totali = tot;
-                    feature.properties.posti_occupati = occupati;
-                    feature.properties.posti_liberi = liberi;
-                    feature.properties.percentuale_occupazione = occupPercent;
-                    feature.properties.piena = (liberi === 0);
-                } else {
-                    // Rastrelliere tradizionali: nessun sensore IoT, sempre blu (mai piene/rosse)
-                    feature.properties.smart_iot = false;
-                    feature.properties.piena = false;
-                }
+                // Nessun sensore IoT sulle rastrelliere: sempre senza simulazione capienza
+                feature.properties.smart_iot = false;
+                feature.properties.piena = false;
 
 
             });
@@ -219,6 +186,34 @@ app.get('/api/v1/parcheggi', (req, res) => {
                     feature.properties.id = 10000 + index;
                 }
                 feature.properties.Tipo_generale = 'Parcheggio_protetto';
+
+                // Simulazione telemetria IoT Smart City per parcheggi protetti (Ciclobox)
+                const id = feature.properties.id || 0;
+                const tot = parseInt(feature.properties.posti || 10, 10);
+                const hash = Math.abs(Math.sin(id * 12.9898 + 78.233) * 43758.5453);
+                const normalized = hash - Math.floor(hash);
+
+                let occupati;
+                if (normalized < 0.08) {
+                    occupati = 0;
+                } else if (normalized > 0.90) {
+                    occupati = tot;
+                } else {
+                    const fraction = 0.20 + (normalized * 0.60);
+                    occupati = Math.round(fraction * tot);
+                    if (tot > 1) occupati = Math.min(tot - 1, Math.max(1, occupati));
+                }
+
+                const liberi = Math.max(0, tot - occupati);
+                const occupPercent = Math.round((occupati / tot) * 100);
+
+                feature.properties.smart_iot = true;
+                feature.properties.posti_totali = tot;
+                feature.properties.posti_occupati = occupati;
+                feature.properties.posti_liberi = liberi;
+                feature.properties.percentuale_occupazione = occupPercent;
+                feature.properties.piena = (liberi === 0);
+
                 index++;
             });
             res.status(200).json(transformed);

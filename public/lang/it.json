@@ -117,7 +117,8 @@
   "popup.surveillance": "Sorveglianza",
   "popup.present": "Presente",
   "popup.access": "Accesso",
-  "popup.mittLink": "Sito MITT ↗",
+  "popup.mittLink": "CicloBox ↗",
+  "popup.cicloboxLink": "CicloBox ↗",
 
   "stats.racks": "Rastrelliere",
   "stats.protected": "Parcheggi protetti",

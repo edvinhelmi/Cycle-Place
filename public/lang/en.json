@@ -116,7 +116,8 @@
   "popup.surveillance": "Surveillance",
   "popup.present": "Present",
   "popup.access": "Access",
-  "popup.mittLink": "MITT Website ↗",
+  "popup.mittLink": "CicloBox ↗",
+  "popup.cicloboxLink": "CicloBox ↗",
   "popup.address": "Address",
 
   "stats.racks": "Bike racks",
