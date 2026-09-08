@@ -36,25 +36,19 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 ---
 
 ## Scopo del documento
-Il presente documento riporta in dettaglio tutte le informazioni necessarie all'implementazione e collaudo dell'applicazione web Cycle Place. 
-In particolare, formalizza le specifiche contrattuali delle Web API conformi allo standard OpenAPI 3.0, l'organizzazione logica della codebase, la strategia di branching e tracciamento delle attività del team, gli schemi di modellazione dei dati persistenti, il piano formale di collaudo e testing (funzionale e di unità), l'architettura dell'interfaccia Front-End (responsive e multilingua) e, infine, la configurazione operativa della pipeline di Continuous Integration e Continuous Deployment (CI/CD) con le credenziali di accesso per la verifica del sistema deployato.
+Il presente documento riporta in dettaglio tutte le informazioni necessarie all'implementazione ed al collaudo dell'applicazione web Cycle Place. 
+In particolare, formalizza le specifiche contrattuali delle Web API conformi allo standard OpenAPI 3.0.3, l'organizzazione logica della codebase, la strategia di branching e tracciamento delle attività del team, gli schemi di modellazione dei dati persistenti, il piano formale di collaudo e testing (funzionale e di unità), l'architettura dell'interfaccia Front-End (responsive e multilingua) e, infine, la configurazione della pipeline di Continuous Integration (CI) basata su GitHub Actions per l'esecuzione automatica dei test, unitamente alle istruzioni di avvio in ambiente locale e alle credenziali di accesso per la verifica del sistema.
 
 ---
 
 ## 1. Web APIs
 L'architettura del sistema di backend adotta il paradigma RESTful (Representational State Transfer) sviluppato tramite Node.js ed Express. Lo scambio informativo tra Client e Server è stateless e basato su formati standard JSON e GeoJSON. La protezione delle risorse private avviene mediante l'impiego di token crittografici **JWT (JSON Web Token)**, validati tramite apposito middleware ed inoltrati dal client all'interno dell'header HTTP `Authorization: Bearer <token>`.
 
-Le API sono state formalizzate secondo le specifiche **OpenAPI 3.0**. La documentazione interattiva e la validazione dello schema OpenAPI 3.0.3 sono consultabili online tramite Swagger Editor al seguente indirizzo:<br>
+Le API sono state formalizzate secondo le specifiche **OpenAPI 3.0.3**. La documentazione interattiva e la validazione dello schema OpenAPI 3.0.3 sono consultabili online tramite Swagger Editor al seguente indirizzo:<br>
 
 https://editor.swagger.io/?url=https://raw.githubusercontent.com/edvinhelmi/Cycle-Place/main/oas3.yaml
 
-
-### 1.1 Scelte di design delle API
-- **Compatibilità Spaziale Real-Time:** L'endpoint `/api/v1/rastrelliere` converte le coordinate territoriali originarie fornite dal Comune di Trento (EPSG:25832) nel sistema convenzionale mondiale WGS84 tramite il motore cartografico `proj4`. Contestualmente, inietta un indicatore telemetrico deterministico per emulare la saturazione degli stalli in tempo reale sulle sole rastrelliere intelligenti (Bloccatelaio).
-- **Uniformazione Dati Eterogenei:** L'endpoint `/api/v1/parcheggi` assegna al volo identificativi numerici univoci per consentire l'interazione con il sistema di memorizzazione dei preferiti e l'inoltro di segnalazioni guasti anche sui parcheggi protetti Bici Box.
-- **Sicurezza e Protezione da Abusi (RNF 2.5):** Gli endpoint critici per l'autenticazione (`/api/v1/login`, `/api/v1/forgot-password`, `/api/v1/reset-password`) e per le segnalazioni della community sono protetti da rate-limiting dedicati (`express-rate-limit`) per mitigare attacchi a forza bruta o flooding.
-
-### 1.2 Specifica OpenAPI 3.0 (YAML)
+### 1.1 Specifica OpenAPI 3.0 (YAML)
 Il contenuto del file di specifica contrattuale `oas3.yaml`, depositato nella directory principale del repository, è riportato per esteso di seguito:
 
 
@@ -683,9 +677,7 @@ L'applicazione è stata sviluppata sfruttando le seguenti tecnologie primarie: N
 
 ### 2.1 Repository Organization
 
-Il codice sorgente del progetto è archiviato nel repository ufficiale GitHub:<br>
-
-https://github.com/edvinhelmi/Cycle-Place.git<br>
+Il codice sorgente del progetto è archiviato nel repository ufficiale GitHub: https://github.com/edvinhelmi/Cycle-Place.git<br>
 
 La struttura delle cartelle e dei file sorgente è così organizzata:
 
@@ -785,10 +777,17 @@ Il backend del progetto si basa sulle seguenti dipendenze runtime caricate trami
 *   **google-auth-library**: (Backend) Libreria crittografica ufficiale di Google impiegata per il decoding del ticket SSO del login ibrido.
 *   **proj4**: (Backend) Componente di cartografia matematica fondamentale per tradurre i tensori da formato UTM a coordinate spaziali convenzionali WGS84.
 *   **cors**: (Backend) Middleware strategico vitale per limitare o allentare le direttive di Cross-Origin Resource Sharing.
+*   **bcrypt**: Libreria crittografica impiegata per il hashing sicuro delle password utente (`salt rounds`).
+*   **express-rate-limit**: Middleware di limitazione del tasso di richieste per la protezione degli endpoint sensibili da attacchi di forza bruta e spam.
 *   **Tailwind CSS**: (Frontend) Framework utility-first utilizzato per definire rapidamente stili responsivi direttamente nel markup, garantendo consistenza e una codebase CSS minima.
 *   **DaisyUI**: (Frontend) Libreria di componenti per Tailwind CSS, utilizzata per lo scaffolding rapido di elementi UI (bottoni, modali, card) preservando pulizia del codice e semantica.
 *   **Leaflet.js**: (Frontend) Framework cartografico client-side integrato nativamente su CDN. Consente l'innesto della View Map in HTML5, la gestione del pan/zoom dinamico, e l'overlay dei custom marker e geo-layer.
 *   **nodemailer**: Modulo di gestione SMTP per l'inoltro delle comunicazioni transazionali (es. reset password utente).
+
+E le seguenti dipendenze di sviluppo:
+*   **jest**: Framework di testing JavaScript principale utilizzato per l'esecuzione, l'automazione e l'asserzione della test-suite.
+*   **supertest**: Libreria di testing HTTP integrata con Jest per il collaudo end-to-end e di integrazione delle API RESTful senza la necessità di avviare manualmente il server di rete.
+
 
 ### 2.4 Database
 A causa del ridottissimo I/O rate temporale, il progetto rifiuta il sovradimensionamento di DBMS complessi, prediligendo un approccio leggero orientato agli standard aperti. Le infrastrutture geografiche sono serializzate in formati GeoJSON caricati dal file-system su richiesta dell'Express Server. Per preservare la massima portabilità del prototipo, azzerare le latenze di runtime ed evitare l'overhead di un DBMS esterno dedicato, il sistema memorizza le entità applicative all'interno di file JSON strutturati:
@@ -851,7 +850,105 @@ L'interfaccia utente è stata concepita come una Single Page Application (SPA) r
 - View: La composizione del DOM HTML5, integrata con il layer grafico responsive fornito da Tailwind CSS, i componenti di DaisyUI e i contenitori mappa generati dinamicamente da Leaflet.js.
 - Controller: La gestione degli Event Listener (click, submit, touch events), l'orchestrazione delle chiamate asincrone (fetch), la manipolazione delle modali e la geolocalizzazione turn-by-turn.
 
-Il front-end include inoltre un motore dedicato di internazionalizzazione client-side (i18n.js) che supporta il passaggio istantaneo e sincrono tra tre lingue: Italiano (IT), Inglese (EN) e Tedesco (DE).
+Il Front-End fornisce le funzionalità di visualizzazione interattiva, gestione spaziale, navigazione e controllo dei dati dell’applicazione, articolandosi nelle seguenti sezioni e componenti descritte nel documento di progetto e specificate nel D1:
+
+* **Home Page e Mappa Interattiva**: L'interfaccia principale integra una vista cartografica basata su Leaflet.js e OpenStreetMap per la visualizzazione delle rastrelliere tradizionali, dei bloccatelaio e dei parcheggi protetti (Ciclobox). La schermata comprende:
+  * Una **barra di ricerca spaziale** con geocoding e un sistema di filtraggio automatico nel raggio di 200 metri nel caso in cui non vengano rilevati parcheggi nella via specificata.
+  * Un **widget meteo live** (integrato con l'API Open-Meteo) dotato di banner di allerta automatici in-app in caso di eventi atmosferici avversi.
+  * Un **selettore di lingua** dinamico per la fruizione in Italiano, Inglese e Tedesco e un **interruttore per il tema chiaro/scuro** (Dark Mode) con persistenza nel `localStorage` del browser.
+  * Un pannello filtri laterale (accessibile via drawer responsive con menu hamburger su mobile) per la gestione delle tipologie di sosta e dei preferiti.
+
+<p align="center">
+<img src="design-front-end/schermata_iniziale.png" alt="Inizio" width="700"><br>
+<em>Schermata principale</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/ricerca_negativa.png" alt="RN" width="700"><br>
+<em>Nessuna rastrelliera trovata nella via specificata, né nei 200m circostanti</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/ricerca_positiva.png" alt="RP" width="700"><br>
+<em>Ricerca effettuata con successo</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/popup_meteo.png" alt="Meteo" width="700"><br>
+<em>Popup meteo</em>
+</p>
+
+* **Modale di Autenticazione (Login & Registrazione)**: Accessibile tramite un'apposita schermata centrata (attivabili cliccando rispettivamente si pulsanti "Registrati" e "Login" nella navbar) che si apre sopra la mappa, offre:
+ **Modale di Login**: Una schermata centrata che si apre sopra la mappa, offrendo la doppia modalità di accesso tramite credenziali locali (email e password validate con hashing bcrypt) o tramite il pulsante rapido **Google SSO** (OAuth 2.0), oltre al link per il **recupero password** via email.
+ **Modale di Registrazione**: Una schermata dedicata per la creazione di un nuovo account che richiede i dati anagrafici e verifica il rispetto dei criteri di complessità della password (minimo 8 caratteri, una maiuscola, un numero e un carattere speciale).
+
+<p align="center">
+<img src="design-front-end/registrazione.png" alt="Registrazione" width="700"><br>
+<em>Pupup registrazione</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/login.png" alt="Login" width="700"><br>
+<em>Popup login</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/recupero_password.png" alt="RP" width="700"><br>
+<em>Recupero password</em>
+</p>
+
+* **Navigazione Turn-by-Turn in-app (Routing)**: Modulo attivabile selezionando una destinazione sulla mappa:
+  * Sfrutta l'integrazione con l'API di **OpenRouteService** per il calcolo dei percorsi ciclabili o pedonali.
+  * Integra un banner superiore con indicazioni di marcia, distanze e la **Web Speech API (TTS)** per la riproduzione vocale automatica delle istruzioni di guida multilingua, unitamente ai controlli per recentrare la mappa o terminare la sessione.
+
+<p align="center">
+<img src="design-front-end/popup_navigazione.png" alt="PN" width="700"><br>
+<em>Popup navigazione</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/navigazione.png" alt="N" width="700"><br>
+<em>Navigazione</em>
+</p>
+
+* **Popup Interattivi delle Aree di Sosta**: Attivabili cliccando sui marker della mappa in stile Glassmorphism:
+  * Mostrano i metadati completi dello stallo e, nel caso dei Ciclobox, la **telemetria IoT in tempo reale** con una progress bar dinamica e il conteggio esatto dei posti liberi e occupati.
+  * Integrano l'icona a forma di cuore per la gestione rapida dei **preferiti** e il modulo d'accesso per l'**invio di segnalazioni** di guasti o problemi di sicurezza, oltre alla visualizzazione di avvisi in evidenza in presenza di segnalazioni recenti.
+
+<p align="center">
+<img src="design-front-end/rastrelliera.png" alt="R" width="700"><br>
+<em>Rastrelliera</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/segnalazione.png" alt="S" width="700"><br>
+<em>Ciclobox con segnalazione effettuata nelle ore precedenti</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/form_segnalazione.png" alt="S" width="700"><br>
+<em>Form segnalazione</em>
+</p>
+
+* **Dashboard Personale (Area Riservata)**: Pannello di controllo protetto e dedicato agli utenti autenticati per:
+  * La visualizzazione e modifica dei dati anagrafici e della password.
+  * La consultazione e la rimozione rapida delle rastrelliere salvate nei **preferiti** (con sincronizzazione real-time sul database e aggiornamento dei marker).
+  * La gestione dello **storico delle segnalazioni** inviate con evidenza dello stato di lavorazione e l'esecuzione della procedura di **cancellazione definitiva dell'account** in conformità con le normative GDPR.
+
+<p align="center">
+<img src="design-front-end/profilo.png" alt="P" width="700"><br>
+<em>Profilo</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/modifica_dati.png" alt="Inizio" width="700"><br>
+<em>Modifica dei dati anagrafici e della password</em>
+</p>
+
+<p align="center">
+<img src="design-front-end/elimina_account.png" alt="E" width="700"><br>
+<em>Eliminazione account</em>
+</p>
 
 ---
 
@@ -872,7 +969,7 @@ Per la consultazione e la verifica del sistema da parte dei valutatori, il proge
 Per completezza riportiamo qui la modalità di avvio dell'applicazione: 
 
 **1. Clonare il repository e posizionarsi nella cartella di lavoro:**<br>
-git clone https://github.com/edvinhelmi/Cycle-Place.git
+git clone https://github.com/edvinhelmi/Cycle-Place.git<br>
 cd Cycle-Place
 
 **2. Installare le dipendenze di Node.js:**<br>
@@ -883,7 +980,7 @@ npm start
 
 ### Modalità di Esecuzione e Test
 
-Il sistema non prevede un deploy permanente su piattaforme cloud esterne, per cui una volta clonato il repository ed installate le dipendenze di node.js è sufficiente eseguire i test attraverso il seguente comando:
+Il sistema non prevede un deploy permanente su piattaforme cloud esterne, per cui una volta clonato il repository ed installate le dipendenze di node.js è sufficiente eseguire i test (per la verifica automatica dei 46 test case tramite Jest e Supertest) attraverso il seguente comando:
 
 **Esecuzione Test Suite:**<br>
-npm test (per la verifica automatica dei 46 test case tramite Jest e Supertest).
+npm test
