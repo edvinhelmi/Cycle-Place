@@ -84,7 +84,7 @@ Le funzionalità principali dell'applicazione sono state definite per risolvere 
 - **RF 3.3 - Modifica della password**.
 - **RF 3.4 - Richiesta di cancellazione definitiva dell'account e dei dati associati** (GDPR).
 - **RF 3.5 - Cancellazione definitiva del proprio account e di tutti i dati associati** (preferiti, segnalazioni).
-- **RF 3.6 - Cancellazione rastrelliere preferite dal profilo**: L'utente registrato deve poter visualizzare l'elenco delle proprie rastrelliere o parcheggi preferiti all'interno della dashboard personale e decidere di rimuoverli in qualsiasi momento, sincronizzando la modifica in tempo reale con il database.
+- **RF 3.6 - Cancellazione rastrelliere preferite dal profilo**: L'utente registrato deve poter visualizzare l'elenco delle proprie rastrelliere o parcheggi preferiti all'interno del profilo personale e decidere di rimuoverli in qualsiasi momento, sincronizzando la modifica in tempo reale con il database.
 
 ### RF 4 - Backup e Ripristino
 Esecuzione di backup regolari dei dati critici per garantirne il ripristino in caso di guasti.
@@ -352,11 +352,11 @@ Visualizzazione dei dati personali e modifica delle impostazioni.<br>
 Come utente registrato, voglio poter visualizzare il mio profilo e modificare le mie informazioni personali o la password, in modo da mantenere i dati aggiornati e sicuri.<br>
 
 Criteri di Accettazione:
-- La dashboard personale mostra le informazioni anagrafiche e le preferenze dell'utente.
+- Il profilo personale mostra le informazioni anagrafiche e le preferenze dell'utente.
 - È disponibile una sezione dedicata alla modifica della password e dei dati personali.
 
 TASKS – User Story 6:
-- Creare la UI della dashboard personale per la gestione dei dati anagrafici.
+- Creare la UI del profilo personale per la gestione dei dati anagrafici.
 - Sviluppare gli endpoint API per l'aggiornamento sicuro del profilo e della password.
 
 #### User Story 7 – Associata a RF 3.4 / RF 3.5: Cancellazione account (GDPR)
@@ -397,7 +397,7 @@ TASKS – User Story 9:
 
 #### User Story 10 – Associata a RF 5.5: Salvataggio preferiti
 Gestione rapida delle rastrelliere preferite.<br>
-Come utente registrato, voglio salvare una rastrelliera o un parcheggio tra i miei preferiti, in modo da poterli ritrovare rapidamente nella dashboard personale.<br>
+Come utente registrato, voglio salvare una rastrelliera o un parcheggio tra i miei preferiti, in modo da poterli ritrovare rapidamente nel profilo personale.<br>
 
 Criteri di Accettazione:
 - È presente un pulsante interattivo (icona a forma di cuore) all'interno del popup di dettaglio per aggiungere o rimuovere il preferito.
@@ -412,12 +412,12 @@ Gestione e rimozione dei preferiti salvati dall'area personale.<br>
 Come utente registrato, voglio poter rimuovere una rastrelliera o un parcheggio dai miei preferiti direttamente dal mio profilo, in modo da mantenere aggiornato l'elenco dei luoghi di mio interesse.<br>
 
 Criteri di Accettazione:
-- Nella dashboard personale è presente un pulsante di rimozione associato a ciascun preferito salvato.
-- Cliccando sul pulsante, il luogo viene rimosso istantaneamente sia dall'elenco della dashboard che dallo stato attivo sulla mappa.
+- Nel profilo personale è presente un pulsante di rimozione associato a ciascun preferito salvato.
+- Cliccando sul pulsante, il luogo viene rimosso istantaneamente sia dall'elenco del profilo che dallo stato attivo sulla mappa.
 
 TASKS – User Story 11:
 - Sviluppare l'endpoint API DELETE per la rimozione dei preferiti dal profilo utente.
-- Aggiornare la UI della dashboard per consentire la cancellazione rapida dei preferiti salvati.
+- Aggiornare la UI del profilo per consentire la cancellazione rapida dei preferiti salvati.
 - Sincronizzare lo stato visivo dei marker a cuore sulla mappa in seguito alla rimozione.
 
 #### User Story 12 – Associata a RF 6: Modulo segnalazione guasti e problemi
@@ -566,9 +566,9 @@ Cliccando su un qualsiasi marker sulla mappa si attiva un popup strutturato in s
 <em>Avviso segnalazioni effettuale nelle ore precedenti</em>
 </p>
 
-### 5. Dashboard Personale (Area Riservata)
+### 5. Profilo
 
-La dashboard è un'area protetta e accessibile unicamente agli utenti autenticati, strutturata come un pannello di controllo completo per la gestione del profilo e delle preferenze.
+Il profilo è un'area protetta e accessibile unicamente agli utenti autenticati, strutturata come un pannello di controllo completo per la gestione del profilo e delle preferenze.
 
 - **RF 3.1 & RF 3.2 (Visualizzazione e modifica profilo)**: L'utente può visualizzare i propri dati anagrafici, il provider di accesso (Locale o Google) e modificare le proprie informazioni personali o la password tramite un form dedicato con controlli di sicurezza.
 - **RF 3.6 & RF 5.5 (Storico Rastrelliere Preferite)**: Una sezione dedicata elenca tutte le rastrelliere e i parcheggi salvati nei preferiti, consentendo all'utente di consultarli o di rimuoverli rapidamente sincronizzando la modifica in tempo reale con il database.
@@ -608,14 +608,14 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 </p>
 
 
-### Flusso 2: Autenticazione e visualizzazione Dashboard
+### Flusso 2: Autenticazione e visualizzazione profilo
 1. **Avvio:** L'utente accede all'app e intende controllare il proprio profilo.
 2. **Accesso form:** L'utente identifica la Navbar e preme il pulsante "Login". 
 3. **Interazione modale:** Un layer semi-trasparente sfuoca la mappa di background, ed emerge al centro un box di autenticazione ibrida.
 4. **Inserimento:** L'utente digita "email" e "password" classiche nel form formattato ad-hoc, per poi inviare il *submit*.
 5. **Validazione:** Il backend verifica la conformità del payload.
-6. **Cambio di Stato UI:** L'esito è positivo. Il modale di login collassa. In modo invisibile la navbar effettua il binding reattivo e nasconde il bottone di Login/Registrazione, sostituendoli con un nuovo pulsante "Dashboard" e il saluto ("Ciao, Utente").
-7. **Conclusione:** L'utente clicca su "Dashboard" venendo reindirizzato alla gestione del profilo, ove godrà dei pieni privilegi del suo ruolo, inclusa la gestione dei preferiti e delle segnalazioni.
+6. **Cambio di Stato UI:** L'esito è positivo. Il modale di login collassa. In modo invisibile la navbar effettua il binding reattivo e nasconde il bottone di Login/Registrazione, sostituendoli con un nuovo pulsante "Ciao, *nome*" e il saluto ("Ciao, Utente").
+7. **Conclusione:** L'utente clicca su ""Ciao, *nome*"" venendo reindirizzato alla gestione del profilo, ove godrà dei pieni privilegi del suo ruolo, inclusa la gestione dei preferiti e delle segnalazioni.
 
 <p align="center">
 <img src="user-flow/UserFlow2.drawio.png" alt="UserFlow2.drawio.png" width="540"><br>
