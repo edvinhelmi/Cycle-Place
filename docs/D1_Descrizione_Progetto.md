@@ -516,7 +516,7 @@ Quando l'utente seleziona una rastrelliera o un parcheggio dalla mappa e richied
 - **RF 5.6 (Calcolo del percorso efficiente e sicuro)**: Sfruttando l'integrazione con l'API di OpenRouteService, il sistema calcola la rotta ottimale scegliendo tra il profilo ciclabile o pedonale.
 
 <p align="center">
-<img src="popup_navigazione.png" alt="Titolo" width="700" />
+<img src="design-front-end/popup_navigazione.png" alt="Titolo" width="700" />
 <em>Popup navigazione</em>
 </p>
 
@@ -524,7 +524,7 @@ Quando l'utente seleziona una rastrelliera o un parcheggio dalla mappa e richied
 - **Banner Turn-by-Turn e Guida Vocale (TTS) (RF 5.7)**: Durante la navigazione attiva, compare in alto un banner scuro che indica la distanza residua alla prossima manovra, l'icona direzionale e il testo dell'istruzione. Grazie alla Web Speech API, l'applicazione pronuncia automaticamente le indicazioni a voce nella lingua selezionata dall'utente.
 
 <p align="center">
-<img src="navigazione.png" alt="Titolo" width="700" />
+<img src="design-front-end/navigazione.png" alt="Titolo" width="700" />
 <em>Navigazione</em>
 </p>
 
