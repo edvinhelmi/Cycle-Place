@@ -1,14 +1,14 @@
 UNIVERSITÀ DEGLI STUDI DI TRENTO<br>
 Dipartimento di Ingegneria e Scienza dell’Informazione
 
-## Progetto: Cycle Place
+# Progetto: Cycle Place
 ## Titolo del documento: Descrizione di Progetto
 
 ---
 
 ### Document Info<br>
 **Doc. Name**: D1-cycle-place-DescrizioneProgetto<br>
-**Doc. Number**: D1 v1.3<br>
+**Doc. Number**: D1 v1.4<br>
 **Description**: Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place.
 
 ---
@@ -106,7 +106,7 @@ Visualizzazione dello storico delle interazioni (segnalazioni inviate, aree salv
 - **RF 8.1 - Toggle Tema Chiaro/Scuro**: Il sistema deve permettere all'utente di alternare in qualsiasi momento il tema visivo dell'interfaccia tra la modalità chiara di default e la modalità scura (dark), salvando la preferenza nel localStorage del browser.
 
 ### RF 9 - Scelta della lingua
-Il sistema deve permettere all'utente di scegliere in quale lingua fruire dell'applicazioni. Sono disponibili il supporto per italiano, inglese e tedesco.
+Il sistema deve permettere all'utente di scegliere in quale lingua fruire dell'applicazione. Sono disponibili il supporto per italiano, inglese e tedesco.
 
 ---
 
@@ -142,7 +142,8 @@ Il sistema deve permettere all'utente di scegliere in quale lingua fruire dell'a
 
 ### Use Case RF1: Gestione Autenticazione e privilegi utente registrato
 
-<img src="RF1_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="use-case/RF1_Diagram.drawio.png" alt="RF1_Diagram.drawio" width="700"><br>
+
 
 **Riassunto:** Utente anonimo e Registrato gestiscono lo stato accesso al sistema, il primo tramite eventuale login il secondo tramite eventuale logout.
 
@@ -157,7 +158,8 @@ Autenticazione Esterna: Il flusso di login standard può essere esteso scegliend
 
 ### Use Case RF2: Registrazione e Accesso utente
 
-<img src="RF2_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="use-case/RF2_Diagram.drawio.png" alt="RF2_Diagram.drawio" width="700"><br>
+
 
 **Riassunto:** L'utente anonimo crea un nuovo account sulla piattaforma utilizzando un form standard oppure delegando l'iscrizione all'account Google.
 
@@ -168,7 +170,8 @@ Autenticazione Esterna: Il flusso di login standard può essere esteso scegliend
 
 ### Use Case RF3: Gestione Profilo
 
-<img src="RF3_Diagram-drawio.png" alt="Titolo" width="700" />
+<img src="use-case/RF3_Diagram-drawio.png" alt="RF3_Diagram.drawio" width="700"><br>
+
 
 **Riassunto:** L'utente registrato amministra i propri dati personali, consulta le proprie interazioni storiche e gestisce lo stato dell'account.
 
@@ -183,7 +186,7 @@ Cancellazione Definitiva Account: L'operazione di richiesta può estendersi alla
 
 ### Use Case RF4: Backup e Ripristino
 
-<img src="RF4.drawio.png" alt="Titolo" width="700" />
+<img src="use-case/RF4.drawio.png" alt="RF4.drawio" width="700"><br>
 
 **Riassunto:** L'Amministratore e il Sistema automatizzato gestiscono la messa in sicurezza dei dati e il loro eventuale ripristino per garantire la continuità del servizio.
 
@@ -196,7 +199,8 @@ Backup Regolare Dati Critici: A seguito di un ripristino, il flusso può estende
 
 ### Use Case RF5: Gestione mappa e aree di sosta
 
-<img src="RF5_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="use-case/RF5_Diagram.drawio.png" alt="RF5_Diagram.drawio" width="700"><br>
+
 
 **Riassunto:** L'utente interagisce con la Mappa per navigare verso una rastrelliera, gestire preferiti, segnalazioni e ottenere informazioni riguardo ad aree di sosta indicate sulla mappa.
 
@@ -216,7 +220,8 @@ Estensioni:
 
 ### Use Case RF6: Gestione storico utilizzo
 
-<img src="RF6_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="use-case/RF6_Diagram.drawio.png" alt="RF6_Diagram.drawio" width="700"><br>
+
 
 **Riassunto:** L'utente registrato consulta l'archivio delle proprie attività passate all'interno del sistema.
 
@@ -240,7 +245,8 @@ Estensioni:
 
 ### Use Case RF8: Personalizzazione del Tema Grafico
 
-<img src="RF8_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="use-case/RF8_Diagram.drawio.png" alt="RF8_Diagram.drawio" width="700"><br>
+
 
 **Riassunto:** L'utente configura l'aspetto dell'interfaccia utente impostando la combinazione di colori preferita.
 
@@ -253,7 +259,8 @@ Estensioni:
 
 ### Use Case RF9: Scelta della lingua
 
-<img src="RF9_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="use-case/RF9_Diagram.drawio.png" alt="RF9_Diagram.drawio" width="700"><br>
+
 
 **Riassunto:** L'utente cambia la lingua della piattaforma assicurandosi che la preferenza venga mantenuta nel tempo.
 **Descrizione:**
@@ -509,14 +516,16 @@ Quando l'utente seleziona una rastrelliera o un parcheggio dalla mappa e richied
 - **RF 5.6 (Calcolo del percorso efficiente e sicuro)**: Sfruttando l'integrazione con l'API di OpenRouteService, il sistema calcola la rotta ottimale scegliendo tra il profilo ciclabile o pedonale.
 
 <p align="center">
-<img src="imgP.png" alt="Titolo" width="700" />
+<img src="popup_navigazione.png" alt="Titolo" width="700" />
+<em>Popup navigazione</em>
 </p>
 
 
 - **Banner Turn-by-Turn e Guida Vocale (TTS) (RF 5.7)**: Durante la navigazione attiva, compare in alto un banner scuro che indica la distanza residua alla prossima manovra, l'icona direzionale e il testo dell'istruzione. Grazie alla Web Speech API, l'applicazione pronuncia automaticamente le indicazioni a voce nella lingua selezionata dall'utente.
 
 <p align="center">
-<img src="imgN.png" alt="Titolo" width="700" />
+<img src="navigazione.png" alt="Titolo" width="700" />
+<em>Navigazione</em>
 </p>
 
 - **Funzionalità di controllo**: L'interfaccia gestisce i pulsanti per recentrare la mappa sulla posizione GPS corrente, disattivare o attivare l'audio e terminare la sessione di navigazione in qualsiasi momento.
@@ -577,7 +586,8 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 6. **Routing In-App:** L'utente consulta il numero di posti e, soddisfatto, esegue il tap sul bottone interno per avviare il calcolo del percorso guidato.
 7. **Conclusione:** Il sistema mostra a schermo la polilinea del tragitto e le indicazioni turn-by-turn per raggiungere lo stallo in bicicletta o a piedi.
 
-<img src="UserFlow1.drawio.png" width="700">
+<img src="user-flow/UserFlow1.drawio.png.png" alt="UserFlow1.drawio.png" width="700"><br>
+
 
 ### Flusso 2: Autenticazione e visualizzazione Dashboard
 1. **Avvio:** L'utente accede all'app e intende controllare il proprio profilo.
@@ -588,7 +598,7 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 6. **Cambio di Stato UI:** L'esito è positivo. Il modale di login collassa. In modo invisibile la navbar effettua il binding reattivo e nasconde il bottone di Login/Registrazione, sostituendoli con un nuovo pulsante "Dashboard" e il saluto ("Ciao, Utente").
 7. **Conclusione:** L'utente clicca su "Dashboard" venendo reindirizzato alla gestione del profilo, ove godrà dei pieni privilegi del suo ruolo, inclusa la gestione dei preferiti e delle segnalazioni.
 
-<img src="UserFlow2.drawio.png" width="700">
+<img src="user-flow/UserFlow2.drawio.png.png" alt="UserFlow2.drawio.png" width="700"><br>
 
 ### Flusso 3: Salvataggio preferiti e invio segnalazione
 1. **Avvio:** L'utente autenticato naviga sulla mappa ed individua una rastrelliera di riferimento abituale.
@@ -598,4 +608,5 @@ La dashboard è un'area protetta e accessibile unicamente agli utenti autenticat
 5. **Compilazione form:** Si apre il modulo di segnalazione in cui seleziona il tipo di problematica e inserisce una breve nota descrittiva.
 6. **Conclusione:** All'invio, la segnalazione viene memorizzata nel sistema per il supporto alla mobilità e l'avviso della community.
 
-<img src="UserFlow3.drawio.png" width="700">
+<img src="user-flow/UserFlow3.drawio.png.png" alt="UserFlow3.drawio.png" width="700"><br>
+
