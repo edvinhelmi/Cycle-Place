@@ -45,7 +45,7 @@ In particolare, formalizza le specifiche contrattuali delle Web API conformi all
 L'architettura del sistema di backend adotta il paradigma RESTful (Representational State Transfer) sviluppato tramite Node.js ed Express. Lo scambio informativo tra Client e Server è stateless e basato su formati standard JSON e GeoJSON. La protezione delle risorse private avviene mediante l'impiego di token crittografici **JWT (JSON Web Token)**, validati tramite apposito middleware ed inoltrati dal client all'interno dell'header HTTP `Authorization: Bearer <token>`.
 
 Le API sono state formalizzate secondo le specifiche **OpenAPI 3.0**. La documentazione interattiva è accessibile e consultabile all'indirizzo Swagger/Apiary al seguente link:  
-**https://cycleplace.docs.apiary.io/#** *(oppure endpoint interno `/api-docs`)*.
+****************** MANCA LINK ************************
 
 ### 1.1 Scelte di design delle API
 - **Compatibilità Spaziale Real-Time:** L'endpoint `/api/v1/rastrelliere` converte le coordinate territoriali originarie fornite dal Comune di Trento (EPSG:25832) nel sistema convenzionale mondiale WGS84 tramite il motore cartografico `proj4`. Contestualmente, inietta un indicatore telemetrico deterministico per emulare la saturazione degli stalli in tempo reale sulle sole rastrelliere intelligenti (Bloccatelaio).
@@ -498,6 +498,7 @@ components:
 *   `PUT /api/v1/user/profile`: (*Protetta da JWT*) Permette l'aggiornamento dei dati anagrafici, delle preferenze di notifica e l'eventuale modifica sicura della password.
 *   `DELETE /api/v1/user/account`: (*Protetta da JWT*) Esegue la cancellazione definitiva e irreversibile dell'account e dei dati associati in conformità al GDPR.
 
+>>>>>>> 5a38f4febfbe19a49a1b10f4042a7d9337fad682
 ---
 
 ## 2. Implementation
@@ -539,10 +540,25 @@ CyclePlace/
 │   │   ├── ricerca_positiva.png
 │   │   ├── schermata_iniziale.png
 │   │   └── segnalazione.png
-│   ├── 1.jpg
-│   ├── 2.jpg
-│   ├── 3.jpg
-│   ├── 4.jpg
+│   ├── powerpoint/
+│   │   ├── 1.jpg
+│   │   ├── 2.jpg
+│   │   ├── 3.jpg
+│   │   └── 4.jpg
+│   ├── use-case/
+│   │   ├── RF1_Diagram.drawio.png
+│   │   ├── RF2_Diagram.drawio.png
+│   │   ├── RF3_Diagram-drawio.png
+│   │   ├── RF4.drawio.png
+│   │   ├── RF5_Diagram.drawio.png
+│   │   ├── RF6_Diagram.drawio.png
+│   │   ├── RF7_Diagram.drawio.png
+│   │   ├── RF8_Diagram.drawio.png
+│   │   └── RF9_Diagram.drawio.png
+│   ├── user-flow/
+│   │   ├── UserFlow1.drawio.png
+│   │   ├── UserFlow2.drawio.png
+│   │   └── UserFlow3.drawio.png
 │   ├── D1_Descrizione_Progetto.md
 │   ├── D2_Sviluppo.md
 │   └── D4_Report_Finale.md
