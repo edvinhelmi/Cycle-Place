@@ -57,282 +57,362 @@ Il contenuto del file di specifica contrattuale `oas3.yaml`, depositato nella di
 
 
 ```yaml
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  version: '1.0.0'
-  title: 'Cycle Place Web APIs'
-  description: 'API RESTful per la consultazione della rete ciclabile urbana di Trento, calcolo del percorso (routing), gestione preferiti e segnalazioni guasti della community.'
-  license:
-    name: MIT
+  title: Cycle Place API
+  description: Backend API per la gestione di rastrelliere, parcheggi protetti, preferiti utente, segnalazioni e routing ciclabile.
+  version: 1.0.0
+
 servers:
-  - url: http://localhost:3000/api/v1
-    description: Server Locale di Sviluppo
-  - url: https://cycle-place.onrender.com/api/v1
-    description: Server Cloud di Produzione
+  - url: http://localhost:3000
+    description: Server locale di sviluppo
 
 paths:
-  /rastrelliere:
+  /api/v1/rastrelliere:
     get:
-      summary: 'Elenco rastrelliere geolocalizzate'
-      description: 'Restituisce la FeatureCollection GeoJSON convertita da EPSG:25832 in WGS84 con telemetria IoT simulata.'
+      summary: Recupera tutte le rastrelliere con telemetria smart IoT in tempo reale
+      tags:
+        - Dati Spaziali
       responses:
         '200':
-          description: 'Collezione GeoJSON rastrelliere recuperata con successo.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeoJsonCollection'
+          description: GeoJSON FeatureCollection con rastrelliere e telemetria
         '500':
-          description: 'Errore interno nel caricamento dei dati spaziali.'
+          description: Errore lettura file o trasformazione coordinate
 
-  /parcheggi:
+  /api/v1/parcheggi:
     get:
-      summary: 'Elenco parcheggi protetti'
-      description: 'Restituisce i parcheggi e box protetti in formato GeoJSON WGS84 con ID univoco normalizzato.'
+      summary: Recupera i parcheggi protetti per biciclette
+      tags:
+        - Dati Spaziali
       responses:
         '200':
-          description: 'Dati dei parcheggi protetti recuperati con successo.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GeoJsonCollection'
+          description: GeoJSON FeatureCollection dei parcheggi protetti
         '500':
-          description: 'Errore interno nel caricamento dei dati spaziali.'
+          description: Errore lettura file o trasformazione coordinate
 
-  /config:
+  /api/v1/config:
     get:
-      summary: 'Configurazione client'
-      description: 'Restituisce le chiavi pubbliche di configurazione runtime (es. Google Client ID).'
+      summary: Restituisce le chiavi di configurazione pubblica per il frontend
+      tags:
+        - Configurazione
       responses:
         '200':
-          description: 'Parametri di configurazione client restituiti con successo.'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  googleClientId:
-                    type: string
+          description: Google Client ID per autenticazione SSO
 
-  /register:
+  /api/v1/register:
     post:
-      summary: 'Registrazione nuovo utente'
-      description: 'Registra un nuovo account con password cifrata tramite bcrypt e invio email di benvenuto.'
+      summary: Registra un nuovo account utente con password cifrata (bcrypt)
+      tags:
+        - Autenticazione
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [name, surname, email, password]
+              required:
+                - name
+                - surname
+                - email
+                - password
               properties:
-                name: { type: string, example: Mario }
-                surname: { type: string, example: Rossi }
-                email: { type: string, format: email, example: mario.rossi@unitn.it }
-                password: { type: string, minLength: 8, example: Password!2026 }
+                name:
+                  type: string
+                  example: Mario
+                surname:
+                  type: string
+                  example: Rossi
+                email:
+                  type: string
+                  format: email
+                  example: mario.rossi@example.com
+                password:
+                  type: string
+                  format: password
+                  example: PasswordSicura123!
       responses:
         '201':
-          description: 'Utente registrato con successo.'
+          description: Registrazione completata con successo
         '400':
-          description: 'Dati mancanti o password non conforme ai criteri di sicurezza.'
+          description: Campi obbligatori mancanti o requisiti di complessità password non rispettati
         '409':
-          description: 'Indirizzo email già registrato nel sistema.'
+          description: Utente già registrato con questo indirizzo email
+        '500':
+          description: Errore interno del server durante il salvataggio
 
-  /login:
+  /api/v1/login:
     post:
-      summary: 'Autenticazione utente locale'
-      description: 'Verifica le credenziali email/password e rilascia Access Token JWT e Refresh Token.'
+      summary: Autentica utente locale e rilascia Access Token (15m) e Refresh Token (30d)
+      tags:
+        - Autenticazione
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [email, password]
+              required:
+                - email
+                - password
               properties:
-                email: { type: string, format: email, example: mario.rossi@unitn.it }
-                password: { type: string, example: Password!2026 }
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
       responses:
         '200':
-          description: 'Login eseguito con successo.'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  accessToken: { type: string }
-                  refreshToken: { type: string }
-                  user: { $ref: '#/components/schemas/UserProfile' }
+          description: Login completato con successo
         '400':
-          description: 'Email o password non fornite.'
+          description: Email o password mancanti o non valide
         '401':
-          description: 'Credenziali non valide o errate.'
+          description: Credenziali errate
         '429':
-          description: 'Troppi tentativi consecutivi (Rate Limit).'
+          description: 'Troppi tentativi falliti: blocco temporaneo (Rate limit)'
+        '500':
+          description: Errore interno del server
 
-  /refresh-token:
+  /api/v1/refresh-token:
     post:
-      summary: 'Rinnovo Access Token'
-      description: 'Riceve un Refresh Token valido e rilascia un nuovo Access Token senza forzare il re-login.'
+      summary: Rinnova l'Access Token scaduto tramite Refresh Token valido
+      tags:
+        - Autenticazione
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [refreshToken]
+              required:
+                - refreshToken
               properties:
-                refreshToken: { type: string }
+                refreshToken:
+                  type: string
       responses:
         '200':
-          description: 'Nuovo Access Token rilasciato con successo.'
+          description: Nuovo Access Token generato
         '401':
-          description: 'Refresh token mancante o non autorizzato.'
+          description: Token mancante
         '403':
-          description: 'Refresh token non valido o scaduto.'
+          description: Token non valido, scaduto o sessione invalidata
+        '500':
+          description: Errore lettura database utenti
 
-  /auth/google:
+  /api/v1/forgot-password:
     post:
-      summary: 'Autenticazione Google SSO'
-      description: 'Verifica l ID Token emesso da Google OAuth2 ed autentica o crea l account utente.'
+      summary: Invia email con link monouso per il reset della password
+      tags:
+        - Autenticazione
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [credential]
+              required:
+                - email
               properties:
-                credential: { type: string }
+                email:
+                  type: string
+                  format: email
+                lang:
+                  type: string
+                  enum:
+                    - it
+                    - en
+                    - de
+                  default: it
       responses:
         '200':
-          description: 'Autenticazione federata convalidata con successo.'
-        '401':
-          description: 'Token Google non valido o scaduto.'
-
-  /auth/verify:
-    get:
-      summary: 'Verifica validità token JWT'
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: 'Token valido e sessione attiva.'
-        '401':
-          description: 'Token mancante o non valido.'
-
-  /forgot-password:
-    post:
-      summary: 'Richiesta reset password'
-      description: 'Genera un token crittografico monouso e invia email per il recupero credenziali.'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [email]
-              properties:
-                email: { type: string, format: email }
-                lang: { type: string, enum: [it, en, de], default: it }
-      responses:
-        '200':
-          description: 'Email di ripristino inviata.'
+          description: Email inviata con successo (o risposta anti-enumeration)
         '400':
-          description: 'Indirizzo email non valido.'
+          description: Formato email non valido o utente registrato via Google SSO
+        '429':
+          description: Troppi tentativi inviati (Rate limit attivo)
+        '500':
+          description: Errore durante la generazione o salvataggio richiesta
 
-  /verify-reset-token:
+  /api/v1/verify-reset-token:
     get:
-      summary: 'Verifica validità token di reset'
+      summary: Verifica la validità e scadenza del token di recupero password
+      tags:
+        - Autenticazione
       parameters:
         - name: token
           in: query
           required: true
-          schema: { type: string }
+          schema:
+            type: string
+          description: Token a 64 caratteri esadecimali
       responses:
         '200':
-          description: 'Token valido.'
+          description: Token valido e non scaduto
         '400':
-          description: 'Token non valido o scaduto.'
+          description: Token mancante, non valido o scaduto
+        '500':
+          description: Errore interno del server
 
-  /reset-password:
+  /api/v1/reset-password:
     post:
-      summary: 'Impostazione nuova password'
-      description: 'Aggiorna la password dell utente consumando il token di reset monouso.'
+      summary: Imposta una nuova password tramite il token di recupero
+      tags:
+        - Autenticazione
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [token, newPassword]
+              required:
+                - token
+                - newPassword
               properties:
-                token: { type: string }
-                newPassword: { type: string, minLength: 8 }
+                token:
+                  type: string
+                newPassword:
+                  type: string
+                  format: password
+                lang:
+                  type: string
+                  enum:
+                    - it
+                    - en
+                    - de
+                  default: it
       responses:
         '200':
-          description: 'Password reimpostata con successo.'
+          description: Password aggiornata con successo
         '400':
-          description: 'Token scaduto o password non conforme.'
+          description: Token scaduto, assente o password troppo breve
+        '429':
+          description: Troppi tentativi (Rate limit attivo)
+        '500':
+          description: Errore durante il salvataggio o hashing
 
-  /user/me:
+  /api/v1/auth/google:
+    post:
+      summary: Autenticazione o registrazione con Google Identity Services (OAuth2/SSO)
+      tags:
+        - Autenticazione
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - credential
+              properties:
+                credential:
+                  type: string
+                  description: ID Token JWT firmato da Google
+      responses:
+        '200':
+          description: Autenticazione completata con rilascio del token applicativo
+        '400':
+          description: Token Google mancante
+        '401':
+          description: 'Verifica fallita: token non valido o scaduto'
+        '500':
+          description: Configurazione Google Client ID mancante o errore salvataggio
+
+  /api/v1/auth/verify:
     get:
-      summary: 'Profilo utente autenticato'
+      summary: Verifica la validità dell'Access Token JWT corrente
+      tags:
+        - Autenticazione
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: 'Dati profilo recuperati.'
+          description: Token valido
         '401':
-          description: 'Non autorizzato.'
+          description: Token non autorizzato, mancante o scaduto
 
-  /user/profile:
+  /api/v1/user/me:
+    get:
+      summary: Restituisce i dati del profilo utente autenticato
+      tags:
+        - Utente
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dati profilo recuperati con successo
+        '401':
+          description: Non autorizzato
+
+  /api/v1/user/profile:
     put:
-      summary: 'Modifica dati anagrafici e/o password'
+      summary: Aggiorna dati anagrafici, cambio password e preferenze notifiche
+      tags:
+        - Utente
       security:
         - bearerAuth: []
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                name: { type: string }
-                surname: { type: string }
-                currentPassword: { type: string }
-                newPassword: { type: string, minLength: 8 }
+                name:
+                  type: string
+                surname:
+                  type: string
+                currentPassword:
+                  type: string
+                  format: password
+                newPassword:
+                  type: string
+                  format: password
+                notificheEmail:
+                  type: boolean
       responses:
         '200':
-          description: 'Profilo aggiornato con successo.'
+          description: Profilo aggiornato e nuovo JWT rigenerato
         '400':
-          description: 'Parametri non validi o password errata.'
+          description: Nuova password debole o account Google privo di password
         '401':
-          description: 'Non autorizzato.'
+          description: Password attuale errata
+        '404':
+          description: Utente non trovato
+        '500':
+          description: Errore interno durante il salvataggio
 
-  /user/account:
+  /api/v1/user/account:
     delete:
-      summary: 'Cancellazione definitiva account (GDPR)'
+      summary: Cancellazione definitiva account e pulizia dati personali (GDPR)
+      tags:
+        - Utente
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: 'Account eliminato con successo.'
+          description: Account, segnalazioni e preferiti eliminati con successo
         '401':
-          description: 'Non autorizzato.'
+          description: Non autorizzato
+        '404':
+          description: Utente non trovato
+        '500':
+          description: Errore durante l'eliminazione dell'account
 
-  /user/preferiti:
+  /api/v1/user/preferiti:
     get:
-      summary: 'Lista preferiti salvati'
+      summary: Restituisce l'elenco delle rastrelliere e parcheggi salvati come preferiti
+      tags:
+        - Preferiti
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: 'Array dei luoghi preferiti salvati.'
+          description: Lista preferiti recuperata
         '401':
-          description: 'Non autorizzato.'
+          description: Non autorizzato
     post:
-      summary: 'Aggiunta elemento ai preferiti'
+      summary: Aggiunge una rastrelliera o parcheggio ai preferiti dell'utente
+      tags:
+        - Preferiti
       security:
         - bearerAuth: []
       requestBody:
@@ -341,41 +421,62 @@ paths:
           application/json:
             schema:
               type: object
-              required: [rastrellieraId]
+              required:
+                - rastrellieraId
               properties:
-                rastrellieraId: { type: integer }
-                tipologia: { type: string }
-                stalli: { type: integer }
-                zona: { type: string }
-                lat: { type: number }
-                lng: { type: number }
+                rastrellieraId:
+                  type: integer
+                tipologia:
+                  type: string
+                stalli:
+                  type: integer
+                zona:
+                  type: string
+                lat:
+                  type: number
+                lng:
+                  type: number
       responses:
         '201':
-          description: 'Aggiunto ai preferiti.'
-        '409':
-          description: 'Elemento già presente.'
+          description: Elemento aggiunto ai preferiti
+        '400':
+          description: rastrellieraId obbligatorio
         '401':
-          description: 'Non autorizzato.'
+          description: Non autorizzato
+        '409':
+          description: Elemento già presente nei preferiti
+        '500':
+          description: Errore nel salvataggio preferiti
 
-  /user/preferiti/{id}:
+  /api/v1/user/preferiti/{id}:
     delete:
-      summary: 'Rimozione preferito per ID'
+      summary: Rimuove una rastrelliera o parcheggio dai preferiti
+      tags:
+        - Preferiti
       security:
         - bearerAuth: []
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
+          description: ID della rastrelliera o parcheggio
       responses:
         '200':
-          description: 'Elemento rimosso.'
+          description: Rimosso dai preferiti
         '401':
-          description: 'Non autorizzato.'
+          description: Non autorizzato
+        '404':
+          description: Nessun preferito trovato
+        '500':
+          description: Errore durante la rimozione
 
-  /segnalazioni:
+  /api/v1/segnalazioni:
     post:
-      summary: 'Inoltro segnalazione disservizio'
+      summary: Invia una segnalazione di guasto o problema su una rastrelliera
+      tags:
+        - Segnalazioni
       security:
         - bearerAuth: []
       requestBody:
@@ -384,77 +485,110 @@ paths:
           application/json:
             schema:
               type: object
-              required: [rastrellieraId, tipo]
+              required:
+                - rastrellieraId
+                - tipo
               properties:
-                rastrellieraId: { type: integer }
-                tipo: { type: string, enum: [bici_abbandonata, danno_strutturale, rastrelliera_piena, vandalismo, altro] }
-                note: { type: string }
-                lat: { type: number }
-                lng: { type: number }
+                rastrellieraId:
+                  type: integer
+                tipo:
+                  type: string
+                  example: danno_strutturale, vandalismo
+                note:
+                  type: string
+                lat:
+                  type: number
+                lng:
+                  type: number
       responses:
         '201':
-          description: 'Segnalazione presa in carico.'
+          description: Segnalazione registrata con successo
         '400':
-          description: 'Dati obbligatori mancanti.'
+          description: rastrellieraId e tipo obbligatori
         '401':
-          description: 'Non autorizzato.'
+          description: Non autorizzato
         '429':
-          description: 'Rate limit segnalazioni superato.'
+          description: Troppe segnalazioni inviate (Rate limit attivo)
+        '500':
+          description: Errore durante il salvataggio della segnalazione
 
-  /segnalazioni/user:
+  /api/v1/segnalazioni/user:
     get:
-      summary: 'Segnalazioni inviate dall utente'
+      summary: Recupera lo storico segnalazioni inviate dall'utente autenticato
+      tags:
+        - Segnalazioni
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: 'Lista segnalazioni utente.'
+          description: Storico segnalazioni recuperato
         '401':
-          description: 'Non autorizzato.'
+          description: Non autorizzato
 
-  /segnalazioni/recenti:
+  /api/v1/segnalazioni/recenti:
     get:
-      summary: 'Ultime segnalazioni pubbliche'
+      summary: Restituisce le segnalazioni aperte delle ultime 48 ore (dati personali anonimizzati)
+      tags:
+        - Segnalazioni
       responses:
         '200':
-          description: 'Elenco segnalazioni recenti.'
+          description: Lista segnalazioni recenti
 
-  /routing:
+  /api/v1/routing:
     get:
-      summary: 'Calcolo percorso turn-by-turn'
-      description: 'Calcola il tragitto tra coordinate WGS84 tramite OpenRouteService o fallback istantaneo OSRM.'
+      summary: Calcola itinerario ciclabile, pedonale o in auto con OpenRouteService e failover OSRM
+      tags:
+        - Routing
       parameters:
         - name: startLat
           in: query
           required: true
-          schema: { type: number }
+          schema:
+            type: number
+          description: Latitudine di partenza
         - name: startLng
           in: query
           required: true
-          schema: { type: number }
+          schema:
+            type: number
+          description: Longitudine di partenza
         - name: endLat
           in: query
           required: true
-          schema: { type: number }
+          schema:
+            type: number
+          description: Latitudine di arrivo
         - name: endLng
           in: query
           required: true
-          schema: { type: number }
+          schema:
+            type: number
+          description: Longitudine di arrivo
         - name: profile
           in: query
-          required: false
-          schema: { type: string, enum: [cycling-regular, foot-walking, driving-car], default: cycling-regular }
+          schema:
+            type: string
+            enum:
+              - cycling-regular
+              - foot-walking
+              - driving-car
+            default: cycling-regular
         - name: language
           in: query
-          required: false
-          schema: { type: string, enum: [it, en, de], default: it }
+          schema:
+            type: string
+            enum:
+              - it
+              - en
+              - de
+            default: it
       responses:
         '200':
-          description: 'Percorso GeoJSON con manovre turn-by-turn.'
+          description: Tracciato GeoJSON con manovre turn-by-turn
         '400':
-          description: 'Coordinate non valide.'
+          description: Parametri obbligatori mancanti o coordinate non numeriche
         '504':
-          description: 'Timeout nel calcolo del percorso.'
+          description: Timeout superato per il calcolo del tragitto (oltre 4.5s)
 
 components:
   securitySchemes:
@@ -463,42 +597,57 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    UserProfile:
+    UserSummary:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        surname: { type: string }
-        email: { type: string }
-        authProvider: { type: string, enum: [local, google] }
-    GeoJsonCollection:
+        name:
+          type: string
+        surname:
+          type: string
+        email:
+          type: string
+          format: email
+    Preferito:
       type: object
       properties:
-        type: { type: string, example: FeatureCollection }
-        features: { type: array, items: { type: object } }
+        id:
+          type: integer
+        tipologia:
+          type: string
+        stalli:
+          type: integer
+        zona:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        savedAt:
+          type: string
+          format: date-time
+    Segnalazione:
+      type: object
+      properties:
+        id:
+          type: string
+        rastrellieraId:
+          type: integer
+        tipo:
+          type: string
+        note:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+        stato:
+          type: string
+          example: inviata
 ```
 
-**Endpoint Principali (Selezione):**
-*   `GET /api/v1/rastrelliere`: (*Pubblica*) Restituisce il censimento delle rastrelliere trasformando (tramite la libreria `proj4`) la proiezione EPSG:25832 nello standard WGS84. Include un micro-servizio che simula e inietta real-time l'occupazione fisica degli stalli IoT.
-*   `GET /api/v1/parcheggi`: (*Pubblica*) Inoltra i dati cartografici dei parcheggi protetti Bici Box pronti per essere agganciati alla libreria Leaflet sul frontend. Implementa una logica di *dynamic injection* per assegnare `id` univoci numerici real-time qualora il formato raw originario ne fosse sprovvisto, uniformando così la base dati e abilitando le funzionalità account-linked (Preferiti e Segnalazioni).
-*   `GET /api/v1/routing`: (*Pubblica*) Calcola il percorso ciclabile e pedonale turn-by-turn con indicazioni vocali e metriche (distanza, durata) tramite OpenRouteService e failover automatico su OSRM.
-*   `POST /api/v1/login`: (*Pubblica*) Riceve un payload contenente email e password, convalida le credenziali ed emette il token JWT se la validazione ha esito positivo.
-*   `POST /api/v1/auth/google`: (*Pubblica*) Endpoint federato SSO (Single Sign-On). Riceve il ticket emesso da Google OAuth, lo decodifica per estrapolare la trusted-identity e rilascia il token JWT di sessione.
-*   `GET /api/v1/user/preferiti` / `POST /api/v1/user/preferiti`: (*Protetta da JWT*) Gestiscono la consultazione e l'aggiunta di rastrelliere e parcheggi protetti ai preferiti dell'utente.
-*   `DELETE /api/v1/user/preferiti/:id`: (*Protetta da JWT*) Rimuove un elemento specifico dalla lista dei luoghi preferiti salvati dall'utente nel proprio profilo.
-*   `POST /api/v1/segnalazioni`: (*Protetta da JWT*) Riceve il feedback geolocalizzato dell'utente (es. furto, danni all'infrastruttura), salvandolo a registro con timestamp annesso.
-*   `POST /api/v1/register`: (*Pubblica*) Gestisce la registrazione di un nuovo utente validando i campi anagrafici e applicando l'hashing sicuro (bcrypt) alla password.
-*   `GET /api/v1/config`: (*Pubblica*) Restituisce le configurazioni pubbliche necessarie al client, inclusa la chiave `googleClientId` per l'inizializzazione del modulo Google SSO.
-*   `POST /api/v1/refresh-token`: (*Pubblica*) Riceve il refresh token e genera un nuovo access token JWT valido per estendere la sessione utente.
-*   `POST /api/v1/forgot-password`: (*Pubblica*) Invia un link temporaneo di recupero password all'indirizzo email specificato dall'utente.
-*   `GET /api/v1/verify-reset-token`: (*Pubblica*) Verifica la validità e la scadenza del token di recupero password prima di consentire il reset.
-*   `POST /api/v1/reset-password`: (*Pubblica*) Aggiorna la password dell'utente nel sistema validando il token temporaneo associato.
-*   `GET /api/v1/segnalazioni/recenti`: (*Pubblica*) Recupera l'elenco delle segnalazioni recenti inviate dalla community per evidenziare eventuali criticità attive sui marker della mappa.
-*   `GET /api/v1/segnalazioni/user`: (*Protetta da JWT*) Restituisce lo storico delle segnalazioni inviate dall'utente all'interno della sua area personale (Dashboard).
-*   `PUT /api/v1/user/profile`: (*Protetta da JWT*) Permette l'aggiornamento dei dati anagrafici, delle preferenze di notifica e l'eventuale modifica sicura della password.
-*   `DELETE /api/v1/user/account`: (*Protetta da JWT*) Esegue la cancellazione definitiva e irreversibile dell'account e dei dati associati in conformità al GDPR.
-
->>>>>>> 5a38f4febfbe19a49a1b10f4042a7d9337fad682
 ---
 
 ## 2. Implementation
@@ -604,7 +753,7 @@ Il backend del progetto si basa sulle seguenti dipendenze runtime caricate trami
 *   **nodemailer**: Modulo di gestione SMTP per l'inoltro delle comunicazioni transazionali (es. reset password utente).
 
 ### 2.4 Database
-A causa del ridottissimo I/O rate temporale, il progetto rifiuta il sovradimensionamento di DBMS complessi, prediligendo un approccio leggero orientato agli standard aperti. Le infrastrutture geografiche sono serializzate in formati GeoJSON caricati dal file-system su richiesta dell'Express Server. Per preservare la massima portabilità del prototipo, azzerare le latenze di runtime ed evitare l'overhead di un DBMS esterno dedicato, il sistema memorizza le entità applicative all'interno di file JSON/GeoJSON strutturati:
+A causa del ridottissimo I/O rate temporale, il progetto rifiuta il sovradimensionamento di DBMS complessi, prediligendo un approccio leggero orientato agli standard aperti. Le infrastrutture geografiche sono serializzate in formati GeoJSON caricati dal file-system su richiesta dell'Express Server. Per preservare la massima portabilità del prototipo, azzerare le latenze di runtime ed evitare l'overhead di un DBMS esterno dedicato, il sistema memorizza le entità applicative all'interno di file JSON strutturati:
 
 - **Users** (users.json): Mantiene l'anagrafica utente, il digest della password crittografata con bcrypt, i token di sessione e recupero credenziali.
 
@@ -613,7 +762,7 @@ A causa del ridottissimo I/O rate temporale, il progetto rifiuta il sovradimensi
 - **Segnalazioni** (segnalazioni.json): Registro delle anomalie territoriali comunicate dalla community con relativo stato di avanzamento..
 
 
-### 2.5 Testing (FONDAMENTALE)
+### 2.5 Testing 
 Il piano di verifica e validazione della piattaforma integra una suite di collaudo automatizzata unita a test funzionali di tipo Black Box, orientati alla verifica puntuale di input, output e stati di sistema.
 
 | Numero | Test Case | Descrizione Test Case | Test Data | Precondizioni | Dipendenze | Risultato Atteso | Risultato Riscontrato |
