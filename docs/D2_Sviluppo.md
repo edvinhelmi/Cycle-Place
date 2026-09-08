@@ -855,7 +855,7 @@ Il Front-End fornisce le funzionalità di visualizzazione interattiva, gestione 
 * **Home Page e Mappa Interattiva**: L'interfaccia principale integra una vista cartografica basata su Leaflet.js e OpenStreetMap per la visualizzazione delle rastrelliere tradizionali, dei bloccatelaio e dei parcheggi protetti (Ciclobox). La schermata comprende:
   * Una **barra di ricerca spaziale** con geocoding e un sistema di filtraggio automatico nel raggio di 200 metri nel caso in cui non vengano rilevati parcheggi nella via specificata.
   * Un **widget meteo live** (integrato con l'API Open-Meteo) dotato di banner di allerta automatici in-app in caso di eventi atmosferici avversi.
-  * Un **selettore di lingua** dinamico per la fruizione in Italiano, Inglese e Tedesco e un **interruttore per il tema chiaro/scuro** (Dark Mode) con persistenza nel `localStorage` del browser.
+  * Un **selettore di lingua** dinamico per la fruizione in Italiano, Inglese e Tedesco e un **interruttore per il tema chiaro/scuro** (Dark Mode).
   * Un pannello filtri laterale (accessibile via drawer responsive con menu hamburger su mobile) per la gestione delle tipologie di sosta e dei preferiti.
 
 <p align="center">
