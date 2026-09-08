@@ -144,6 +144,17 @@ Il sistema deve permettere all'utente di scegliere in quale lingua fruire dell'a
 
 <img src="RF1_Diagram.drawio.png" alt="Titolo" width="700" />
 
+**Riassunto:** Utente anonimo e Registrato gestiscono lo stato accesso al sistema, il primo tramite eventuale login il secondo tramite eventuale logout.
+
+**Descrizione:**
+- L'Utente (Anonimo o Registrato) accede alla vista pubblica "Accesso Mappa e Iniziative".
+- L'Utente Anonimo può effettuare la "Registrazione" o eseguire il "Login Credenziali Locali".
+- Durante il "Login Credenziali Locali", il sistema esegue passaggi obbligatori: applica il "Rate Limiting" per prevenire abusi, genera la "Gestione Sessione JWT" e procede all'"Invalidazione Sessione" precedente per ragioni di sicurezza.
+- L'Utente Anonimo può richiedere il "Recupero Password".
+- L'Utente Registrato può effettuare il "Logout", azione che include sempre l'"Invalidazione Sessione" attiva.
+**Estensioni:**
+Autenticazione Esterna: Il flusso di login standard può essere esteso scegliendo l'accesso tramite un sistema esterno (Provider Google - OAuth 2.0).
+
 ### Use Case RF2: Registrazione e Accesso utente
 
 <img src="RF2_Diagram.drawio.png" alt="Titolo" width="700" />
