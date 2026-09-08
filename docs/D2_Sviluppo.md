@@ -1,7 +1,7 @@
 UNIVERSITÀ DEGLI STUDI DI TRENTO<br>
 Dipartimento di Ingegneria e Scienza dell’Informazione
 
-# **Progetto:** Cycle Place  
+# **Progetto:** Cycle-Place  
 **Titolo del documento:** D2 - Sviluppo (Implementazione, Testing e Deployment)  
 
 ---
@@ -36,7 +36,7 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 ---
 
 ## Scopo del documento
-Il presente documento riporta in dettaglio tutte le informazioni necessarie all'implementazione ed al collaudo dell'applicazione web Cycle Place. 
+Il presente documento riporta in dettaglio tutte le informazioni necessarie all'implementazione ed al collaudo dell'applicazione web Cycle-Place. 
 In particolare, formalizza le specifiche contrattuali delle Web API conformi allo standard OpenAPI 3.0.3, l'organizzazione logica della codebase, la strategia di branching e tracciamento delle attività del team, gli schemi di modellazione dei dati persistenti, il piano formale di collaudo e testing (funzionale e di unità), l'architettura dell'interfaccia Front-End (responsive e multilingua) e, infine, la configurazione della pipeline di Continuous Integration (CI) basata su GitHub Actions per l'esecuzione automatica dei test, unitamente alle istruzioni di avvio in ambiente locale e alle credenziali di accesso per la verifica del sistema.
 
 ---
