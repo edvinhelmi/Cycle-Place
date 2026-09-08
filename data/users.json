@@ -12,5 +12,24 @@
     "surname": "ciao",
     "email": "ciao",
     "password": "ciao"
+  },
+  {
+    "id": "1788892050444",
+    "name": "Mario",
+    "surname": "Rossi",
+    "email": "mariorossi@esempio.it",
+    "password": "$2b$10$hFmYugAfAi78UQLdwYDWHuXvS6CWOmixssT7h0J53kRYguHgwijzO",
+    "refreshToken": "0623a67f6d92a6a28a2d9cd2b91763be124c52affaf40dbb17f4782e079c39d5"
+  },
+  {
+    "id": "1788893184153",
+    "name": "Cycle",
+    "surname": "Place",
+    "email": "cycleplace@esempio.com",
+    "password": "$2b$10$G5FOugXsetx0QbRZn28K2.bSV0eBk2IuxC/W6rjuYguX6Yrd2pGcG",
+    "refreshToken": "fe3cb00cc2e7050d76e8b8e1f79bb4199a051b5d35fc91f74f3f3ce2c2c0df67",
+    "notifiche": {
+      "email": true
+    }
   }
 ]

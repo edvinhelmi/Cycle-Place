@@ -94,5 +94,17 @@
     "lng": 11.123051901154113,
     "timestamp": "2026-09-04T10:49:50.479Z",
     "stato": "inviata"
+  },
+  {
+    "id": "seg_1788893267772",
+    "userId": "1788893184153",
+    "userEmail": "cycleplace@esempio.com",
+    "rastrellieraId": 73,
+    "tipo": "vandalismo",
+    "note": "Graffiti",
+    "lat": 46.06522621034989,
+    "lng": 11.1194043995741,
+    "timestamp": "2026-09-08T18:47:47.772Z",
+    "stato": "inviata"
   }
 ]
