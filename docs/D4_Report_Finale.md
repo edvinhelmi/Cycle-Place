@@ -18,6 +18,15 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 
 ---
 
+### INDICE
+- *1. Organizzazione del lavoro*
+- *2. Ruoli e attività*
+- *3. Carico e distribuzione del lavoro*
+- *4. Criticità*
+- *5. Autovalutazione*
+
+---
+
 ## 1. Organizzazione del lavoro
 
 Per lo sviluppo dell'applicazione "Cycle-Place", il Gruppo G52 ha adottato una metodologia ispirata ai principi **Agile**, mirata a favorire un approccio incrementale e iterativo. Al fine di mantenere l'allineamento sui task e sul progresso delle attività, è stato impiegato un sistema di gestione visuale **Kanban**, che ha permesso di mappare in modo trasparente gli stati di avanzamento e assegnare l'adeguata priorità ad ogni compito.
