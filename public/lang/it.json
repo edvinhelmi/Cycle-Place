@@ -14,14 +14,14 @@
   "filter.tradizionali": "Rastrelliere Tradizionali",
   "filter.bloccatelaio": "Rastrelliere Bloccatelaio",
   "filter.parcheggi": "Parcheggi Protetti",
-  "filter.nascondiPiene": "Nascondi rastrelliere piene",
+  "filter.nascondiPiene": "Nascondi parcheggi pieni",
   "filter.soloPreferiti": "Mostra solo preferiti",
 
   "legend.title": "Legenda",
   "legend.button": "Legenda",
   "legend.tradizionale": "Rastrelliera tradizionale",
   "legend.bloccatelaio": "Rastrelliera bloccatelaio",
-  "legend.piena": "Bloccatelaio piena (0 posti)",
+  "legend.piena": "Parcheggio protetto pieno (0 posti)",
   "legend.parcheggio": "Parcheggio protetto",
   "legend.preferito": "Parcheggio preferito",
 

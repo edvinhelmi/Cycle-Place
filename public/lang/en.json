@@ -14,14 +14,14 @@
   "filter.tradizionali": "Traditional Racks",
   "filter.bloccatelaio": "Frame-Lock Racks",
   "filter.parcheggi": "Protected Parking",
-  "filter.nascondiPiene": "Hide full racks",
+  "filter.nascondiPiene": "Hide full parking",
   "filter.soloPreferiti": "Show favorites only",
 
   "legend.title": "Legend",
   "legend.button": "Legend",
   "legend.tradizionale": "Traditional rack",
   "legend.bloccatelaio": "Frame-lock rack",
-  "legend.piena": "Full frame-lock rack (0 slots)",
+  "legend.piena": "Full protected parking (0 slots)",
   "legend.parcheggio": "Protected parking",
   "legend.preferito": "Favorite parking",
 

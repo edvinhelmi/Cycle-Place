@@ -14,14 +14,14 @@
   "filter.tradizionali": "Traditionelle Fahrradständer",
   "filter.bloccatelaio": "Rahmensichere Ständer",
   "filter.parcheggi": "Geschützte Parkplätze",
-  "filter.nascondiPiene": "Volle Ständer ausblenden",
+  "filter.nascondiPiene": "Volle Parkplätze ausblenden",
   "filter.soloPreferiti": "Nur Favoriten anzeigen",
 
   "legend.title": "Legende",
   "legend.button": "Legende",
   "legend.tradizionale": "Traditioneller Ständer",
   "legend.bloccatelaio": "Rahmensicherer Ständer",
-  "legend.piena": "Voller Rahmensicherer Ständer (0 Plätze)",
+  "legend.piena": "Voller geschützter Parkplatz (0 Plätze)",
   "legend.parcheggio": "Geschützter Parkplatz",
   "legend.preferito": "Favorisierter Parkplatz",
 
