@@ -1,15 +1,18 @@
 UNIVERSITÀ DEGLI STUDI DI TRENTO<br>
 Dipartimento di Ingegneria e Scienza dell’Informazione
 
-# Progetto: Cycle Place
-## Titolo del documento: Descrizione di Progetto
+# **Progetto**: Cycle Place
+**Titolo del documento: Descrizione di Progetto** (Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place)
 
 ---
 
-### Document Info<br>
-**Doc. Name**: D1_Descrizione_Progetto<br>
-**Doc. Number**: D1 v1.5<br>
-**Description**: Documento di analisi dei requisiti funzionali, non funzionali, use case, user story e design front-end per l'applicazione Cycle-Place.
+| Parametro | Dettaglio |
+| :--- | :--- |
+| **Doc. Name** | D1_Descrizione_Progetto |
+| **Doc. Number** | D1 v1.5<br> |
+| **Data Rilascio** | A.A. 2025/2026 |
+| **Stato** | Rilasciato / Conforme specifiche UniTN |
+| **Autori** | Edvin Helmi, Lorenzo Pasotti, Natalina Perazzolli |
 
 ---
 
