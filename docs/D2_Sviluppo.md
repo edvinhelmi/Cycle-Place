@@ -4,6 +4,8 @@ Dipartimento di Ingegneria e Scienza dell’Informazione
 # **Progetto:** Cycle Place  
 **Titolo del documento:** D2 - Sviluppo (Implementazione, Testing e Deployment)  
 
+---
+
 ### Document Info
 | Parametro | Dettaglio |
 | :--- | :--- |
