@@ -43,13 +43,14 @@ Durante le prime fasi del lavoro abbiamo riscontrato molte criticità a causa di
    
 ## 5. Autovalutazione
 
-L'autovalutazione è risultata estremamente positiva. Nonostante le poche competenze organizzative e le poche conoscenze delle tecnologie utilizzate all'inizio del percorso ogni membro è riuscito ad ottenere delle solide basi di ogni strumento e soft skill. Inoltre grazie alla gestione verticalizzata del lavoro ogni componente del gruppo ha avuto l'opportunità di approfondire ulteriormente determinate fasi dello sviluppo che più interessavano individualmente.
+
+L'autovalutazione è risultata estremamente positiva. Nonostante le poche competenze organizzative e le poche conoscenze delle tecnologie avute all'inizio del percorso ogni membro è riuscito ad ottenere delle solide basi di ogni strumento e sviluppare soft-skill utili nel lavoro in Team. Inoltre grazie alla gestione verticalizzata del lavoro ogni componente del gruppo ha avuto l'opportunità di approfondire ulteriormente determinate fasi dello sviluppo che più interessavano individualmente.
 Questo è stato il punto di forza del gruppo, nonostante un inizio complesso sono stati subito individuati gli interessi individuali, developing puro per Edvin, organizzazione strutturale e grafica dell'applicazione per Natalina e gestione del lavoro e delle normative per Lorenzo.
+
+Date le precedenti considerazioni e le parti facoltative svolte la nostra autovalutazione è la seguente:
 
 | Edvin Helmi         | 30  |
 | ------------------- | --- |
 | Pasotti Lorenzo     | 30  |
 | Natalina Perazzolli | 30  |
 
-
-| Natalina Perazzolli | 30  |
