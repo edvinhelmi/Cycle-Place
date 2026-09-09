@@ -238,7 +238,7 @@ Estensioni:
 
 ### Use Case RF7: Widget Meteo e Sistema di Allerta
 
-<img src="RF7_Diagram.drawio.png" alt="Titolo" width="700" />
+<img src="use-case/RF7_Diagram.drawio.png" alt="Titolo" width="700" />
 
 **Riassunto:** Il sistema informa gli utenti sulle condizioni meteorologiche in tempo reale ed emette allerte automatiche basate sul monitoraggio ambientale.
 
