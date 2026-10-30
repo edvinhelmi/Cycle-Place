@@ -744,8 +744,8 @@ app.post('/api/v1/auth/google', authLimiter, async (req, res) => {
 
         const googleId = payload['sub'];
         const email = (payload['email'] || '').toLowerCase().trim();
-        const name = payload['given_name'] || payload['name'] || '';
-        const surname = payload['family_name'] || '';
+        const name = payload['given_name'] || payload['name'] || 'Utente';
+        const surname = payload['family_name'] || 'Google';
         const picture = payload['picture'] || '';
 
         let user = await db.findUserByGoogleId(googleId);
@@ -772,7 +772,7 @@ app.post('/api/v1/auth/google', authLimiter, async (req, res) => {
             });
         }
 
-        const token = jwt.sign({
+        const accessToken = jwt.sign({
             sub: user.id,
             googleId: googleId,
             email: user.email,
@@ -780,10 +780,21 @@ app.post('/api/v1/auth/google', authLimiter, async (req, res) => {
             surname: user.surname,
             picture: user.picture || picture,
             provider: 'google'
-        }, JWT_SECRET, { expiresIn: '24h' });
+        }, JWT_SECRET, { expiresIn: '15m' });
+
+        const refreshToken = jwt.sign(
+            { id: user.id }, 
+            JWT_REFRESH_SECRET, 
+            { expiresIn: '30d' }
+        );
+        const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+        await db.updateUser(user.id, { refreshToken: hashedRefreshToken });
 
         res.status(200).json({
-            token,
+            message: "Login con Google effettuato",
+            token: accessToken,
+            accessToken,
+            refreshToken,
             user: {
                 name: user.name,
                 surname: user.surname,

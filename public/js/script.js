@@ -423,6 +423,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!m) return;
         m.classList.remove('hidden');
         m.classList.add('modal-open');
+        if (m.id === 'login-modal' || m.id === 'register-modal') {
+            if (typeof renderGoogleButtons === 'function') {
+                setTimeout(renderGoogleButtons, 80);
+            }
+        }
     };
     const closeModal = m => {
         if (!m) return;
@@ -1083,17 +1088,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkResetPasswordFromUrl();
 
     // Google SSO
-    
+    let cachedGoogleClientId = null;
+
     async function handleGoogleCredential(response) {
         const googleErrorEl = document.getElementById('google-error');
         if (googleErrorEl) googleErrorEl.textContent = '';
+        console.log('[Google SSO] Credenziale ricevuta da Google, invio al server per verifica...');
+
         try {
             const res  = await fetch('/api/v1/auth/google', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ credential: response.credential })
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
+            if (!res.ok) throw new Error(data.error || 'Verifica token fallita');
+            
+            console.log('[Google SSO] Autenticazione completata con successo per:', data.user?.email);
             saveToken(data.accessToken || data.token, data.refreshToken);
             
             closeModal(loginModal);
@@ -1102,7 +1113,54 @@ document.addEventListener('DOMContentLoaded', async () => {
             loginSuccess(data.user);
             setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
         } catch (err) {
+            console.error('[Google SSO] Errore autenticazione:', err);
             if (googleErrorEl) googleErrorEl.textContent = '❌ Errore Google SSO: ' + (err.message || 'Autenticazione Google fallita');
+        }
+    }
+
+    function renderGoogleButtons() {
+        if (!window.google?.accounts?.id || !cachedGoogleClientId) return;
+
+        const lang = (window.I18n && typeof I18n.getLanguage === 'function') 
+            ? (I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it'))
+            : 'it';
+
+        const container = document.getElementById('google-btn-container');
+        if (container) {
+            try {
+                container.innerHTML = '';
+                const width = container.offsetWidth ? Math.min(Math.max(container.offsetWidth, 240), 340) : 340;
+                google.accounts.id.renderButton(container, {
+                    type: 'standard',
+                    shape: 'rectangular',
+                    theme: 'outline',
+                    text: 'signin_with',
+                    size: 'large',
+                    width: width,
+                    locale: lang
+                });
+            } catch (e) {
+                console.warn('[Google SSO] renderButton login:', e);
+            }
+        }
+
+        const regContainer = document.getElementById('google-register-btn-container');
+        if (regContainer) {
+            try {
+                regContainer.innerHTML = '';
+                const width = regContainer.offsetWidth ? Math.min(Math.max(regContainer.offsetWidth, 240), 340) : 340;
+                google.accounts.id.renderButton(regContainer, {
+                    type: 'standard',
+                    shape: 'rectangular',
+                    theme: 'outline',
+                    text: 'signup_with',
+                    size: 'large',
+                    width: width,
+                    locale: lang
+                });
+            } catch (e) {
+                console.warn('[Google SSO] renderButton register:', e);
+            }
         }
     }
 
@@ -1116,29 +1174,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { googleClientId } = await res.json();
             const container = document.getElementById('google-btn-container');
             if (!container) return;
-            if (!googleClientId || googleClientId.includes('IL_TUO')) {
+
+            if (!googleClientId || googleClientId.includes('IL_TUO') || googleClientId.includes('your-google-client-id')) {
                 container.innerHTML = '<small style="color:#888">Google Login: aggiungi GOOGLE_CLIENT_ID nel file .env</small>';
                 return;
             }
-            await new Promise(resolve => {
-                if (window.google?.accounts) return resolve();
-                const t = setInterval(() => { if (window.google?.accounts) { clearInterval(t); resolve(); } }, 100);
-            });
-            google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential, ux_mode: 'popup' });
-            google.accounts.id.renderButton(container, {
-                type: 'standard', shape: 'rectangular', theme: 'outline',
-                text: 'signin_with', size: 'large', width: 340,
-                locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
-            });
-            const regContainer = document.getElementById('google-register-btn-container');
-            if (regContainer) {
-                google.accounts.id.renderButton(regContainer, {
-                    type: 'standard', shape: 'rectangular', theme: 'outline',
-                    text: 'signup_with', size: 'large', width: 340,
-                    locale: I18n.getLanguage() === 'de' ? 'de' : (I18n.getLanguage() === 'en' ? 'en' : 'it')
-                });
+            cachedGoogleClientId = googleClientId;
+
+            // Attende caricamento libreria GSI (con timeout massimo di 6s)
+            let elapsed = 0;
+            while (!window.google?.accounts?.id && elapsed < 6000) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                elapsed += 100;
             }
-        } catch (err) { console.error('Errore Google SSO:', err); }
+
+            if (!window.google?.accounts?.id) {
+                console.warn('[Google SSO] Script Google GSI non disponibile (adblocker o rete)');
+                return;
+            }
+
+            google.accounts.id.initialize({ 
+                client_id: cachedGoogleClientId, 
+                callback: handleGoogleCredential, 
+                auto_select: false,
+                cancel_on_tap_outside: true
+            });
+
+            renderGoogleButtons();
+        } catch (err) { 
+            console.error('[Google SSO] Errore inizializzazione:', err); 
+        }
     }
 
     initGoogleSSO();
