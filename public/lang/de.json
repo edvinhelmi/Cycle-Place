@@ -184,6 +184,8 @@
   "auth.agreeTerms": "Ich habe die Nutzungsbedingungen und die Datenschutzerklärung gelesen und akzeptiere sie",
   "auth.termsLink": "Nutzungsbedingungen",
   "auth.privacyLink": "Datenschutzerklärung",
+  "auth.googleLogin": "Mit Google anmelden",
+  "auth.googleRegister": "Mit Google registrieren",
   "auth.errMustAcceptTerms": "Sie müssen die Datenschutzerklärung und die Nutzungsbedingungen akzeptieren, um ein Konto zu erstellen",
 
   "footer.rights": "Alle Rechte vorbehalten. Open Data Stadt Trient & OpenStreetMap.",

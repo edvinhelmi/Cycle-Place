@@ -23,14 +23,14 @@ function securityHeaders(req, res, next) {
     // Necessario per consentire il corretto funzionamento del popup di Google SSO (OAuth)
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
 
-    // Content Security Policy calibrata per Cycle Place
+    // Content Security Policy calibrata per Cycle Place (con pieno supporto Google Identity Services e OAuth2)
     const cspDirectives = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://accounts.google.com https://unpkg.com https://cdnjs.cloudflare.com",
-        "style-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com",
+        "script-src 'self' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://unpkg.com https://cdnjs.cloudflare.com",
+        "style-src 'self' 'unsafe-inline' https://accounts.google.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com",
         "font-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.gstatic.com data:",
-        "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://unpkg.com https://lh3.googleusercontent.com https://cdn.jsdelivr.net",
-        "connect-src 'self' https://accounts.google.com https://api.open-meteo.com https://router.project-osrm.org",
+        "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://unpkg.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.gstatic.com https://accounts.google.com https://cdn.jsdelivr.net",
+        "connect-src 'self' https://accounts.google.com https://apis.google.com https://*.googleapis.com https://api.open-meteo.com https://router.project-osrm.org",
         "frame-src 'self' https://accounts.google.com",
         "object-src 'none'",
         "base-uri 'self'",

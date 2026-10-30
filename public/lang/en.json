@@ -184,6 +184,8 @@
   "auth.agreeTerms": "I have read and agree to the Terms of Service and Privacy Policy",
   "auth.termsLink": "Terms of Service",
   "auth.privacyLink": "Privacy Policy",
+  "auth.googleLogin": "Sign in with Google",
+  "auth.googleRegister": "Sign up with Google",
   "auth.errMustAcceptTerms": "You must accept the Privacy Policy and Terms of Service to create an account",
 
   "footer.rights": "All rights reserved. Open Data City of Trento & OpenStreetMap.",

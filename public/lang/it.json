@@ -184,6 +184,8 @@
   "auth.agreeTerms": "Ho letto e accetto i Termini di Servizio e l'Informativa sulla Privacy",
   "auth.termsLink": "Termini di Servizio",
   "auth.privacyLink": "Informativa sulla Privacy",
+  "auth.googleLogin": "Accedi con Google",
+  "auth.googleRegister": "Registrati con Google",
   "auth.errMustAcceptTerms": "Devi accettare l'Informativa sulla Privacy e i Termini di Servizio per creare un account",
 
   "footer.rights": "Tutti i diritti riservati. Dati aperti Comune di Trento & OpenStreetMap.",

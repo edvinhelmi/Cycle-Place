@@ -733,20 +733,34 @@ app.post('/api/v1/reset-password', authLimiter, async (req, res) => {
 // =======================================================
 
 app.post('/api/v1/auth/google', authLimiter, async (req, res) => {
-    const { credential } = req.body;
-    if (!credential) return res.status(400).json({ error: 'Token Google mancante' });
+    const { credential, accessToken: gAccessToken } = req.body;
+    if (!credential && !gAccessToken) return res.status(400).json({ error: 'Token Google mancante' });
     if (!GOOGLE_CLIENT_ID) return res.status(500).json({ error: 'Google Client ID non configurato sul server' });
 
     try {
-        const client = new OAuth2Client(GOOGLE_CLIENT_ID);
-        const ticket = await client.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
-        const payload = ticket.getPayload();
+        let googleId, email, name, surname, picture;
 
-        const googleId = payload['sub'];
-        const email = (payload['email'] || '').toLowerCase().trim();
-        const name = payload['given_name'] || payload['name'] || 'Utente';
-        const surname = payload['family_name'] || 'Google';
-        const picture = payload['picture'] || '';
+        if (credential) {
+            const client = new OAuth2Client(GOOGLE_CLIENT_ID);
+            const ticket = await client.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
+            const payload = ticket.getPayload();
+            googleId = payload['sub'];
+            email = (payload['email'] || '').toLowerCase().trim();
+            name = payload['given_name'] || payload['name'] || 'Utente';
+            surname = payload['family_name'] || 'Google';
+            picture = payload['picture'] || '';
+        } else if (gAccessToken) {
+            const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { 'Authorization': `Bearer ${gAccessToken}` }
+            });
+            if (!userInfoRes.ok) throw new Error('Verifica token Google fallita');
+            const payload = await userInfoRes.json();
+            googleId = payload.sub;
+            email = (payload.email || '').toLowerCase().trim();
+            name = payload.given_name || payload.name || 'Utente';
+            surname = payload.family_name || 'Google';
+            picture = payload.picture || '';
+        }
 
         let user = await db.findUserByGoogleId(googleId);
         if (!user && email) {
