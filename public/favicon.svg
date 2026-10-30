@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <circle cx="32" cy="32" r="30" fill="#0284c7" />
+  <g fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Ruota sinistra -->
+    <circle cx="20" cy="42" r="9" />
+    <!-- Ruota destra -->
+    <circle cx="44" cy="42" r="9" />
+    <!-- Telaio -->
+    <polyline points="20,42 29,42 37,30 25,30 20,42" />
+    <polyline points="29,42 34,23 37,30" />
+    <polyline points="37,30 44,42" />
+    <!-- Manubrio -->
+    <path d="M 33 21 L 37 21 L 40 23" />
+    <!-- Sella -->
+    <line x1="22" y1="27" x2="28" y2="27" />
+    <line x1="25" y1="27" x2="27" y2="35" />
+  </g>
+</svg>

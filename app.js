@@ -11,31 +11,57 @@ const proj4      = require('proj4');
 const { OAuth2Client } = require('google-auth-library');
 const jwt        = require('jsonwebtoken');
 const tokenChecker = require('./middleware/tokenChecker');
+const { securityHeaders, sanitizeString } = require('./middleware/security');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const crypto     = require('crypto');
+const db         = require('./db');
 const SALT_ROUNDS = 10;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret_key';
 
-// --- Configurazione ---
-const app  = express();
+// --- Configurazione Server & Sicurezza ---
+const app = express();
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Rimuove l'header X-Powered-By per sicurezza
+app.disable('x-powered-by');
+
+// Abilita trust proxy per reverse proxy (Render, Railway, Nginx, Cloudflare)
+app.set('trust proxy', 1);
+
+// Applica gli header di sicurezza HTTP difensivi (CSP, X-Frame, Nosniff, Referrer, Permissions)
+app.use(securityHeaders);
+
+// Configurazione CORS sicura e flessibile
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
+    : null;
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || !allowedOrigins || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Origine non consentita dalle policy CORS'));
+        }
+    },
+    credentials: true
+}));
+
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // =======================================================
-// RATE LIMITERS (RNF 2.5)
+// RATE LIMITERS (RNF 2.5 & Protezione DDoS / Brute-force)
 // =======================================================
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: 15,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {
-    const mins = Math.max(1, Math.ceil((req.rateLimit.resetTime.getTime() - Date.now()) / 60000));
-    res.status(options.statusCode).json({ error: `Troppi tentativi di accesso. Riprova tra ${mins} ${mins === 1 ? 'minuto' : 'minuti'}.` });
+        const mins = Math.max(1, Math.ceil((req.rateLimit.resetTime.getTime() - Date.now()) / 60000));
+        res.status(options.statusCode).json({ error: `Troppi tentativi di autenticazione. Riprova tra ${mins} ${mins === 1 ? 'minuto' : 'minuti'}.` });
     }
 });
 
@@ -45,15 +71,42 @@ const segnalazioniLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {
-    const mins = Math.max(1, Math.ceil((req.rateLimit.resetTime.getTime() - Date.now()) / 60000));
-    res.status(options.statusCode).json({ error: `Hai inviato troppe segnalazioni. Riprova tra ${mins} ${mins === 1 ? 'minuto' : 'minuti'}.` });
+        const mins = Math.max(1, Math.ceil((req.rateLimit.resetTime.getTime() - Date.now()) / 60000));
+        res.status(options.statusCode).json({ error: `Hai inviato troppe segnalazioni. Riprova tra ${mins} ${mins === 1 ? 'minuto' : 'minuti'}.` });
     }
 });
+
+const routingLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 30, // Massimo 30 calcoli percorso al minuto per IP
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res, next, options) => {
+        res.status(options.statusCode).json({ error: 'Troppe richieste di calcolo percorso. Attendi qualche istante.' });
+    }
+});
+
+const generalApiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 400, // Limite generale per chiamate API
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res, next, options) => {
+        res.status(options.statusCode).json({ error: 'Frequenza delle richieste troppo elevata. Riprova tra qualche minuto.' });
+    }
+});
+
+app.use('/api/', generalApiLimiter);
 
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET       = process.env.SUPER_SECRET || 'segreto_universitario_cycle_place';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '455956234516-62c55ghdcsl2tffohcancm7is467jgda.apps.googleusercontent.com';
-const ORS_API_KEY      = (process.env.ORS_API_KEY ? process.env.ORS_API_KEY.trim() : '') || 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjBkZmY3MGY1NjJiYTQ0OTE5NWQwNWNmOTQ3ODU3NmE2IiwiaCI6Im11cm11cjY0In0=';
+const ORS_API_KEY      = process.env.ORS_API_KEY ? process.env.ORS_API_KEY.trim() : '';
+
+// Controllo sicurezza in produzione per segreto JWT
+if (process.env.NODE_ENV === 'production' && (!process.env.SUPER_SECRET || process.env.SUPER_SECRET === 'segreto_universitario_cycle_place')) {
+    console.warn('⚠️  [SICUREZZA] SUPER_SECRET non configurato o su valore di default. Configura una chiave casuale a 256 bit in produzione.');
+}
 
 // --- Proiezione EPSG:25832 → WGS84 ---
 proj4.defs('EPSG:25832', '+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
@@ -88,10 +141,41 @@ function transformToWGS84(geojson, addComputedFields) {
 }
 
 // --- Path dati ---
-const dataPath      = path.join(__dirname, 'data');
-const usersFile     = path.join(dataPath, 'users.json');
-const preferitiFile = path.join(dataPath, 'preferiti.json');
-const segFile       = path.join(dataPath, 'segnalazioni.json');
+const staticDataPath  = path.join(__dirname, 'data');
+const isServerless    = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+// Su Vercel (serverless) il filesystem del bundle è in sola lettura: usiamo /tmp per le modifiche
+const dynamicDataPath = isServerless ? path.join('/tmp', 'cycle-place-data') : staticDataPath;
+
+const usersFile     = path.join(dynamicDataPath, 'users.json');
+const preferitiFile = path.join(dynamicDataPath, 'preferiti.json');
+const segFile       = path.join(dynamicDataPath, 'segnalazioni.json');
+
+// Inizializzazione automatica per prevenire errori su installazioni pulite, deploy cloud o serverless
+function ensureDataFiles() {
+    try {
+        if (!fs.existsSync(dynamicDataPath)) {
+            fs.mkdirSync(dynamicDataPath, { recursive: true });
+        }
+        if (!fs.existsSync(usersFile)) {
+            const seed = path.join(staticDataPath, 'users.json');
+            if (fs.existsSync(seed)) fs.copyFileSync(seed, usersFile);
+            else fs.writeFileSync(usersFile, '[]', 'utf8');
+        }
+        if (!fs.existsSync(preferitiFile)) {
+            const seed = path.join(staticDataPath, 'preferiti.json');
+            if (fs.existsSync(seed)) fs.copyFileSync(seed, preferitiFile);
+            else fs.writeFileSync(preferitiFile, '{}', 'utf8');
+        }
+        if (!fs.existsSync(segFile)) {
+            const seed = path.join(staticDataPath, 'segnalazioni.json');
+            if (fs.existsSync(seed)) fs.copyFileSync(seed, segFile);
+            else fs.writeFileSync(segFile, '[]', 'utf8');
+        }
+    } catch (e) {
+        console.warn('[Data Init] Impossibile inizializzare file data:', e.message);
+    }
+}
+ensureDataFiles();
 
 // --- Helpers I/O ---
 const readJsonFile = (filePath, callback) => {
@@ -109,6 +193,13 @@ const writeJsonFile = (filePath, data, callback) => {
 let mailTransporter = null;
 async function getMailTransporter() {
     if (mailTransporter) return mailTransporter;
+    // In ambiente di test usiamo jsonTransport per evitare chiamate SMTP esterne e blocchi
+    if (process.env.NODE_ENV === 'test') {
+        mailTransporter = nodemailer.createTransport({
+            jsonTransport: true
+        });
+        return mailTransporter;
+    }
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
         mailTransporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -148,7 +239,7 @@ async function getMailTransporter() {
 // =======================================================
 
 app.get('/api/v1/rastrelliere', (req, res) => {
-    readJsonFile(path.join(dataPath, 'rastrelliere.geojson'), (err, data) => {
+    readJsonFile(path.join(staticDataPath, 'rastrelliere.geojson'), (err, data) => {
         if (err) {
             console.error('[API] Errore lettura rastrelliere:', err.message);
             return res.status(500).json({ error: 'Errore nella lettura delle rastrelliere: ' + err.message });
@@ -174,7 +265,7 @@ app.get('/api/v1/rastrelliere', (req, res) => {
 
 
 app.get('/api/v1/parcheggi', (req, res) => {
-    readJsonFile(path.join(dataPath, 'parcheggi.geojson'), (err, data) => {
+    readJsonFile(path.join(staticDataPath, 'parcheggi.geojson'), (err, data) => {
         if (err) {
             console.error('[API] Errore lettura parcheggi:', err.message);
             return res.status(500).json({ error: 'Errore nella lettura dei parcheggi: ' + err.message });
@@ -241,14 +332,18 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Regex: Minimo 8 caratteri, almeno una maiuscola, almeno un numero e almeno un carattere speciale
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 
-app.post('/api/v1/register', (req, res) => {
-    const { name, surname, email, password } = req.body;
+app.post('/api/v1/register', authLimiter, async (req, res) => {
+    const { name, surname, email, password, privacyAccepted } = req.body;
     if (!name || !surname || !email || !password) {
         return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
     }
 
-    const trimmedName = String(name).trim();
-    const trimmedSurname = String(surname).trim();
+    if (privacyAccepted === false) {
+        return res.status(400).json({ error: 'È necessario accettare i Termini e l\'Informativa sulla Privacy' });
+    }
+
+    const trimmedName = sanitizeString(String(name).trim());
+    const trimmedSurname = sanitizeString(String(surname).trim());
     const trimmedEmail = String(email).trim().toLowerCase();
     const cleanPassword = String(password);
 
@@ -267,36 +362,31 @@ app.post('/api/v1/register', (req, res) => {
         });
     }
 
-    readJsonFile(usersFile, async (err, users) => {
-        if (err) users = [];
-        if (users.find(u => u.email && u.email.toLowerCase() === trimmedEmail)) {
+    try {
+        const existing = await db.findUserByEmail(trimmedEmail);
+        if (existing) {
             return res.status(409).json({ error: 'Utente già registrato con questa email' });
         }
 
-        try {
-            // Hashing sicuro della password prima di salvarla
-            const hashedPassword = await bcrypt.hash(cleanPassword, SALT_ROUNDS);
+        const hashedPassword = await bcrypt.hash(cleanPassword, SALT_ROUNDS);
+        await db.createUser({
+            id: Date.now().toString(),
+            name: trimmedName,
+            surname: trimmedSurname,
+            email: trimmedEmail,
+            password: hashedPassword,
+            privacyAccepted: privacyAccepted !== undefined ? Boolean(privacyAccepted) : true,
+            createdAt: new Date().toISOString()
+        });
 
-            users.push({
-                id: Date.now().toString(),
-                name: trimmedName,
-                surname: trimmedSurname,
-                email: trimmedEmail,
-                password: hashedPassword
-            });
-
-            writeJsonFile(usersFile, users, werr => {
-                if (werr) return res.status(500).json({ error: 'Errore nel salvataggio utente' });
-                res.status(201).json({ message: 'Registrazione completata con successo' });
-            });
-        } catch (hashErr) {
-            console.error('[Bcrypt] Errore hashing:', hashErr);
-            return res.status(500).json({ error: 'Errore interno durante la registrazione' });
-        }
-    });
+        res.status(201).json({ message: 'Registrazione completata con successo' });
+    } catch (hashErr) {
+        console.error('[Register] Errore registrazione:', hashErr);
+        return res.status(500).json({ error: 'Errore interno durante la registrazione' });
+    }
 });
 
-app.post('/api/v1/login', authLimiter, (req, res) => {
+app.post('/api/v1/login', authLimiter, async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ error: 'Email e password sono obbligatorie' });
@@ -309,84 +399,72 @@ app.post('/api/v1/login', authLimiter, (req, res) => {
         return res.status(400).json({ error: 'Formato email non valido' });
     }
 
-    readJsonFile(usersFile, async (err, users) => {
-        if (err) return res.status(500).json({ error: 'Errore interno del server' });
-        
-        // 1. Cerca l'utente tramite email
-        const user = users.find(u => u.email && u.email.toLowerCase() === trimmedEmail);
+    try {
+        const user = await db.findUserByEmail(trimmedEmail);
         if (!user) {
             return res.status(401).json({ error: 'Credenziali non valide. Controlla email e password.' });
         }
 
-        try {
-            // 2. Confronta la password con l'hash memorizzato
-            const isMatch = await bcrypt.compare(cleanPassword, user.password);
-            if (!isMatch) {
-                return res.status(401).json({ error: 'Credenziali non valide. Controlla email e password.' });
-            }
-
-            // 3. Genera Access Token (15m) e Refresh Token (30d)
-            const accessToken = jwt.sign(
-                { sub: user.id, email: user.email, name: user.name, surname: user.surname, provider: 'local' }, 
-                JWT_SECRET, 
-                { expiresIn: '15m' }
-            );
-            const refreshToken = jwt.sign(
-                { id: user.id }, 
-                JWT_REFRESH_SECRET, 
-                { expiresIn: '30d' }
-            );
-            
-            // 4. Salva il refresh token su file formattato come hash SHA-256 (FIX)
-            const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
-            user.refreshToken = hashedRefreshToken;
-            writeJsonFile(usersFile, users, (werr) => {
-                if (werr) return res.status(500).json({ error: 'Errore nel salvataggio della sessione' });
-            
-                res.status(200).json({ 
-                    message: "Login effettuato",
-                    accessToken,
-                    token: accessToken,
-                    refreshToken,
-                    user: { name: user.name, surname: user.surname, email: user.email } 
-                });
-            });
-        } catch (compareErr) {
-            console.error('[Bcrypt] Errore verifica password:', compareErr);
-            return res.status(500).json({ error: 'Errore durante la verifica delle credenziali' });
+        const isMatch = await bcrypt.compare(cleanPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Credenziali non valide. Controlla email e password.' });
         }
-    });
+
+        // Genera Access Token (15m) e Refresh Token (30d)
+        const accessToken = jwt.sign(
+            { sub: user.id, email: user.email, name: user.name, surname: user.surname, provider: 'local' }, 
+            JWT_SECRET, 
+            { expiresIn: '15m' }
+        );
+        const refreshToken = jwt.sign(
+            { id: user.id }, 
+            JWT_REFRESH_SECRET, 
+            { expiresIn: '30d' }
+        );
+        
+        const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
+        await db.updateUser(user.id, { refreshToken: hashedRefreshToken });
+
+        res.status(200).json({ 
+            message: "Login effettuato",
+            accessToken,
+            token: accessToken,
+            refreshToken,
+            user: { name: user.name, surname: user.surname, email: user.email } 
+        });
+    } catch (err) {
+        console.error('[Login] Errore login:', err);
+        return res.status(500).json({ error: 'Errore durante la verifica delle credenziali' });
+    }
 });
 
 app.post('/api/v1/refresh-token', (req, res) => {
     const { refreshToken } = req.body;
     if (!refreshToken) return res.status(401).json({ error: "Token mancante" });
 
-    jwt.verify(refreshToken, JWT_REFRESH_SECRET, (err, decoded) => {
+    jwt.verify(refreshToken, JWT_REFRESH_SECRET, async (err, decoded) => {
         if (err) return res.status(403).json({ error: "Token non valido o scaduto" });
 
-        readJsonFile(usersFile, (uErr, users) => {
-            if (uErr) return res.status(500).json({ error: "Errore lettura database utenti" });
-
-            const user = users.find(u => u.id === decoded.id);
+        try {
+            const user = await db.findUserById(decoded.id);
             if (!user || !user.refreshToken) {
                 return res.status(403).json({ error: "Nessuna sessione attiva o sessione invalidata" });
             }
 
-            // Applica l'hashing al token in ingresso e confrontalo con quello salvato
             const hashedInput = crypto.createHash('sha256').update(refreshToken).digest('hex');
             if (user.refreshToken !== hashedInput) {
                 return res.status(403).json({ error: "Sessione invalidata da un nuovo login" });
             }
 
-            // Genera nuovo Access Token a 15 minuti
             const newAccessToken = jwt.sign(
                 { sub: user.id, email: user.email, name: user.name, surname: user.surname, provider: 'local' }, 
                 JWT_SECRET, 
                 { expiresIn: '15m' }
             );
             res.status(200).json({ accessToken: newAccessToken, token: newAccessToken });
-        });
+        } catch (e) {
+            return res.status(500).json({ error: "Errore lettura database utenti" });
+        }
     });
 });
 
@@ -459,7 +537,7 @@ const RESET_RESPONSES = {
     }
 };
 
-app.post('/api/v1/forgot-password', authLimiter, (req, res) => {
+app.post('/api/v1/forgot-password', authLimiter, async (req, res) => {
     const { email, lang } = req.body;
     const userLang = ['it', 'en', 'de'].includes(lang) ? lang : 'it';
     const tpl = EMAIL_TEMPLATES[userLang];
@@ -473,10 +551,8 @@ app.post('/api/v1/forgot-password', authLimiter, (req, res) => {
         return res.status(400).json({ error: userLang === 'en' ? 'Invalid email format' : (userLang === 'de' ? 'Ungültiges E-Mail-Format' : 'Formato email non valido') });
     }
 
-    readJsonFile(usersFile, async (err, users) => {
-        if (err) return res.status(500).json({ error: 'Errore interno del server' });
-
-        const user = users.find(u => u.email && u.email.toLowerCase() === trimmedEmail);
+    try {
+        const user = await db.findUserByEmail(trimmedEmail);
 
         // Anti-enumeration
         if (!user) {
@@ -492,96 +568,96 @@ app.post('/api/v1/forgot-password', authLimiter, (req, res) => {
         const token = crypto.randomBytes(32).toString('hex');
         const expires = Date.now() + 3600000; // 1 ora di validità
 
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = expires;
-
-        writeJsonFile(usersFile, users, async (werr) => {
-            if (werr) return res.status(500).json({ error: 'Errore durante il salvataggio della richiesta' });
-
-            const host = req.get('host');
-            const protocol = req.protocol;
-            const resetLink = `${protocol}://${host}/?action=reset-password&token=${token}&lang=${userLang}`;
-
-            try {
-                const transporter = await getMailTransporter();
-                const info = await transporter.sendMail({
-                    from: process.env.SMTP_FROM || '"Cycle Place" <noreply@cycleplace.it>',
-                    to: trimmedEmail,
-                    subject: tpl.subject,
-                    text: tpl.textMsg(user.name, resetLink),
-                    html: `
-                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; border-radius: 16px; background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                            <div style="text-align: center; margin-bottom: 20px;">
-                                <h1 style="color: #0284c7; margin: 0; font-size: 22px;">${tpl.title}</h1>
-                                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 13px;">${tpl.subtitle}</p>
-                            </div>
-                            <div style="background-color: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                                <h2 style="color: #1e293b; font-size: 17px; margin-top: 0;">${tpl.heading}</h2>
-                                <p style="color: #475569; font-size: 14px; line-height: 1.6;">
-                                    ${tpl.greeting(user.name)}<br>
-                                    ${tpl.body}
-                                </p>
-                                <div style="text-align: center; margin: 28px 0;">
-                                    <a href="${resetLink}" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; padding: 12px 28px; border-radius: 9999px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
-                                        ${tpl.button}
-                                    </a>
-                                </div>
-                                <p style="color: #64748b; font-size: 12px; line-height: 1.5;">
-                                    ${tpl.expiry}<br>
-                                    <a href="${resetLink}" style="color: #0284c7; word-break: break-all;">${resetLink}</a>
-                                </p>
-                                <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 20px 0;">
-                                <p style="color: #94a3b8; font-size: 11px; margin: 0;">
-                                    ${tpl.disclaimer}
-                                </p>
-                            </div>
-                        </div>
-                    `
-                });
-
-                const previewUrl = nodemailer.getTestMessageUrl(info);
-                if (previewUrl) {
-                    console.log(`[Email - ${userLang.toUpperCase()}] ✉️ Anteprima Ethereal per`, trimmedEmail, ':', previewUrl);
-                }
-                console.log(`[Email - ${userLang.toUpperCase()}] Link di reset per ${trimmedEmail}: ${resetLink}`);
-
-                res.status(200).json({
-                    message: tpl.apiMsg,
-                    previewUrl: previewUrl || null
-                });
-            } catch (mailErr) {
-                console.error('[Email] Errore invio:', mailErr.message);
-                console.log(`[Email] Link diretto di emergenza (per sviluppo locale): ${resetLink}`);
-                res.status(200).json({
-                    message: tpl.apiMsg,
-                    previewUrl: null
-                });
-            }
+        await db.updateUser(user.id, {
+            resetPasswordToken: token,
+            resetPasswordExpires: expires
         });
-    });
+
+        const host = req.get('host');
+        const protocol = req.protocol;
+        const resetLink = `${protocol}://${host}/?action=reset-password&token=${token}&lang=${userLang}`;
+
+        try {
+            const transporter = await getMailTransporter();
+            const info = await transporter.sendMail({
+                from: process.env.SMTP_FROM || '"Cycle Place" <noreply@cycleplace.it>',
+                to: trimmedEmail,
+                subject: tpl.subject,
+                text: tpl.textMsg(user.name, resetLink),
+                html: `
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; border-radius: 16px; background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h1 style="color: #0284c7; margin: 0; font-size: 22px;">${tpl.title}</h1>
+                            <p style="color: #64748b; margin: 4px 0 0 0; font-size: 13px;">${tpl.subtitle}</p>
+                        </div>
+                        <div style="background-color: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                            <h2 style="color: #1e293b; font-size: 17px; margin-top: 0;">${tpl.heading}</h2>
+                            <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+                                ${tpl.greeting(user.name)}<br>
+                                ${tpl.body}
+                            </p>
+                            <div style="text-align: center; margin: 28px 0;">
+                                <a href="${resetLink}" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; padding: 12px 28px; border-radius: 9999px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
+                                    ${tpl.button}
+                                </a>
+                            </div>
+                            <p style="color: #64748b; font-size: 12px; line-height: 1.5;">
+                                ${tpl.expiry}<br>
+                                <a href="${resetLink}" style="color: #0284c7; word-break: break-all;">${resetLink}</a>
+                            </p>
+                            <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 20px 0;">
+                            <p style="color: #94a3b8; font-size: 11px; margin: 0;">
+                                ${tpl.disclaimer}
+                            </p>
+                        </div>
+                    </div>
+                `
+            });
+
+            const previewUrl = nodemailer.getTestMessageUrl(info);
+            if (previewUrl) {
+                console.log(`[Email - ${userLang.toUpperCase()}] ✉️ Anteprima Ethereal per`, trimmedEmail, ':', previewUrl);
+            }
+            console.log(`[Email - ${userLang.toUpperCase()}] Link di reset per ${trimmedEmail}: ${resetLink}`);
+
+            res.status(200).json({
+                message: tpl.apiMsg,
+                previewUrl: previewUrl || null
+            });
+        } catch (mailErr) {
+            console.error('[Email] Errore invio:', mailErr.message);
+            console.log(`[Email] Link diretto di emergenza (per sviluppo locale): ${resetLink}`);
+            res.status(200).json({
+                message: tpl.apiMsg,
+                previewUrl: null
+            });
+        }
+    } catch (err) {
+        console.error('[Forgot Password] Errore:', err);
+        return res.status(500).json({ error: 'Errore interno del server' });
+    }
 });
 
-app.get('/api/v1/verify-reset-token', (req, res) => {
+app.get('/api/v1/verify-reset-token', async (req, res) => {
     const { token } = req.query;
     if (!token) {
         return res.status(400).json({ valid: false, error: 'Token mancante' });
     }
 
-    readJsonFile(usersFile, (err, users) => {
-        if (err) return res.status(500).json({ valid: false, error: 'Errore interno del server' });
-
+    try {
+        const user = await db.findUserByResetToken(token);
         const now = Date.now();
-        const user = users.find(u => u.resetPasswordToken === token && u.resetPasswordExpires && u.resetPasswordExpires > now);
-
-        if (!user) {
+        if (!user || !user.resetPasswordExpires || user.resetPasswordExpires <= now) {
             return res.status(400).json({ valid: false, error: 'Link di recupero non valido o scaduto.' });
         }
 
         res.status(200).json({ valid: true, email: user.email });
-    });
+    } catch (err) {
+        return res.status(500).json({ valid: false, error: 'Errore interno del server' });
+    }
 });
 
-app.post('/api/v1/reset-password', authLimiter, (req, res) => {
+app.post('/api/v1/reset-password', authLimiter, async (req, res) => {
     const { token, newPassword, lang } = req.body;
     const userLang = ['it', 'en', 'de'].includes(lang) ? lang : 'it';
     const rMsg = RESET_RESPONSES[userLang];
@@ -595,42 +671,33 @@ app.post('/api/v1/reset-password', authLimiter, (req, res) => {
         return res.status(400).json({ error: rMsg.tooShort });
     }
 
-    readJsonFile(usersFile, async (err, users) => {
-        if (err) return res.status(500).json({ error: 'Errore interno del server' });
-
+    try {
+        const user = await db.findUserByResetToken(token);
         const now = Date.now();
-        const user = users.find(u => u.resetPasswordToken === token && u.resetPasswordExpires && u.resetPasswordExpires > now);
-
-        if (!user) {
+        if (!user || !user.resetPasswordExpires || user.resetPasswordExpires <= now) {
             return res.status(400).json({ error: rMsg.invalid });
         }
 
-        try {
-            const hashedPassword = await bcrypt.hash(cleanPassword, SALT_ROUNDS);
-            user.password = hashedPassword;
-            delete user.resetPasswordToken;
-            delete user.resetPasswordExpires;
-            delete user.refreshToken;
+        const hashedPassword = await bcrypt.hash(cleanPassword, SALT_ROUNDS);
+        await db.updateUser(user.id, {
+            password: hashedPassword,
+            resetPasswordToken: null,
+            resetPasswordExpires: null,
+            refreshToken: null
+        });
 
-            writeJsonFile(usersFile, users, (werr) => {
-                if (werr) return res.status(500).json({ error: 'Errore durante il salvataggio della password' });
-
-                res.status(200).json({
-                    message: rMsg.success
-                });
-            });
-        } catch (hashErr) {
-            console.error('[Bcrypt] Errore hashing password:', hashErr);
-            return res.status(500).json({ error: 'Errore durante l\'aggiornamento della password' });
-        }
-    });
+        res.status(200).json({ message: rMsg.success });
+    } catch (hashErr) {
+        console.error('[Bcrypt] Errore hashing password:', hashErr);
+        return res.status(500).json({ error: 'Errore durante l\'aggiornamento della password' });
+    }
 });
 
 // =======================================================
 // API: Google SSO
 // =======================================================
 
-app.post('/api/v1/auth/google', async (req, res) => {
+app.post('/api/v1/auth/google', authLimiter, async (req, res) => {
     const { credential } = req.body;
     if (!credential) return res.status(400).json({ error: 'Token Google mancante' });
     if (!GOOGLE_CLIENT_ID) return res.status(500).json({ error: 'Google Client ID non configurato sul server' });
@@ -646,57 +713,48 @@ app.post('/api/v1/auth/google', async (req, res) => {
         const surname = payload['family_name'] || '';
         const picture = payload['picture'] || '';
 
-        readJsonFile(usersFile, (err, users) => {
-            if (err) users = [];
+        let user = await db.findUserByGoogleId(googleId);
+        if (!user && email) {
+            user = await db.findUserByEmail(email);
+        }
 
-            // Cerca utente esistente per googleId o email
-            let user = users.find(u => (u.googleId && u.googleId === googleId) || (u.email && u.email.toLowerCase() === email));
-
-            if (user) {
-                // Collega googleId se non presente e aggiorna informazioni profilo
-                user.googleId = googleId;
-                if (!user.name && name) user.name = name;
-                if (!user.surname && surname) user.surname = surname;
-                if (picture) user.picture = picture;
-            } else {
-                // Crea nuovo profilo utente federato Google
-                user = {
-                    id: Date.now().toString(),
-                    googleId: googleId,
-                    name: name,
-                    surname: surname,
-                    email: email,
-                    picture: picture
-                };
-                users.push(user);
-            }
-
-            writeJsonFile(usersFile, users, (werr) => {
-                if (werr) {
-                    console.error('[Google SSO] Errore salvataggio utente:', werr);
-                    return res.status(500).json({ error: 'Errore durante il salvataggio dei dati utente' });
-                }
-
-                const token = jwt.sign({
-                    sub: user.id,
-                    googleId: googleId,
-                    email: user.email,
-                    name: user.name,
-                    surname: user.surname,
-                    picture: user.picture || picture,
-                    provider: 'google'
-                }, JWT_SECRET, { expiresIn: '24h' });
-
-                res.status(200).json({
-                    token,
-                    user: {
-                        name: user.name,
-                        surname: user.surname,
-                        email: user.email,
-                        picture: user.picture || picture
-                    }
-                });
+        if (user) {
+            const updates = { googleId };
+            if (!user.name && name) updates.name = name;
+            if (!user.surname && surname) updates.surname = surname;
+            if (picture) updates.picture = picture;
+            user = await db.updateUser(user.id, updates);
+        } else {
+            user = await db.createUser({
+                id: Date.now().toString(),
+                googleId: googleId,
+                name: name,
+                surname: surname,
+                email: email,
+                picture: picture,
+                privacyAccepted: true,
+                createdAt: new Date().toISOString()
             });
+        }
+
+        const token = jwt.sign({
+            sub: user.id,
+            googleId: googleId,
+            email: user.email,
+            name: user.name,
+            surname: user.surname,
+            picture: user.picture || picture,
+            provider: 'google'
+        }, JWT_SECRET, { expiresIn: '24h' });
+
+        res.status(200).json({
+            token,
+            user: {
+                name: user.name,
+                surname: user.surname,
+                email: user.email,
+                picture: user.picture || picture
+            }
         });
     } catch (error) {
         console.error('[Google SSO] Errore verifica token:', error.message);
@@ -718,83 +776,98 @@ app.get('/api/v1/user/me', tokenChecker, (req, res) => {
 
 // --- Preferiti ---
 
-app.get('/api/v1/user/preferiti', tokenChecker, (req, res) => {
-    readJsonFile(preferitiFile, (err, data) => {
-        if (err) data = {};
-        const preferiti = data[req.user.sub] || (req.user.googleId && data[req.user.googleId]) || [];
+app.get('/api/v1/user/preferiti', tokenChecker, async (req, res) => {
+    try {
+        let preferiti = await db.getPreferitiByUser(req.user.sub);
+        if (preferiti.length === 0 && req.user.googleId) {
+            const googlePrefs = await db.getPreferitiByUser(req.user.googleId);
+            if (googlePrefs.length > 0) preferiti = googlePrefs;
+        }
         res.status(200).json({ preferiti });
-    });
+    } catch (e) {
+        console.error('[Preferiti] Errore lettura preferiti:', e);
+        res.status(500).json({ error: 'Errore lettura preferiti' });
+    }
 });
 
-app.post('/api/v1/user/preferiti', tokenChecker, (req, res) => {
+app.post('/api/v1/user/preferiti', tokenChecker, async (req, res) => {
     const { rastrellieraId, tipologia, stalli, zona, lat, lng } = req.body;
     if (rastrellieraId === undefined) return res.status(400).json({ error: 'rastrellieraId obbligatorio' });
 
-    readJsonFile(preferitiFile, (err, data) => {
-        if (err) data = {};
-        const uid = req.user.sub;
-        if (!data[uid]) data[uid] = [];
-        const numId = Number(rastrellieraId);
-        if (data[uid].find(f => Number(f.id) === numId || f.id === rastrellieraId))
-            return res.status(409).json({ error: 'Già nei preferiti' });
-
-        data[uid].push({ id: numId, tipologia, stalli, zona, lat, lng, savedAt: new Date().toISOString() });
-        writeJsonFile(preferitiFile, data, werr => {
-            if (werr) return res.status(500).json({ error: 'Errore salvataggio preferiti' });
-            res.status(201).json({ message: 'Aggiunto ai preferiti' });
+    try {
+        const added = await db.addPreferito(req.user.sub, {
+            id: Number(rastrellieraId),
+            tipologia,
+            stalli,
+            zona,
+            lat,
+            lng,
+            savedAt: new Date().toISOString()
         });
-    });
+
+        if (!added) {
+            return res.status(409).json({ error: 'Già nei preferiti' });
+        }
+        res.status(201).json({ message: 'Aggiunto ai preferiti' });
+    } catch (e) {
+        console.error('[Preferiti] Errore salvataggio:', e);
+        res.status(500).json({ error: 'Errore salvataggio preferiti' });
+    }
 });
 
-app.delete('/api/v1/user/preferiti/:id', tokenChecker, (req, res) => {
+app.delete('/api/v1/user/preferiti/:id', tokenChecker, async (req, res) => {
     const id = parseInt(req.params.id, 10);
-    readJsonFile(preferitiFile, (err, data) => {
-        if (err) return res.status(500).json({ error: 'Errore lettura preferiti' });
-        const uid = req.user.sub;
-        if (!data[uid]) return res.status(404).json({ error: 'Nessun preferito trovato' });
-        data[uid] = data[uid].filter(f => Number(f.id) !== id && f.id !== req.params.id);
-        writeJsonFile(preferitiFile, data, werr => {
-            if (werr) return res.status(500).json({ error: 'Errore salvataggio' });
-            res.status(200).json({ message: 'Rimosso dai preferiti' });
-        });
-    });
+    try {
+        const removed = await db.removePreferito(req.user.sub, id);
+        if (!removed && req.user.googleId) {
+            const removedG = await db.removePreferito(req.user.googleId, id);
+            if (removedG) return res.status(200).json({ message: 'Rimosso dai preferiti' });
+        }
+        if (!removed) {
+            const current = await db.getPreferitiByUser(req.user.sub);
+            if (!current || current.length === 0) {
+                return res.status(404).json({ error: 'Nessun preferito trovato' });
+            }
+        }
+        res.status(200).json({ message: 'Rimosso dai preferiti' });
+    } catch (e) {
+        console.error('[Preferiti] Errore rimozione:', e);
+        res.status(500).json({ error: 'Errore salvataggio' });
+    }
 });
 
 // =======================================================
 // API: Aggiornamento Profilo, Password e Notifiche (RF 3.2, RF 3.3)
 // =======================================================
-app.put('/api/v1/user/profile', tokenChecker, (req, res) => {
-    const { name, surname, currentPassword, newPassword, notificheEmail} = req.body;
+app.put('/api/v1/user/profile', tokenChecker, async (req, res) => {
+    const { name, surname, currentPassword, newPassword, notificheEmail } = req.body;
     const userId = req.user.sub;
     const userEmail = req.user.email ? req.user.email.toLowerCase().trim() : null;
     const userGoogleId = req.user.googleId || (req.user.provider === 'google' ? req.user.sub : null);
 
-    readJsonFile(usersFile, async (err, users) => {
-        if (err) return res.status(500).json({ error: 'Errore nella lettura del database utenti' });
-        
-        const userIndex = users.findIndex(u => 
-            u.id === userId || 
-            (u.googleId && (u.googleId === userId || (userGoogleId && u.googleId === userGoogleId))) ||
-            (userEmail && u.email && u.email.toLowerCase() === userEmail)
-        );
-        if (userIndex === -1) {
+    try {
+        let user = await db.findUserById(userId);
+        if (!user && userGoogleId) user = await db.findUserByGoogleId(userGoogleId);
+        if (!user && userEmail) user = await db.findUserByEmail(userEmail);
+
+        if (!user) {
             return res.status(404).json({ error: 'Utente non trovato' });
         }
 
-        const user = users[userIndex];
+        const updates = {};
 
         // 1. Aggiornamento Anagrafica di base
         if (name && String(name).trim().length >= 2) {
-            user.name = String(name).trim();
+            updates.name = String(name).trim();
         }
         if (surname && String(surname).trim().length >= 2) {
-            user.surname = String(surname).trim();
+            updates.surname = String(surname).trim();
         }
 
         // 2. Aggiornamento Preferenze Notifiche
         if (notificheEmail !== undefined) {
-            user.notifiche = {
-                email: notificheEmail !== undefined ? Boolean(notificheEmail) : (user.notifiche?.email ?? true),
+            updates.notifiche = {
+                email: Boolean(notificheEmail)
             };
         }
 
@@ -808,175 +881,125 @@ app.put('/api/v1/user/profile', tokenChecker, (req, res) => {
                 return res.status(400).json({ error: 'Inserisci la password attuale per confermare la modifica' });
             }
 
-            try {
-                const isMatch = await bcrypt.compare(String(currentPassword), user.password);
-                if (!isMatch) {
-                    return res.status(401).json({ error: 'La password attuale non è corretta' });
-                }
-
-                const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
-                if (!PASSWORD_REGEX.test(String(newPassword))) {
-                    return res.status(400).json({ 
-                        error: 'La nuova password deve contenere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale' 
-                    });
-                }
-
-                user.password = await bcrypt.hash(String(newPassword), SALT_ROUNDS);
-            } catch (pErr) {
-                console.error('[Profile Update] Errore cambio password:', pErr);
-                return res.status(500).json({ error: 'Errore durante la modifica della password' });
+            const isMatch = await bcrypt.compare(String(currentPassword), user.password);
+            if (!isMatch) {
+                return res.status(401).json({ error: 'La password attuale non è corretta' });
             }
+
+            const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+            if (!PASSWORD_REGEX.test(String(newPassword))) {
+                return res.status(400).json({ 
+                    error: 'La nuova password deve contenere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale' 
+                });
+            }
+
+            updates.password = await bcrypt.hash(String(newPassword), SALT_ROUNDS);
         }
 
-        users[userIndex] = user;
+        const updatedUser = await db.updateUser(user.id, updates);
 
-        writeJsonFile(usersFile, users, werr => {
-            if (werr) return res.status(500).json({ error: 'Errore nel salvataggio del profilo' });
+        // Genera nuovo JWT aggiornato con i nuovi dati anagrafici
+        const newToken = jwt.sign(
+            { sub: updatedUser.id, email: updatedUser.email, name: updatedUser.name, surname: updatedUser.surname, provider: updatedUser.password ? 'local' : 'google' },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
 
-            // Genera nuovo JWT aggiornato con i nuovi dati anagrafici
-            const newToken = jwt.sign(
-                { sub: user.id, email: user.email, name: user.name, surname: user.surname, provider: user.password ? 'local' : 'google' },
-                JWT_SECRET,
-                { expiresIn: '24h' }
-            );
-
-            res.status(200).json({
-                message: 'Profilo aggiornato con successo',
-                token: newToken,
-                user: {
-                    name: user.name,
-                    surname: user.surname,
-                    email: user.email,
-                    notifiche: user.notifiche || { email: true }
-                }
-            });
+        res.status(200).json({
+            message: 'Profilo aggiornato con successo',
+            token: newToken,
+            user: {
+                name: updatedUser.name,
+                surname: updatedUser.surname,
+                email: updatedUser.email,
+                notifiche: updatedUser.notifiche || { email: true }
+            }
         });
-    });
+    } catch (pErr) {
+        console.error('[Profile Update] Errore modifica profilo:', pErr);
+        return res.status(500).json({ error: 'Errore durante la modifica del profilo' });
+    }
 });
 
 /**
  * DELETE /api/v1/user/account — RF 3.4 (Cancellazione definitiva Account GDPR)
- * Elimina l'utente dal database users.json e cancella tutte le sue segnalazioni e preferiti associati
+ * Elimina l'utente dal database e cancella tutte le sue segnalazioni e preferiti associati
  */
-app.delete('/api/v1/user/account', tokenChecker, (req, res) => {
+app.delete('/api/v1/user/account', tokenChecker, async (req, res) => {
     const userId = req.user.sub;
     const userEmail = req.user.email ? req.user.email.toLowerCase().trim() : null;
     const userGoogleId = req.user.googleId || (req.user.provider === 'google' ? req.user.sub : null);
 
-    readJsonFile(usersFile, (err, users) => {
-        if (err) return res.status(500).json({ error: 'Errore durante la lettura del database utenti' });
+    try {
+        let user = await db.findUserById(userId);
+        if (!user && userGoogleId) user = await db.findUserByGoogleId(userGoogleId);
+        if (!user && userEmail) user = await db.findUserByEmail(userEmail);
 
-        // Cerca l'utente per id primario, googleId, o email
-        const userIndex = users.findIndex(u => 
-            u.id === userId || 
-            (u.googleId && (u.googleId === userId || (userGoogleId && u.googleId === userGoogleId))) ||
-            (userEmail && u.email && u.email.toLowerCase() === userEmail)
-        );
-
-        if (userIndex === -1) {
+        if (!user) {
             return res.status(404).json({ error: 'Utente non trovato' });
         }
 
-        const targetUser = users[userIndex];
-        const associatedIds = new Set([
-            userId,
-            targetUser.id,
-            targetUser.googleId,
-            userGoogleId
-        ].filter(Boolean));
-
-        // Rimuovi l'utente dall'array
-        users.splice(userIndex, 1);
-
-        writeJsonFile(usersFile, users, (writeErr) => {
-            if (writeErr) return res.status(500).json({ error: 'Errore durante l\'eliminazione dell\'account' });
-
-            // GDPR Cleanup 1: Rimuovi le segnalazioni associate all'utente (per id, googleId ed email)
-            const segnalazioniFile = path.join(__dirname, 'data', 'segnalazioni.json');
-            readJsonFile(segnalazioniFile, (segErr, segnalazioni) => {
-                if (!segErr && Array.isArray(segnalazioni)) {
-                    const cleanSegnalazioni = segnalazioni.filter(s => {
-                        const matchesId = associatedIds.has(s.userId);
-                        const matchesEmail = targetUser.email && s.userEmail && s.userEmail.toLowerCase() === targetUser.email.toLowerCase();
-                        return !matchesId && !matchesEmail;
-                    });
-                    writeJsonFile(segnalazioniFile, cleanSegnalazioni, () => {});
-                }
-            });
-
-            // GDPR Cleanup 2: Rimuovi le posizioni preferite associate all'utente (per tutti gli ID associati)
-            const preferitiFile = path.join(__dirname, 'data', 'preferiti.json');
-            readJsonFile(preferitiFile, (prefErr, preferitiData) => {
-                if (!prefErr && preferitiData) {
-                    associatedIds.forEach(id => {
-                        delete preferitiData[id];
-                    });
-                    writeJsonFile(preferitiFile, preferitiData, () => {});
-                }
-            });
-
-            return res.json({ success: true, message: 'Account e dati personali eliminati definitivamente con successo.' });
-        });
-    });
+        await db.deleteUser(user.id);
+        return res.json({ success: true, message: 'Account e dati personali eliminati definitivamente con successo.' });
+    } catch (e) {
+        console.error('[Account Delete] Errore eliminazione account:', e);
+        return res.status(500).json({ error: 'Errore durante l\'eliminazione dell\'account' });
+    }
 });
 
 // =======================================================
 // API: Segnalazioni (protette da JWT)
 // =======================================================
 
-app.post('/api/v1/segnalazioni', segnalazioniLimiter, tokenChecker, (req, res) => {
+app.post('/api/v1/segnalazioni', segnalazioniLimiter, tokenChecker, async (req, res) => {
     const { rastrellieraId, tipo, note, lat, lng } = req.body;
     if (!rastrellieraId || !tipo)
         return res.status(400).json({ error: 'rastrellieraId e tipo sono obbligatori' });
 
-    readJsonFile(segFile, (err, data) => {
-        if (err) data = [];
+    try {
         const segnalazione = {
             id: `seg_${Date.now()}`,
             userId: req.user.sub,
             userEmail: req.user.email,
-            rastrellieraId,
+            rastrellieraId: Number(rastrellieraId),
             tipo,
-            note: note || '',
-            lat: lat || null,
-            lng: lng || null,
+            note: sanitizeString(note || '').slice(0, 500),
+            lat: lat ? Number(lat) : null,
+            lng: lng ? Number(lng) : null,
             timestamp: new Date().toISOString(),
             stato: 'inviata'
         };
-        data.push(segnalazione);
-        writeJsonFile(segFile, data, werr => {
-            if (werr) return res.status(500).json({ error: 'Errore salvataggio segnalazione' });
-            res.status(201).json({ message: 'Segnalazione inviata con successo', id: segnalazione.id });
-        });
-    });
+        await db.addSegnalazione(segnalazione);
+        res.status(201).json({ message: 'Segnalazione inviata con successo', id: segnalazione.id });
+    } catch (e) {
+        console.error('[Segnalazioni] Errore salvataggio:', e);
+        res.status(500).json({ error: 'Errore salvataggio segnalazione' });
+    }
 });
 
-app.get('/api/v1/segnalazioni/user', tokenChecker, (req, res) => {
-    readJsonFile(segFile, (err, data) => {
-        if (err) data = [];
-        res.status(200).json({ segnalazioni: data.filter(s => s.userId === req.user.sub || (req.user.googleId && s.userId === req.user.googleId)) });
-    });
+app.get('/api/v1/segnalazioni/user', tokenChecker, async (req, res) => {
+    try {
+        let userSegs = await db.getSegnalazioniByUser(req.user.sub);
+        if (userSegs.length === 0 && req.user.googleId) {
+            const gSegs = await db.getSegnalazioniByUser(req.user.googleId);
+            if (gSegs.length > 0) userSegs = gSegs;
+        }
+        res.status(200).json({ segnalazioni: userSegs });
+    } catch (e) {
+        console.error('[Segnalazioni] Errore recupero utente:', e);
+        res.status(500).json({ error: 'Errore recupero segnalazioni' });
+    }
 });
 
 // GET /api/v1/segnalazioni/recenti — Segnalazioni recenti pubbliche (ultime 48h)
-app.get('/api/v1/segnalazioni/recenti', (req, res) => {
-    readJsonFile(segFile, (err, data) => {
-        if (err || !Array.isArray(data)) return res.status(200).json({ segnalazioni: [] });
-        
-        const now = Date.now();
-        const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
-
-        // Filtra quelle recenti e non risolte, omettendo dati privati (userId, userEmail)
-        const recenti = data
-            .filter(s => s.stato !== 'risolta' && (now - new Date(s.timestamp).getTime()) < FORTY_EIGHT_HOURS)
-            .map(s => ({
-                rastrellieraId: s.rastrellieraId,
-                tipo: s.tipo,
-                timestamp: s.timestamp
-            }));
-
+app.get('/api/v1/segnalazioni/recenti', async (req, res) => {
+    try {
+        const recenti = await db.getSegnalazioniRecenti(48);
         res.status(200).json({ segnalazioni: recenti });
-    });
+    } catch (e) {
+        console.error('[Segnalazioni] Errore recupero recenti:', e);
+        res.status(200).json({ segnalazioni: [] });
+    }
 });
 
 // Helper per tradurre le manovre OSRM nei vari linguaggi supportati
@@ -1071,7 +1094,7 @@ async function fetchOsrmRoute(osrmMode, sLng, sLat, eLng, eLat, lang) {
     };
 }
 
-app.get('/api/v1/routing', async (req, res) => {
+app.get('/api/v1/routing', routingLimiter, async (req, res) => {
     const { startLat, startLng, endLat, endLng, profile } = req.query;
 
     if (!startLat || !startLng || !endLat || !endLng) {
@@ -1168,7 +1191,7 @@ app.get('*', (req, res) => {
 });
 
 let server = null;
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
     server = app.listen(PORT, () => {
         console.log(`\n🚲 Cycle Place → http://localhost:${PORT}`);
         console.log(`   Google SSO: ${GOOGLE_CLIENT_ID ? '✅ Configurato' : '⚠️  Non configurato'}`);

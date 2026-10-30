@@ -1,0 +1,11 @@
+[
+  {
+    "id": "1000000000001",
+    "name": "Demo",
+    "surname": "User",
+    "email": "demo@cycleplace.it",
+    "password": "$2b$10$YourHashedPasswordHere",
+    "privacyAccepted": true,
+    "createdAt": "2026-10-30T00:00:00.000Z"
+  }
+]

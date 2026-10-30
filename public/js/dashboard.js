@@ -48,6 +48,16 @@ function formatDate(iso) {
     });
 }
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // Cache dati per ri-render al cambio lingua
 let cachedPreferiti = [];
 let cachedSegnalazioni = [];
@@ -77,7 +87,7 @@ async function init() {
     function updateGreeting() {
         const dashGreetingText = document.getElementById('dash-greeting-text');
         if (dashGreetingText) {
-            dashGreetingText.innerHTML = tr('greeting', { name: `<strong style="color: #3b82f6 !important;">${user.name || 'Utente'}</strong>` });
+            dashGreetingText.innerHTML = tr('greeting', { name: `<strong style="color: #3b82f6 !important;">${escapeHtml(user.name || 'Utente')}</strong>` });
         }
     }
     
@@ -226,18 +236,20 @@ function renderPreferiti(items) {
         return;
     }
 
-    list.innerHTML = items.map(f => `
+    list.innerHTML = items.map(f => {
+        const safeZona = escapeHtml(f.zona || '');
+        return `
         <div class="list-item card bg-base-100/90 border border-base-300 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-shadow flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5" id="fav-${f.id}">
             <div class="list-item-info space-y-1">
                 <div class="font-bold text-slate-800 text-sm sm:text-base flex flex-wrap items-center gap-2">
                     ${f.tipologia === 'Parcheggio_protetto' 
-                        ? `<span><i class="fa-solid fa-shield-halved text-secondary"></i> ${f.zona || 'Parcheggio Protetto'}</span><span class="badge badge-sm badge-secondary text-white font-bold">Bici Box</span>` 
+                        ? `<span><i class="fa-solid fa-shield-halved text-secondary"></i> ${safeZona || 'Parcheggio Protetto'}</span><span class="badge badge-sm badge-secondary text-white font-bold">Bici Box</span>` 
                         : `<span><i class="fa-solid fa-bicycle text-primary"></i> ${tr('dash.rack')} #${f.id}</span>`}
                     ${f.stalli ? `<span class="badge badge-sm badge-stalli font-bold">(${f.stalli} ${tr('dash.stalli')})</span>` : ''}
                     ${f.tipologia === 'Rastr_bloccatelaio' ? '<span class="badge badge-sm badge-accent text-white font-bold">bloccatelaio</span>' : ''}
                 </div>
                 <div class="text-xs text-slate-500 flex flex-wrap items-center gap-2">
-                    <span><i class="fa-solid fa-location-dot text-slate-400"></i> ${tr('dash.zone')}: <strong>${f.zona || '—'}</strong></span>
+                    <span><i class="fa-solid fa-location-dot text-slate-400"></i> ${tr('dash.zone')}: <strong>${safeZona || '—'}</strong></span>
                     <span class="text-slate-300">•</span>
                     <span><i class="fa-regular fa-calendar text-slate-400"></i> ${tr('dash.savedOn')} ${formatDate(f.savedAt)}</span>
                 </div>
@@ -247,7 +259,8 @@ function renderPreferiti(items) {
                     <i class="fa-solid fa-trash-can"></i> <span>${tr('dash.remove')}</span>
                 </button>
             </div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 }
 
 async function rimuoviPreferito(id) {
@@ -313,7 +326,7 @@ function renderSegnalazioni(items) {
                 </div>
                 <div class="text-xs text-slate-500 flex flex-wrap items-center gap-2">
                     <span><i class="fa-regular fa-calendar text-slate-400"></i> ${formatDate(s.timestamp)}</span>
-                    ${s.note ? `<span class="text-slate-300">•</span> <span class="italic text-slate-600">"${s.note}"</span>` : ''}
+                    ${s.note ? `<span class="text-slate-300">•</span> <span class="italic text-slate-600">"${escapeHtml(s.note)}"</span>` : ''}
                 </div>
             </div>
             <div class="list-item-actions w-full sm:w-auto flex justify-start sm:justify-end">
@@ -511,6 +524,59 @@ if (btnConfirmDeleteAccount) {
             if (deleteAccountError) {
                 deleteAccountError.textContent = '❌ ' + err.message;
             }
+        }
+    });
+}
+
+// Gestione Modale Legale (Privacy Policy, Termini e Cookie)
+const legalModal = document.getElementById('legal-modal');
+
+function switchLegalTab(tabId) {
+    document.querySelectorAll('.legal-tab-btn').forEach(btn => {
+        const isTarget = btn.getAttribute('data-target') === tabId;
+        btn.classList.toggle('tab-active', isTarget);
+        btn.classList.toggle('bg-primary', isTarget);
+        btn.classList.toggle('text-white', isTarget);
+    });
+    document.querySelectorAll('.legal-pane').forEach(pane => {
+        pane.classList.toggle('hidden', pane.id !== tabId);
+    });
+}
+
+document.querySelectorAll('.legal-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-target');
+        if (target) switchLegalTab(target);
+    });
+});
+
+document.querySelectorAll('.btn-open-legal').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tab = btn.getAttribute('data-tab');
+        const targetTab = tab === 'terms' ? 'tab-terms' : (tab === 'cookies' ? 'tab-cookies' : 'tab-privacy');
+        switchLegalTab(targetTab);
+        if (legalModal) {
+            legalModal.classList.remove('hidden');
+            legalModal.classList.add('modal-open');
+        }
+    });
+});
+
+document.querySelectorAll('[data-modal="legal-modal"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (legalModal) {
+            legalModal.classList.remove('modal-open');
+            legalModal.classList.add('hidden');
+        }
+    });
+});
+
+if (legalModal) {
+    legalModal.addEventListener('click', (e) => {
+        if (e.target === legalModal) {
+            legalModal.classList.remove('modal-open');
+            legalModal.classList.add('hidden');
         }
     });
 }

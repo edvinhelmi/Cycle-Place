@@ -168,5 +168,55 @@
   "routing.inDistance": "Tra {dist}",
   "routing.voiceOn": "Indicazioni vocali attive",
   "routing.voiceOff": "Indicazioni vocali disattivate",
-  "routing.now": "Ora"
+  "routing.now": "Ora",
+
+  "cookie.bannerTitle": "Informativa su Cookie & Privacy",
+  "cookie.bannerText": "Cycle Place rispetta la tua privacy. Utilizziamo esclusivamente archiviazione tecnica (localStorage) per mantenere la sessione, memorizzare il tema grafico e la lingua, e connetterci ai servizi di mappe e meteo. Non usiamo cookie di tracciamento pubblicitario o profilazione commerciale.",
+  "cookie.accept": "Accetta e Continua",
+  "cookie.details": "Consulta Informativa",
+
+  "legal.title": "Informativa Legale, Privacy & Cookie",
+  "legal.tabPrivacy": "Privacy Policy (GDPR)",
+  "legal.tabTerms": "Termini di Servizio",
+  "legal.tabCookies": "Cookie & Archiviazione",
+  "legal.close": "Chiudi",
+
+  "auth.agreeTerms": "Ho letto e accetto i Termini di Servizio e l'Informativa sulla Privacy",
+  "auth.termsLink": "Termini di Servizio",
+  "auth.privacyLink": "Informativa sulla Privacy",
+  "auth.errMustAcceptTerms": "Devi accettare l'Informativa sulla Privacy e i Termini di Servizio per creare un account",
+
+  "footer.rights": "Tutti i diritti riservati. Dati aperti Comune di Trento & OpenStreetMap.",
+  "footer.privacy": "Privacy Policy",
+  "footer.terms": "Termini di Servizio",
+  "footer.cookies": "Cookie Policy",
+
+  "privacy.title": "Informativa sul Trattamento dei Dati Personali (GDPR)",
+  "privacy.subtitle": "Ai sensi degli artt. 13 e 14 del Regolamento UE 2016/679 (GDPR)",
+  "privacy.controller": "1. Titolare del Trattamento",
+  "privacy.controllerText": "Il titolare del trattamento è il team di Cycle Place (Trento, Italia). Per qualsiasi chiarimento in materia di protezione dati o esercizio dei diritti è possibile scrivere a: privacy@cycleplace.it.",
+  "privacy.dataCollected": "2. Categorie di Dati Trattati",
+  "privacy.dataCollectedText": "Cycle Place raccoglie e tratta unicamente i seguenti dati: (a) Dati dell'account: nome, cognome, indirizzo email e password protetta da cifratura crittografica (bcrypt); (b) Credenziali Google OAuth: identificativo Google univoco, nome ed email qualora si scelga l'autenticazione tramite Google Sign-In; (c) Geolocalizzazione GPS: rilevata in tempo reale solo previo tuo consenso esplicito nel browser per mostrarti la posizione sulla mappa e calcolare l'itinerario. Le coordinate non vengono salvate su server né cedute a terzi; (d) Dati di utilizzo: preferiti salvati e segnalazioni inviate (stato e note).",
+  "privacy.purposes": "3. Finalità e Basi Giuridiche",
+  "privacy.purposesText": "I dati sono trattati esclusivamente per: erogare le funzionalità del servizio (art. 6.1.b GDPR), gestire le segnalazioni per migliorare la sicurezza delle rastrelliere, e garantire la sicurezza dei sistemi contro tentativi di accesso non autorizzato o attacchi informatici (art. 6.1.f GDPR).",
+  "privacy.retention": "4. Conservazione e Cancellazione (Diritto all'Oblio)",
+  "privacy.retentionText": "I tuoi dati sono conservati fino a quando mantieni attivo il tuo account. Puoi cancellare il tuo account e tutti i dati a te associati in qualsiasi momento con effetto immediato tramite il pulsante 'Elimina Account' nella tua Dashboard.",
+  "privacy.rights": "5. Diritti dell'Interessato",
+  "privacy.rightsText": "Ai sensi degli artt. 15-22 del GDPR, puoi richiedere in ogni momento l'accesso, la rettifica, la cancellazione dei dati, la limitazione del trattamento o la portabilità, contattando il titolare del trattamento.",
+
+  "terms.title": "Termini e Condizioni di Utilizzo",
+  "terms.p1": "Benvenuto su Cycle Place. Utilizzando questo servizio accetti di rispettare i presenti Termini e Condizioni.",
+  "terms.p2": "1. Oggetto del Servizio: Cycle Place è una piattaforma creata per facilitare la mobilità sostenibile, mappando rastrelliere e parcheggi per biciclette nel Comune di Trento e offrendo calcolo percorsi e segnalazione anomalie.",
+  "terms.p3": "2. Esclusione di Responsabilità: Le informazioni sulle rastrelliere e sulla disponibilità sono fornite a titolo informativo. Cycle Place non è responsabile di furti, danneggiamenti di biciclette, incidenti stradali o infrazioni al Codice della Strada durante la navigazione.",
+  "terms.p4": "3. Condotta dell'Utente: È severamente vietato inserire segnalazioni false, diffamatorie o offensive, tentare di violare la sicurezza del server o utilizzare sistemi automatizzati per saturare o estrarre dati.",
+
+  "cookies.title": "Informativa sui Cookie e Archiviazione Locale",
+  "cookies.p1": "Cycle Place non utilizza cookie di profilazione pubblicitaria né strumenti di tracciamento commerciale.",
+  "cookies.p2": "Utilizziamo esclusivamente archiviazione tecnica (localStorage e sessionStorage del browser) strettamente necessaria al funzionamento dell'applicazione:",
+  "cookies.item1": "• tbp_jwt / tbp_refresh_jwt: token di sicurezza crittografati per mantenere aperta la tua sessione autenticata.",
+  "cookies.item2": "• tbp_theme: preferenza visiva del tema (chiaro/scuro).",
+  "cookies.item3": "• tbp_lang: preferenza della lingua di navigazione (Italiano, Inglese, Tedesco).",
+  "cookies.item4": "• tbp_cookie_consent: memorizzazione dell'avvenuta presa visione della presente informativa.",
+  "cookies.item5": "• tbp_offline_cache: salvataggio locale temporaneo dei dati cartografici per consentire la consultazione in caso di perdita momentanea del segnale internet.",
+  "cookies.thirdParty": "Servizi di terze parti: L'applicazione si integra con OpenStreetMap per le mappe cartografiche, Google Identity Services per l'eventuale accesso federato, OpenRouteService per il calcolo dei percorsi e Open-Meteo per le informazioni meteo."
 }

@@ -168,5 +168,55 @@
   "routing.inDistance": "In {dist}",
   "routing.voiceOn": "Sprachführung aktiviert",
   "routing.voiceOff": "Sprachführung deaktiviert",
-  "routing.now": "Jetzt"
+  "routing.now": "Jetzt",
+
+  "cookie.bannerTitle": "Hinweis zu Cookies & Datenschutz",
+  "cookie.bannerText": "Cycle Place respektiert Ihre Privatsphäre. Wir nutzen ausschließlich technische lokale Speicherung (localStorage) für Sitzung, Themen- und Spracheinstellungen sowie Karten- und Wetterdienste. Wir verwenden keine Werbe- oder Tracking-Cookies.",
+  "cookie.accept": "Akzeptieren & Weiter",
+  "cookie.details": "Richtlinie anzeigen",
+
+  "legal.title": "Rechtliche Hinweise, Datenschutz & Cookies",
+  "legal.tabPrivacy": "Datenschutzerklärung (DSGVO)",
+  "legal.tabTerms": "Nutzungsbedingungen",
+  "legal.tabCookies": "Cookies & Speicherung",
+  "legal.close": "Schließen",
+
+  "auth.agreeTerms": "Ich habe die Nutzungsbedingungen und die Datenschutzerklärung gelesen und akzeptiere sie",
+  "auth.termsLink": "Nutzungsbedingungen",
+  "auth.privacyLink": "Datenschutzerklärung",
+  "auth.errMustAcceptTerms": "Sie müssen die Datenschutzerklärung und die Nutzungsbedingungen akzeptieren, um ein Konto zu erstellen",
+
+  "footer.rights": "Alle Rechte vorbehalten. Open Data Stadt Trient & OpenStreetMap.",
+  "footer.privacy": "Datenschutz",
+  "footer.terms": "Nutzungsbedingungen",
+  "footer.cookies": "Cookie-Richtlinie",
+
+  "privacy.title": "Datenschutzerklärung & Verarbeitung personenbezogener Daten (DSGVO)",
+  "privacy.subtitle": "Gemäß Art. 13 und 14 der EU-Verordnung 2016/679 (DSGVO)",
+  "privacy.controller": "1. Verantwortlicher für die Datenverarbeitung",
+  "privacy.controllerText": "Verantwortlicher ist das Cycle Place Team (Trient, Italien). Bei Fragen zum Datenschutz oder zur Ausübung Ihrer Rechte schreiben Sie an: privacy@cycleplace.it.",
+  "privacy.dataCollected": "2. Verarbeitete Datenkategorien",
+  "privacy.dataCollectedText": "Cycle Place verarbeitet ausschließlich: (a) Kontodaten: Name, Nachname, E-Mail-Adresse und per bcrypt verschlüsseltes Passwort; (b) Google OAuth-Anmeldedaten: Google-ID, Name und E-Mail bei Google Sign-In; (c) GPS-Standort: Live-Position mit Ihrer Browser-Zustimmung zur Routenberechnung (wird nicht dauerhaft gespeichert); (d) Nutzungsdaten: gespeicherte Fahrradständer und gemeldete Probleme.",
+  "privacy.purposes": "3. Zwecke und Rechtsgrundlagen",
+  "privacy.purposesText": "Die Verarbeitung erfolgt zur Bereitstellung der Dienste (Art. 6 Abs. 1 lit. b DSGVO), Bearbeitung von Meldungen und Gewährleistung der Systemsicherheit gegen Angriffe (Art. 6 Abs. 1 lit. f DSGVO).",
+  "privacy.retention": "4. Speicherdauer & Löschung (Recht auf Vergessenwerden)",
+  "privacy.retentionText": "Ihre Daten werden nur gespeichert, solange Ihr Konto aktiv ist. Sie können Ihr Konto und alle zugehörigen Daten jederzeit mit sofortiger Wirkung über die Schaltfläche 'Konto löschen' im Dashboard entfernen.",
+  "privacy.rights": "5. Rechte der betroffenen Person",
+  "privacy.rightsText": "Gemäß Art. 15-22 DSGVO haben Sie jederzeit das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung oder Datenübertragbarkeit.",
+
+  "terms.title": "Allgemeine Nutzungsbedingungen",
+  "terms.p1": "Willkommen bei Cycle Place. Durch die Nutzung dieses Dienstes erklären Sie sich mit diesen Bedingungen einverstanden.",
+  "terms.p2": "1. Gegenstand des Dienstes: Cycle Place fördert nachhaltige Mobilität durch die Kartierung von Fahrradabstellplätzen in Trient sowie Routing und Schadensmeldungen.",
+  "terms.p3": "2. Haftungsausschluss: Alle Angaben dienen rein informativen Zwecken. Cycle Place haftet nicht für Diebstähle, Beschädigungen von Fahrrädern oder Unfälle während der Navigation.",
+  "terms.p4": "3. Nutzerverhalten: Falsche oder beleidigende Meldungen sowie unbefugte Angriffe auf das System sind strengstens untersagt.",
+
+  "cookies.title": "Hinweise zu Cookies & Lokaler Speicherung",
+  "cookies.p1": "Cycle Place verwendet keine Werbe- oder Profilierungs-Cookies.",
+  "cookies.p2": "Wir nutzen ausschließlich technische Speicherung (Browser localStorage & sessionStorage), die für den Betrieb zwingend erforderlich ist:",
+  "cookies.item1": "• tbp_jwt / tbp_refresh_jwt: verschlüsselte Sicherheitstoken für Ihre angemeldete Sitzung.",
+  "cookies.item2": "• tbp_theme: grafische Designpräferenz (hell/dunkel).",
+  "cookies.item3": "• tbp_lang: Sprachauswahl (Italienisch, Englisch, Deutsch).",
+  "cookies.item4": "• tbp_cookie_consent: Speicherung der Kenntnisnahme dieser Hinweise.",
+  "cookies.item5": "• tbp_offline_cache: Zwischenspeicherung von Geodaten bei vorübergehendem Signalverlust.",
+  "cookies.thirdParty": "Drittanbieter: Integriert sind OpenStreetMap für Kartendaten, Google Identity für Login, OpenRouteService für Routing und Open-Meteo für Wetterdaten."
 }

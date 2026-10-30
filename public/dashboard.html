@@ -13,6 +13,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard utente Cycle Place — Gestione profilo, preferiti e segnalazioni rastrelliere">
+    <meta name="theme-color" content="#0284c7">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <title>Dashboard — Cycle Place</title>
     <!-- FontAwesome Free (Locale & CDN Fallback) -->
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
@@ -237,6 +240,100 @@
             </div>
         </section>
     </main>
+
+    <!-- Footer Legale & Privacy -->
+    <footer class="w-full max-w-4xl mx-auto px-4 py-6 text-center text-xs text-slate-500 border-t border-base-300 mt-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span data-i18n="footer.rights">&copy; 2026 Cycle Place — Dati aperti Comune di Trento & OpenStreetMap</span>
+        <div class="flex items-center gap-3">
+            <button class="btn-open-legal hover:text-primary transition-colors cursor-pointer" data-tab="privacy" data-i18n="footer.privacy">Privacy Policy</button>
+            <span>&bull;</span>
+            <button class="btn-open-legal hover:text-primary transition-colors cursor-pointer" data-tab="terms" data-i18n="footer.terms">Termini</button>
+            <span>&bull;</span>
+            <button class="btn-open-legal hover:text-primary transition-colors cursor-pointer" data-tab="cookies" data-i18n="footer.cookies">Cookie</button>
+        </div>
+    </footer>
+
+    <!-- Modale Legale Unificata (Privacy Policy, Termini e Cookie) -->
+    <div id="legal-modal" class="modal hidden fixed inset-0 z-[4000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-3 sm:p-4" role="dialog" aria-modal="true">
+        <div class="modal-content glass-modal rounded-3xl p-5 sm:p-7 max-w-2xl w-full relative shadow-2xl max-h-[85vh] flex flex-col">
+            <button class="close btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-slate-500 hover:text-slate-800" data-modal="legal-modal" aria-label="Chiudi">&times;</button>
+            
+            <div class="flex items-center gap-2.5 pb-3 border-b border-base-200">
+                <i class="fa-solid fa-scale-balanced text-primary text-xl"></i>
+                <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100" data-i18n="legal.title">Informativa Legale & Privacy</h2>
+            </div>
+
+            <!-- Tab Selector -->
+            <div class="tabs tabs-boxed bg-base-200/80 p-1 rounded-2xl my-3.5 flex gap-1">
+                <button class="legal-tab-btn tab tab-sm sm:tab-md flex-1 rounded-xl font-bold transition-all active tab-active bg-primary text-white" data-target="tab-privacy" data-i18n="legal.tabPrivacy">Privacy Policy</button>
+                <button class="legal-tab-btn tab tab-sm sm:tab-md flex-1 rounded-xl font-bold transition-all text-slate-600 dark:text-slate-300" data-target="tab-terms" data-i18n="legal.tabTerms">Termini</button>
+                <button class="legal-tab-btn tab tab-sm sm:tab-md flex-1 rounded-xl font-bold transition-all text-slate-600 dark:text-slate-300" data-target="tab-cookies" data-i18n="legal.tabCookies">Cookie & Storage</button>
+            </div>
+
+            <!-- Tab Contents (Scrollable) -->
+            <div class="legal-tab-content overflow-y-auto pr-2 space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300 flex-1 leading-relaxed">
+                <!-- Privacy Policy Tab -->
+                <div id="tab-privacy" class="legal-pane space-y-3">
+                    <div class="bg-primary/10 border border-primary/20 rounded-2xl p-3.5">
+                        <h3 class="font-bold text-sm text-primary" data-i18n="privacy.title">Informativa sul Trattamento dei Dati Personali</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5" data-i18n="privacy.subtitle">Ai sensi degli artt. 13 e 14 del Regolamento UE 2016/679 (GDPR)</p>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-slate-800 dark:text-slate-200" data-i18n="privacy.controller">1. Titolare del Trattamento</h4>
+                        <p data-i18n="privacy.controllerText"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-slate-800 dark:text-slate-200" data-i18n="privacy.dataCollected">2. Categorie di Dati Trattati</h4>
+                        <p data-i18n="privacy.dataCollectedText"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-slate-800 dark:text-slate-200" data-i18n="privacy.purposes">3. Finalità e Basi Giuridiche</h4>
+                        <p data-i18n="privacy.purposesText"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-slate-800 dark:text-slate-200" data-i18n="privacy.retention">4. Conservazione e Cancellazione</h4>
+                        <p data-i18n="privacy.retentionText"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-slate-800 dark:text-slate-200" data-i18n="privacy.rights">5. Diritti dell'Interessato</h4>
+                        <p data-i18n="privacy.rightsText"></p>
+                    </div>
+                </div>
+
+                <!-- Terms of Service Tab -->
+                <div id="tab-terms" class="legal-pane hidden space-y-3">
+                    <div class="bg-base-200/60 border border-base-300 rounded-2xl p-3.5">
+                        <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200" data-i18n="terms.title">Termini e Condizioni di Utilizzo</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5" data-i18n="terms.p1"></p>
+                    </div>
+                    <p data-i18n="terms.p2"></p>
+                    <p data-i18n="terms.p3"></p>
+                    <p data-i18n="terms.p4"></p>
+                </div>
+
+                <!-- Cookies & Storage Tab -->
+                <div id="tab-cookies" class="legal-pane hidden space-y-3">
+                    <div class="bg-base-200/60 border border-base-300 rounded-2xl p-3.5">
+                        <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200" data-i18n="cookies.title">Informativa sui Cookie e Archiviazione Locale</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5" data-i18n="cookies.p1"></p>
+                    </div>
+                    <p data-i18n="cookies.p2"></p>
+                    <div class="bg-base-200/40 rounded-xl p-3 space-y-1 font-mono text-[11px] sm:text-xs">
+                        <p data-i18n="cookies.item1"></p>
+                        <p data-i18n="cookies.item2"></p>
+                        <p data-i18n="cookies.item3"></p>
+                        <p data-i18n="cookies.item4"></p>
+                        <p data-i18n="cookies.item5"></p>
+                    </div>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs" data-i18n="cookies.thirdParty"></p>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-base-200 flex justify-end">
+                <button class="btn btn-primary btn-sm rounded-xl text-white font-bold px-5" data-modal="legal-modal" data-i18n="legal.close">Chiudi</button>
+            </div>
+        </div>
+    </div>
 
     <script src="js/i18n.js"></script>
     <script src="js/dashboard.js"></script>

@@ -168,5 +168,55 @@
   "routing.inDistance": "In {dist}",
   "routing.voiceOn": "Voice guidance enabled",
   "routing.voiceOff": "Voice guidance disabled",
-  "routing.now": "Now"
+  "routing.now": "Now",
+
+  "cookie.bannerTitle": "Cookies & Privacy Notice",
+  "cookie.bannerText": "Cycle Place respects your privacy. We strictly use technical local storage (localStorage) to maintain your session, store theme and language preferences, and interface with map and weather services. We do not use advertising or commercial tracking cookies.",
+  "cookie.accept": "Accept & Continue",
+  "cookie.details": "View Policy",
+
+  "legal.title": "Legal Information, Privacy & Cookies",
+  "legal.tabPrivacy": "Privacy Policy (GDPR)",
+  "legal.tabTerms": "Terms of Service",
+  "legal.tabCookies": "Cookies & Storage",
+  "legal.close": "Close",
+
+  "auth.agreeTerms": "I have read and agree to the Terms of Service and Privacy Policy",
+  "auth.termsLink": "Terms of Service",
+  "auth.privacyLink": "Privacy Policy",
+  "auth.errMustAcceptTerms": "You must accept the Privacy Policy and Terms of Service to create an account",
+
+  "footer.rights": "All rights reserved. Open Data City of Trento & OpenStreetMap.",
+  "footer.privacy": "Privacy Policy",
+  "footer.terms": "Terms of Service",
+  "footer.cookies": "Cookie Policy",
+
+  "privacy.title": "Privacy Policy & Personal Data Processing (GDPR)",
+  "privacy.subtitle": "Pursuant to Articles 13 and 14 of EU Regulation 2016/679 (GDPR)",
+  "privacy.controller": "1. Data Controller",
+  "privacy.controllerText": "The Data Controller is the Cycle Place Team (Trento, Italy). For any inquiries regarding personal data protection or exercising your rights, contact: privacy@cycleplace.it.",
+  "privacy.dataCollected": "2. Categories of Data Processed",
+  "privacy.dataCollectedText": "Cycle Place collects and processes solely: (a) Account data: name, surname, email address and bcrypt-hashed password; (b) Google OAuth credentials: user ID, name and email when Google Sign-In is chosen; (c) GPS geolocation: live real-time position with browser consent to display on the map and compute routing (never stored on servers or shared with third parties); (d) Usage data: saved bike racks and submitted issue reports.",
+  "privacy.purposes": "3. Purposes and Legal Basis",
+  "privacy.purposesText": "Data is processed solely to provide platform features (Art. 6.1.b GDPR), manage reports for rack maintenance, and protect system security against malicious intrusion or abuse (Art. 6.1.f GDPR).",
+  "privacy.retention": "4. Data Retention & Erasure (Right to be Forgotten)",
+  "privacy.retentionText": "Your data is kept only while your account is active. You may delete your account and all associated data at any time with immediate effect via the 'Delete Account' button in your Dashboard.",
+  "privacy.rights": "5. Data Subject Rights",
+  "privacy.rightsText": "Pursuant to Articles 15-22 GDPR, you may request access, rectification, erasure, restriction or portability of your data at any time by contacting the Data Controller.",
+
+  "terms.title": "Terms and Conditions of Use",
+  "terms.p1": "Welcome to Cycle Place. By using this service you agree to abide by these Terms and Conditions.",
+  "terms.p2": "1. Nature of the Service: Cycle Place promotes sustainable mobility by mapping bicycle racks and protected shelters in Trento, offering routing and community issue reporting.",
+  "terms.p3": "2. Limitation of Liability: Information is provided for reference only. Cycle Place is not liable for bicycle thefts, damages, traffic accidents, or road violations during navigation.",
+  "terms.p4": "3. User Conduct: Submitting false, defamatory or offensive reports, attempting security breaches or performing automated scraping is strictly forbidden.",
+
+  "cookies.title": "Cookies & Local Storage Policy",
+  "cookies.p1": "Cycle Place does not use advertising profiling cookies or commercial tracking tools.",
+  "cookies.p2": "We solely use technical storage (browser localStorage & sessionStorage) essential to the application:",
+  "cookies.item1": "• tbp_jwt / tbp_refresh_jwt: encrypted security tokens maintaining your active login session.",
+  "cookies.item2": "• tbp_theme: visual theme preference (light/dark).",
+  "cookies.item3": "• tbp_lang: interface language choice (Italian, English, German).",
+  "cookies.item4": "• tbp_cookie_consent: stores acknowledgment of this policy.",
+  "cookies.item5": "• tbp_offline_cache: temporary local cache of rack GeoJSON data for offline resilience.",
+  "cookies.thirdParty": "Third-party services: Integrated with OpenStreetMap for map tiles, Google Identity for optional SSO, OpenRouteService for route calculation, and Open-Meteo for live weather data."
 }

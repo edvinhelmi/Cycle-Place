@@ -66,6 +66,17 @@ function getWeatherDetails(code, lang = 'it') {
     return { icon, desc };
 }
 
+// Sanitizzazione contro attacchi XSS
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function updateWeatherUI() {
     if (cachedWeatherTemp === null || cachedWeatherCode === null) return;
     const tempEl = document.getElementById('weather-temp');
@@ -398,6 +409,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const registerModal       = document.getElementById('register-modal');
     const forgotPasswordModal = document.getElementById('forgot-password-modal');
     const resetPasswordModal  = document.getElementById('reset-password-modal');
+    const legalModal          = document.getElementById('legal-modal');
+    const cookieBanner        = document.getElementById('cookie-banner');
+    const btnAcceptCookies    = document.getElementById('btn-accept-cookies');
+    const btnDetailsCookies   = document.getElementById('btn-details-cookies');
     const btnOpenForgotModal  = document.getElementById('btn-open-forgot-modal');
     const btnBackToLogin      = document.getElementById('btn-back-to-login');
     const segnalazioneModal   = document.getElementById('segnalazione-modal');
@@ -415,6 +430,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         m.classList.add('hidden');
         clearForms();
     };
+
+    // =========================================================
+    // COOKIE BANNER & INFORMATIVA PRIVACY (GDPR)
+    // =========================================================
+    if (cookieBanner && localStorage.getItem('tbp_cookie_consent') !== 'accepted') {
+        setTimeout(() => {
+            cookieBanner.classList.remove('hidden');
+        }, 800);
+    }
+
+    if (btnAcceptCookies) {
+        btnAcceptCookies.addEventListener('click', () => {
+            localStorage.setItem('tbp_cookie_consent', 'accepted');
+            cookieBanner.classList.add('opacity-0', 'translate-y-4');
+            setTimeout(() => {
+                cookieBanner.classList.add('hidden');
+            }, 300);
+        });
+    }
+
+    function switchLegalTab(tabId) {
+        document.querySelectorAll('.legal-tab-btn').forEach(btn => {
+            const isTarget = btn.getAttribute('data-target') === tabId;
+            btn.classList.toggle('tab-active', isTarget);
+            btn.classList.toggle('bg-primary', isTarget);
+            btn.classList.toggle('text-white', isTarget);
+        });
+        document.querySelectorAll('.legal-pane').forEach(pane => {
+            pane.classList.toggle('hidden', pane.id !== tabId);
+        });
+    }
+
+    document.querySelectorAll('.legal-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-target');
+            if (target) switchLegalTab(target);
+        });
+    });
+
+    document.querySelectorAll('.btn-open-legal').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tab = btn.getAttribute('data-tab');
+            const targetTab = tab === 'terms' ? 'tab-terms' : (tab === 'cookies' ? 'tab-cookies' : 'tab-privacy');
+            switchLegalTab(targetTab);
+            openModal(legalModal);
+        });
+    });
+
+    if (btnDetailsCookies) {
+        btnDetailsCookies.addEventListener('click', () => {
+            switchLegalTab('tab-cookies');
+            openModal(legalModal);
+        });
+    }
 
     // Chiudi banner meteo 
 
@@ -503,7 +573,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            [loginModal, registerModal, segnalazioneModal, forgotPasswordModal, resetPasswordModal].forEach(m => {
+            [loginModal, registerModal, segnalazioneModal, forgotPasswordModal, resetPasswordModal, legalModal].forEach(m => {
                 if (m && !m.classList.contains('hidden')) {
                     closeModal(m);
                 }
@@ -511,7 +581,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    [loginModal, registerModal, segnalazioneModal, forgotPasswordModal, resetPasswordModal].forEach(m => {
+    [loginModal, registerModal, segnalazioneModal, forgotPasswordModal, resetPasswordModal, legalModal].forEach(m => {
         if (m) {
             m.addEventListener('click', e => {
                 if (e.target === m) closeModal(m);
@@ -579,7 +649,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const u = currentUserData || (isTokenValid(getToken()) ? (decodeToken(getToken()) || decodeToken(getRefreshToken())) : null);
         if (u && u.name) {
             userGreeting.classList.remove('hidden');
-            const safeName = u.name || 'Utente';
+            const safeName = escapeHtml(u.name || 'Utente');
             userGreeting.innerHTML = `<i class="fa-solid fa-circle-user text-sm"></i><span class="whitespace-nowrap leading-none">${tr('greeting', { name: `<strong class="text-primary">${safeName}</strong>` })}</span>`;
             const profileText = tr('dash.profile') || tr('nav.profile') || 'Profilo';
             userGreeting.title = profileText;
@@ -709,6 +779,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
+            const privacyTermsInput = document.getElementById('reg-privacy-terms');
+            if (privacyTermsInput && !privacyTermsInput.checked) {
+                if (errorEl) errorEl.textContent = '❌ ' + (tr('auth.errMustAcceptTerms') || 'Devi accettare l\'Informativa sulla Privacy e i Termini di Servizio');
+                privacyTermsInput.focus();
+                return;
+            }
+
             if (btnSubmit) {
                 btnSubmit.disabled = true;
                 btnSubmit.innerHTML = '<span class="loading loading-spinner loading-xs"></span> ' + tr('nav.register');
@@ -717,7 +794,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const res  = await fetch('/api/v1/register', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, surname, email, password })
+                    body: JSON.stringify({ name, surname, email, password, privacyAccepted: true })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error);

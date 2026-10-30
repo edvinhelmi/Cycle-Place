@@ -1,3 +1,29 @@
+# Dipendenze
 node_modules/
-.env
 
+# Variabili d'ambiente e segreti (CRITICO: non pubblicare mai!)
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# File di sistema e log
+.DS_Store
+*/.DS_Store
+*.log
+backend.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dati utente dinamici (GDPR: i dati personali non devono essere tracciati su git)
+data/users.json
+data/preferiti.json
+data/segnalazioni.json
+data/backup_pre_reset/
+
+# Cartelle di test e build temporanee
+coverage/
+.nyc_output/
+dist/
