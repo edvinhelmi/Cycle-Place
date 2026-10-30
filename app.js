@@ -57,6 +57,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 15,
+    skip: () => process.env.NODE_ENV === 'test',
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {
@@ -68,6 +69,7 @@ const authLimiter = rateLimit({
 const segnalazioniLimiter = rateLimit({
     windowMs: 5 * 60 * 1000,
     max: 5,
+    skip: () => process.env.NODE_ENV === 'test',
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {
@@ -79,6 +81,7 @@ const segnalazioniLimiter = rateLimit({
 const routingLimiter = rateLimit({
     windowMs: 1 * 60 * 1000,
     max: 30, // Massimo 30 calcoli percorso al minuto per IP
+    skip: () => process.env.NODE_ENV === 'test',
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {
@@ -89,6 +92,7 @@ const routingLimiter = rateLimit({
 const generalApiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 400, // Limite generale per chiamate API
+    skip: () => process.env.NODE_ENV === 'test',
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {
