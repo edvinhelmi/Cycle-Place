@@ -7,6 +7,8 @@
     <meta name="description" content="Termini e Condizioni di Utilizzo della piattaforma Cycle Place.">
     <meta name="theme-color" content="#0284c7">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <title>Termini di Servizio — Cycle Place</title>
     <!-- FontAwesome Free -->
     <link rel="stylesheet" href="/fontawesome/css/all.min.css">
@@ -27,21 +29,21 @@
         html[data-theme="dark"] .legal-nav { background-color: rgba(15, 23, 42, 0.9) !important; border-color: #1e293b !important; }
         html[data-theme="dark"] .nav-brand-text { color: #ffffff !important; }
 
-        html:not([data-theme="dark"]) body { background-color: #f1f5f9 !important; color: #0f172a !important; }
-        html:not([data-theme="dark"]) .legal-card { background-color: #ffffff !important; border-color: #e2e8f0 !important; color: #334155 !important; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08) !important; }
-        html:not([data-theme="dark"]) .legal-heading { color: #0f172a !important; }
-        html:not([data-theme="dark"]) .legal-subheading { color: #0f172a !important; }
-        html:not([data-theme="dark"]) .legal-text { color: #334155 !important; }
-        html:not([data-theme="dark"]) .legal-muted { color: #64748b !important; }
-        html:not([data-theme="dark"]) .legal-box { background-color: #f8fafc !important; border-color: #e2e8f0 !important; color: #1e293b !important; }
-        html:not([data-theme="dark"]) .legal-info-box { background-color: #f0f9ff !important; border-color: #bae6fd !important; color: #0369a1 !important; }
-        html:not([data-theme="dark"]) .legal-nav { background-color: rgba(255, 255, 255, 0.92) !important; border-color: #e2e8f0 !important; }
-        html:not([data-theme="dark"]) .nav-brand-text { color: #0f172a !important; }
+        html:not([data-theme="dark"]) body { background-color: #0f172a !important; color: #f1f5f9 !important; }
+        html:not([data-theme="dark"]) .legal-card { background-color: #1e293b !important; border-color: #334155 !important; color: #cbd5e1 !important; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3) !important; }
+        html:not([data-theme="dark"]) .legal-heading { color: #ffffff !important; }
+        html:not([data-theme="dark"]) .legal-subheading { color: #f8fafc !important; }
+        html:not([data-theme="dark"]) .legal-text { color: #cbd5e1 !important; }
+        html:not([data-theme="dark"]) .legal-muted { color: #94a3b8 !important; }
+        html:not([data-theme="dark"]) .legal-box { background-color: #0f172a !important; border-color: #334155 !important; color: #e2e8f0 !important; }
+        html:not([data-theme="dark"]) .legal-info-box { background-color: rgba(2, 132, 199, 0.15) !important; border-color: rgba(56, 189, 248, 0.3) !important; color: #e0f2fe !important; }
+        html:not([data-theme="dark"]) .legal-nav { background-color: rgba(15, 23, 42, 0.92) !important; border-color: #334155 !important; }
+        html:not([data-theme="dark"]) .nav-brand-text { color: #ffffff !important; }
     </style>
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('tbp_theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.classList.add('dark');
         })();
     </script>
 </head>

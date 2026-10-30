@@ -624,7 +624,7 @@ body {
     /* Pulsante GPS Geolocation Mobile (in basso a sinistra, distanziato SOPRA le statistiche) */
     .btn-geo {
         position: absolute;
-        bottom: 7.25rem;
+        bottom: 5.8rem;
         left: 0.75rem;
         width: 44px;
         height: 44px;
