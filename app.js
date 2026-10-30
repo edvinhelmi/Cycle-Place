@@ -51,6 +51,11 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Pagine HTML standalone (compatibilità routing senza estensione .html)
+app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
+app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy.html')));
+app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms.html')));
+
 // Normalizzazione URL per compatibilità sia serverless Vercel che standalone locale
 app.use((req, res, next) => {
     const original = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'];

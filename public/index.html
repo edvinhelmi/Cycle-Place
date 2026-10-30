@@ -390,7 +390,7 @@
                         <input type="checkbox" id="reg-privacy-terms" class="checkbox checkbox-primary checkbox-xs rounded shrink-0" required />
                         <span class="label-text text-[11px] sm:text-xs text-slate-600 leading-snug">
                             <span data-i18n="auth.agreeTerms">Ho letto e accetto i Termini di Servizio e l'Informativa sulla Privacy</span>
-                            (<a href="#" class="btn-open-legal text-primary font-semibold hover:underline" data-tab="privacy" data-i18n="auth.privacyLink">Privacy</a> &bull; <a href="#" class="btn-open-legal text-primary font-semibold hover:underline" data-tab="terms" data-i18n="auth.termsLink">Termini</a>)
+                            (<a href="/privacy" target="_blank" class="btn-open-legal text-primary font-semibold hover:underline" data-tab="privacy" data-i18n="auth.privacyLink">Privacy</a> &bull; <a href="/terms" target="_blank" class="btn-open-legal text-primary font-semibold hover:underline" data-tab="terms" data-i18n="auth.termsLink">Termini</a>)
                         </span>
                     </label>
                 </div>
@@ -556,9 +556,9 @@
     <div class="fixed bottom-2 left-3 z-[1000] hidden sm:flex items-center gap-2 bg-base-100/85 backdrop-blur-md px-3 py-1 rounded-full border border-base-300 shadow-xs text-[11px] text-slate-500 select-none">
         <span>&copy; 2026 Cycle Place</span>
         <span>&bull;</span>
-        <button class="btn-open-legal hover:text-primary transition-colors cursor-pointer" data-tab="privacy" data-i18n="footer.privacy">Privacy Policy</button>
+        <a href="/privacy" target="_blank" class="hover:text-primary transition-colors cursor-pointer" data-i18n="footer.privacy">Privacy Policy</a>
         <span>&bull;</span>
-        <button class="btn-open-legal hover:text-primary transition-colors cursor-pointer" data-tab="terms" data-i18n="footer.terms">Termini</button>
+        <a href="/terms" target="_blank" class="hover:text-primary transition-colors cursor-pointer" data-i18n="footer.terms">Termini</a>
         <span>&bull;</span>
         <button class="btn-open-legal hover:text-primary transition-colors cursor-pointer" data-tab="cookies" data-i18n="footer.cookies">Cookie</button>
     </div>
