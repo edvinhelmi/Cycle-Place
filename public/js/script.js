@@ -2113,14 +2113,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         let errorMsg = tr('geo.errorUnavailable') || 'Posizione non disponibile';
                         let isPerm = false;
                         if (err2.code === err2.PERMISSION_DENIED) {
-                            errorMsg = tr('geo.errorPermission') || 'Accesso posizione negato: tocca l\'icona delle impostazioni nella barra dell\'URL per abilitarla.';
+                            errorMsg = tr('geo.errorPermission') || 'Accesso posizione negato: concedi l\'accesso e ricarica la pagina (tasto 🔄).';
                             isPerm = true;
                         } else if (err2.code === err2.TIMEOUT) {
-                            errorMsg = 'Timeout rilevamento GPS. Riprova con una connessione stabile o all\'aperto.';
+                            errorMsg = 'Timeout rilevamento GPS. Assicurati che il GPS del dispositivo sia attivo.';
                         }
                         showSearchFeedback(errorMsg, true, isPerm ? 8000 : 4000);
                     },
-                    { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 }
+                    { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
                 );
                 return;
             }
@@ -2129,7 +2129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let errorMsg = tr('geo.errorUnavailable') || 'Posizione non disponibile';
             let isPerm = false;
             if (error.code === error.PERMISSION_DENIED) {
-                errorMsg = tr('geo.errorPermission') || 'Accesso posizione negato: tocca l\'icona delle impostazioni nella barra dell\'URL per abilitarla.';
+                errorMsg = tr('geo.errorPermission') || 'Accesso posizione negato: concedi l\'accesso e ricarica la pagina (tasto 🔄).';
                 isPerm = true;
             }
             showSearchFeedback(errorMsg, true, isPerm ? 8000 : 4000);
@@ -2138,7 +2138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         navigator.geolocation.getCurrentPosition(
             onGeoSuccess,
             onGeoError,
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
+            { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
         );
     }
 

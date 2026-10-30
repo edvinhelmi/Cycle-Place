@@ -39,7 +39,7 @@
   "geo.locating": "Standort wird ermittelt...",
   "geo.youAreHere": "Sie befinden sich hier",
   "geo.accuracy": "Genauigkeit",
-  "geo.errorPermission": "Standortzugriff verweigert: Tippen Sie auf das Einstellungssymbol in der Adressleiste, um ihn zu aktivieren.",
+  "geo.errorPermission": "Standortzugriff verweigert: Berechtigung erteilen und Seite neu laden (🔄).",
   "geo.errorUnavailable": "GPS-Position derzeit nicht verfügbar.",
   "geo.errorTimeout": "Zeitüberschreitung bei der Standortabfrage.",
   "geo.notSupported": "Geolokalisierung wird von Ihrem Browser nicht unterstützt.",

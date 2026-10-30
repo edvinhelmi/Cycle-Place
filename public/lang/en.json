@@ -39,7 +39,7 @@
   "geo.locating": "Locating...",
   "geo.youAreHere": "You are here",
   "geo.accuracy": "Accuracy",
-  "geo.errorPermission": "Location access denied: tap the settings icon in your browser's URL bar to enable it.",
+  "geo.errorPermission": "Location access denied: grant permission and refresh the page (🔄).",
   "geo.errorUnavailable": "GPS position unavailable at this time.",
   "geo.errorTimeout": "Location request timed out.",
   "geo.notSupported": "Geolocation is not supported by your browser.",
