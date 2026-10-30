@@ -14,24 +14,47 @@
     <!-- Tailwind CSS + DaisyUI -->
     <link rel="stylesheet" href="/css/tailwind.css">
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Regole ad altissimo contrasto garantito sia in Dark che in Light mode */
+        html[data-theme="dark"] body { background-color: #020617 !important; color: #f1f5f9 !important; }
+        html[data-theme="dark"] .legal-card { background-color: #0f172a !important; border-color: #1e293b !important; color: #e2e8f0 !important; }
+        html[data-theme="dark"] .legal-heading { color: #ffffff !important; }
+        html[data-theme="dark"] .legal-subheading { color: #f8fafc !important; }
+        html[data-theme="dark"] .legal-text { color: #cbd5e1 !important; }
+        html[data-theme="dark"] .legal-muted { color: #94a3b8 !important; }
+        html[data-theme="dark"] .legal-box { background-color: #020617 !important; border-color: #1e293b !important; color: #e2e8f0 !important; }
+        html[data-theme="dark"] .legal-info-box { background-color: rgba(2, 132, 199, 0.15) !important; border-color: rgba(56, 189, 248, 0.3) !important; color: #e0f2fe !important; }
+        html[data-theme="dark"] .legal-nav { background-color: rgba(15, 23, 42, 0.9) !important; border-color: #1e293b !important; }
+        html[data-theme="dark"] .nav-brand-text { color: #ffffff !important; }
+
+        html:not([data-theme="dark"]) body { background-color: #f1f5f9 !important; color: #0f172a !important; }
+        html:not([data-theme="dark"]) .legal-card { background-color: #ffffff !important; border-color: #e2e8f0 !important; color: #334155 !important; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08) !important; }
+        html:not([data-theme="dark"]) .legal-heading { color: #0f172a !important; }
+        html:not([data-theme="dark"]) .legal-subheading { color: #0f172a !important; }
+        html:not([data-theme="dark"]) .legal-text { color: #334155 !important; }
+        html:not([data-theme="dark"]) .legal-muted { color: #64748b !important; }
+        html:not([data-theme="dark"]) .legal-box { background-color: #f8fafc !important; border-color: #e2e8f0 !important; color: #1e293b !important; }
+        html:not([data-theme="dark"]) .legal-info-box { background-color: #f0f9ff !important; border-color: #bae6fd !important; color: #0369a1 !important; }
+        html:not([data-theme="dark"]) .legal-nav { background-color: rgba(255, 255, 255, 0.92) !important; border-color: #e2e8f0 !important; }
+        html:not([data-theme="dark"]) .nav-brand-text { color: #0f172a !important; }
+    </style>
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('tbp_theme');
-            const theme = savedTheme ? savedTheme : 'dark';
-            document.documentElement.setAttribute('data-theme', theme);
+            const savedTheme = localStorage.getItem('tbp_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
         })();
     </script>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col font-sans transition-colors duration-300">
+<body class="antialiased min-h-screen flex flex-col font-sans transition-colors duration-200">
     <!-- Header -->
-    <header class="navbar glass-navbar px-4 sm:px-8 py-3 sticky top-0 z-50 border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md">
+    <header class="legal-nav navbar px-4 sm:px-8 py-3 sticky top-0 z-50 border-b backdrop-blur-md transition-colors duration-200">
         <div class="max-w-4xl w-full mx-auto flex items-center justify-between">
             <a href="/" class="logo font-bold text-xl text-primary flex items-center gap-2.5 tracking-tight hover:opacity-90 transition-opacity">
                 <i class="fa-solid fa-bicycle text-2xl text-primary"></i>
-                <span class="text-white">Cycle-Place</span>
+                <span class="nav-brand-text font-bold">Cycle-Place</span>
             </a>
             <div class="flex items-center gap-3">
-                <button id="theme-toggle-btn" class="btn btn-ghost btn-sm btn-circle text-slate-300 hover:text-white" title="Cambia Tema" aria-label="Cambia tema">
+                <button id="theme-toggle-btn" class="btn btn-ghost btn-sm btn-circle text-slate-500 hover:text-primary" title="Cambia tema chiaro/scuro" aria-label="Cambia tema">
                     <i class="fa-solid fa-moon text-base" id="theme-icon"></i>
                 </button>
                 <a href="/" class="btn btn-outline btn-primary btn-sm rounded-xl gap-2 font-semibold">
@@ -44,66 +67,66 @@
 
     <!-- Main Content -->
     <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-8 py-8 sm:py-12">
-        <div class="bg-slate-900/90 text-slate-200 shadow-2xl rounded-3xl p-6 sm:p-10 border border-slate-800 space-y-8 backdrop-blur-xl">
+        <div class="legal-card rounded-3xl p-6 sm:p-10 border space-y-8 backdrop-blur-xl transition-colors duration-200">
             <!-- Title Section -->
-            <div class="border-b border-slate-800 pb-6">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-sky-400 text-xs font-semibold mb-3 border border-sky-500/30">
+            <div class="border-b border-slate-200 dark:border-slate-800 pb-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-semibold mb-3 border border-primary/20">
                     <i class="fa-solid fa-shield-halved"></i>
                     <span>Regolamento UE 2016/679 (GDPR)</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                <h1 class="legal-heading text-2xl sm:text-3xl font-extrabold tracking-tight">
                     Informativa sul Trattamento dei Dati Personali
                 </h1>
-                <p class="text-sm text-slate-400 mt-2">
+                <p class="legal-muted text-sm mt-2">
                     Ultimo aggiornamento: 30 Ottobre 2026 &bull; Versione 1.2
                 </p>
             </div>
 
             <!-- Premessa -->
-            <div class="p-4 bg-sky-950/40 rounded-2xl border border-sky-800/40 text-sm leading-relaxed text-slate-300">
+            <div class="legal-info-box p-4 rounded-2xl border text-sm leading-relaxed">
                 La presente Informativa sulla Privacy descrive come <strong>Cycle Place</strong> raccoglie, utilizza, protegge e conserva i dati personali degli utenti in conformità al Regolamento Generale sulla Protezione dei Dati dell'Unione Europea (GDPR, Regolamento UE 2016/679) e alle linee guida di Google relative ai dati degli utenti (<em>Google API Services User Data Policy</em>).
             </div>
 
             <!-- 1. Titolare -->
             <section class="space-y-3">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <h2 class="legal-heading text-lg font-bold flex items-center gap-2">
                     <span class="badge badge-primary badge-sm text-white font-mono">1</span>
                     Titolare del Trattamento
                 </h2>
-                <p class="text-sm text-slate-300 leading-relaxed">
+                <p class="legal-text text-sm leading-relaxed">
                     Il titolare del trattamento dei dati è il <strong>Team di Sviluppo Cycle Place</strong>, con sede operativa a Trento (TN), Italia. Per qualsiasi chiarimento in merito alla privacy o per esercitare i tuoi diritti, puoi contattare il responsabile della protezione dei dati all'indirizzo email:
-                    <a href="mailto:privacy@cycleplace.it" class="text-sky-400 font-semibold hover:underline">privacy@cycleplace.it</a>.
+                    <a href="mailto:privacy@cycleplace.it" class="text-primary font-semibold hover:underline">privacy@cycleplace.it</a>.
                 </p>
             </section>
 
             <!-- 2. Dati Raccolti -->
             <section class="space-y-3">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <h2 class="legal-heading text-lg font-bold flex items-center gap-2">
                     <span class="badge badge-primary badge-sm text-white font-mono">2</span>
                     Tipologie di Dati Raccolti
                 </h2>
                 <div class="grid gap-3 text-sm">
-                    <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
-                        <strong class="text-white block mb-1">a) Dati dell'Account Registrato</strong>
-                        <p class="text-slate-300">
+                    <div class="legal-box p-4 rounded-xl border">
+                        <strong class="legal-subheading block mb-1">a) Dati dell'Account Registrato</strong>
+                        <p class="legal-text">
                             Nome, cognome, indirizzo email e password. La password viene immediatamente cifrata tramite algoritmo crittografico unidirezionale ad alta intensità computazionale (<strong>bcrypt</strong>) prima di qualsiasi memorizzazione e non è mai accessibile in chiaro.
                         </p>
                     </div>
-                    <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
-                        <strong class="text-white block mb-1">b) Autenticazione Federata Google Sign-In (OAuth 2.0)</strong>
-                        <p class="text-slate-300">
+                    <div class="legal-box p-4 rounded-xl border">
+                        <strong class="legal-subheading block mb-1">b) Autenticazione Federata Google Sign-In (OAuth 2.0)</strong>
+                        <p class="legal-text">
                             Qualora l'utente scelga di accedere tramite <em>Google Sign-In</em>, Cycle Place riceve da Google esclusivamente: l'identificativo numerico univoco dell'account Google (Google ID), il nome/cognome e l'indirizzo email verificato. <strong>Non accediamo</strong> a contatti, file di Google Drive, cronologia di navigazione o altri dati personali dell'account Google.
                         </p>
                     </div>
-                    <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
-                        <strong class="text-white block mb-1">c) Dati di Geolocalizzazione (GPS)</strong>
-                        <p class="text-slate-300">
+                    <div class="legal-box p-4 rounded-xl border">
+                        <strong class="legal-subheading block mb-1">c) Dati di Geolocalizzazione (GPS)</strong>
+                        <p class="legal-text">
                             La posizione geografica in tempo reale viene richiesta solo previo tuo esplicito consenso fornito al browser. Le coordinate GPS vengono elaborate <strong>esclusivamente sul dispositivo dell'utente (client-side)</strong> per centrare la mappa e calcolare l'itinerario ciclabile verso la rastrelliera scelta. <strong>Nessun dato di localizzazione viene salvato sul nostro database né tracciato in background</strong>.
                         </p>
                     </div>
-                    <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
-                        <strong class="text-white block mb-1">d) Dati Operativi e Contributi Utente</strong>
-                        <p class="text-slate-300">
+                    <div class="legal-box p-4 rounded-xl border">
+                        <strong class="legal-subheading block mb-1">d) Dati Operativi e Contributi Utente</strong>
+                        <p class="legal-text">
                             Elenco delle rastrelliere salvate nei preferiti e segnalazioni di stato/anomalie inviate per le rastrelliere di Trento (es. rastrelliera danneggiata o piena).
                         </p>
                     </div>
@@ -112,11 +135,11 @@
 
             <!-- 3. Finalità e Basi Giuridiche -->
             <section class="space-y-3">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <h2 class="legal-heading text-lg font-bold flex items-center gap-2">
                     <span class="badge badge-primary badge-sm text-white font-mono">3</span>
                     Finalità del Trattamento e Basi Giuridiche
                 </h2>
-                <ul class="list-disc list-inside space-y-2 text-sm text-slate-300 leading-relaxed">
+                <ul class="list-disc list-inside space-y-2 text-sm legal-text leading-relaxed">
                     <li><strong>Esecuzione del Servizio (Art. 6.1.b GDPR):</strong> consentire l'accesso all'account, la gestione dei preferiti, la visualizzazione della mappa e la segnalazione delle rastrelliere.</li>
                     <li><strong>Sicurezza del Sistema (Art. 6.1.f GDPR - Legittimo Interesse):</strong> prevenzione di frodi, attacchi informatici DDoS, tentativi di brute-force o uso abusivo dei server tramite rate limiting e monitoraggio degli accessi.</li>
                     <li><strong>Nessuna Profilazione Commerciale:</strong> i dati personali <strong>non vengono ceduti, venduti o condivisi</strong> con terzi per finalità di marketing, pubblicità comportamentale o profilazione commerciale.</li>
@@ -124,16 +147,16 @@
             </section>
 
             <!-- 4. Google User Data Policy Compliance -->
-            <section class="space-y-3 p-5 bg-sky-950/30 rounded-2xl border border-sky-800/40">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-brands fa-google text-sky-400"></i>
+            <section class="legal-info-box space-y-3 p-5 rounded-2xl border">
+                <h2 class="legal-subheading text-lg font-bold flex items-center gap-2">
+                    <i class="fa-brands fa-google text-primary"></i>
                     Conformità alla Google User Data Policy
                 </h2>
-                <p class="text-sm text-slate-300 leading-relaxed">
+                <p class="text-sm leading-relaxed">
                     L'uso e il trasferimento a qualsiasi altra app delle informazioni ricevute dalle API di Google da parte di Cycle Place rispettano rigorosamente la 
-                    <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" class="text-sky-400 font-semibold hover:underline">Google API Services User Data Policy</a>, compresi i requisiti di <strong>Uso Limitato (Limited Use)</strong>:
+                    <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Google API Services User Data Policy</a>, compresi i requisiti di <strong>Uso Limitato (Limited Use)</strong>:
                 </p>
-                <ul class="list-disc list-inside space-y-1.5 text-xs sm:text-sm text-slate-300">
+                <ul class="list-disc list-inside space-y-1.5 text-xs sm:text-sm">
                     <li>I dati Google vengono usati esclusivamente per fornire o migliorare le funzionalità visibili all'utente (login rapido e profilo).</li>
                     <li>Nessun dato Google viene trasferito a terzi, salvo quanto strettamente necessario per l'erogazione del servizio o per adempiere a obblighi di legge.</li>
                     <li>Nessun dato Google viene utilizzato per scopi pubblicitari o per addestrare modelli linguistici/AI di profilazione.</li>
@@ -142,59 +165,59 @@
 
             <!-- 5. Cookie e Conservazione Locale -->
             <section class="space-y-3">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <h2 class="legal-heading text-lg font-bold flex items-center gap-2">
                     <span class="badge badge-primary badge-sm text-white font-mono">5</span>
                     Cookie e Tecnologie di Archiviazione Locale
                 </h2>
-                <p class="text-sm text-slate-300 leading-relaxed">
+                <p class="legal-text text-sm leading-relaxed">
                     Cycle Place <strong>non utilizza cookie di terze parti per profilazione pubblicitaria</strong>. Utilizziamo unicamente l'archiviazione tecnica locale del browser (<code>localStorage</code>) per scopi strettamente tecnici:
                 </p>
-                <div class="overflow-x-auto text-xs font-mono bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-1 text-slate-300">
-                    <p>• <strong class="text-sky-300">tbp_jwt / tbp_refresh_jwt:</strong> token crittografati per mantenere aperta la sessione autenticata.</p>
-                    <p>• <strong class="text-sky-300">tbp_theme:</strong> preferenza grafica selezionata dall'utente (tema chiaro o scuro).</p>
-                    <p>• <strong class="text-sky-300">tbp_lang:</strong> preferenza di lingua selezionata (Italiano, Inglese, Tedesco).</p>
-                    <p>• <strong class="text-sky-300">tbp_cookie_consent:</strong> presa visione del banner informativo.</p>
+                <div class="legal-box overflow-x-auto text-xs font-mono p-4 rounded-xl border space-y-1.5">
+                    <p>• <strong class="text-primary">tbp_jwt / tbp_refresh_jwt:</strong> token crittografati per mantenere aperta la sessione autenticata.</p>
+                    <p>• <strong class="text-primary">tbp_theme:</strong> preferenza grafica selezionata dall'utente (tema chiaro o scuro).</p>
+                    <p>• <strong class="text-primary">tbp_lang:</strong> preferenza di lingua selezionata (Italiano, Inglese, Tedesco).</p>
+                    <p>• <strong class="text-primary">tbp_cookie_consent:</strong> presa visione del banner informativo.</p>
                 </div>
             </section>
 
             <!-- 6. Conservazione e Diritto all'Oblio -->
             <section class="space-y-3">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <h2 class="legal-heading text-lg font-bold flex items-center gap-2">
                     <span class="badge badge-primary badge-sm text-white font-mono">6</span>
                     Conservazione e Diritto alla Cancellazione (Diritto all'Oblio)
                 </h2>
-                <p class="text-sm text-slate-300 leading-relaxed">
-                    I tuoi dati vengono conservati per il solo tempo in cui il tuo account rimane attivo. In conformità all'art. 17 del GDPR (Diritto alla Cancellazione), puoi eliminare autonomamente e in qualunque momento il tuo profilo cliccando su <strong>"Elimina Account"</strong> all'interno della tua <a href="/dashboard" class="text-sky-400 font-semibold hover:underline">Dashboard</a>. L'eliminazione comporta l'immediata e irreversibile cancellazione dal database di tutte le tue informazioni personali, token di accesso e preferiti.
+                <p class="legal-text text-sm leading-relaxed">
+                    I tuoi dati vengono conservati per il solo tempo in cui il tuo account rimane attivo. In conformità all'art. 17 del GDPR (Diritto alla Cancellazione), puoi eliminare autonomamente e in qualunque momento il tuo profilo cliccando su <strong>"Elimina Account"</strong> all'interno della tua <a href="/dashboard" class="text-primary font-semibold hover:underline">Dashboard</a>. L'eliminazione comporta l'immediata e irreversibile cancellazione dal database di tutte le tue informazioni personali, token di accesso e preferiti.
                 </p>
             </section>
 
             <!-- 7. Diritti dell'Interessato -->
             <section class="space-y-3">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <h2 class="legal-heading text-lg font-bold flex items-center gap-2">
                     <span class="badge badge-primary badge-sm text-white font-mono">7</span>
                     Diritti dell'Interessato
                 </h2>
-                <p class="text-sm text-slate-300 leading-relaxed">
-                    Ai sensi degli articoli 15-22 del GDPR, in qualsiasi momento puoi esercitare i seguenti diritti inviando una comunicazione a <a href="mailto:privacy@cycleplace.it" class="text-sky-400 font-semibold hover:underline">privacy@cycleplace.it</a>:
+                <p class="legal-text text-sm leading-relaxed">
+                    Ai sensi degli articoli 15-22 del GDPR, in qualsiasi momento puoi esercitare i seguenti diritti inviando una comunicazione a <a href="mailto:privacy@cycleplace.it" class="text-primary font-semibold hover:underline">privacy@cycleplace.it</a>:
                 </p>
-                <ul class="list-disc list-inside space-y-1 text-sm text-slate-300">
+                <ul class="list-disc list-inside space-y-1 text-sm legal-text">
                     <li>Diritto di accesso ai tuoi dati personali (art. 15);</li>
                     <li>Diritto di rettifica o aggiornamento dei dati inesatti (art. 16);</li>
                     <li>Diritto di cancellazione (art. 17);</li>
                     <li>Diritto di limitazione del trattamento (art. 18);</li>
                     <li>Diritto alla portabilità dei dati in formato strutturato (art. 20);</li>
                     <li>Diritto di opposizione al trattamento (art. 21);</li>
-                    <li>Diritto di proporre reclamo all'Autorità Garante per la Protezione dei Dati Personali (Piazza Venezia 11, 00187 Roma, <a href="https://www.garanteprivacy.it" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">www.garanteprivacy.it</a>).</li>
+                    <li>Diritto di proporre reclamo all'Autorità Garante per la Protezione dei Dati Personali (Piazza Venezia 11, 00187 Roma, <a href="https://www.garanteprivacy.it" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">www.garanteprivacy.it</a>).</li>
                 </ul>
             </section>
 
             <!-- Footer interno -->
-            <div class="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <div class="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs legal-muted">
                 <p>&copy; 2026 Cycle Place. Tutti i diritti riservati.</p>
                 <div class="flex items-center gap-4">
-                    <a href="/terms" class="hover:text-sky-400 transition-colors">Termini di Servizio</a>
+                    <a href="/terms" class="hover:text-primary transition-colors">Termini di Servizio</a>
                     <span>&bull;</span>
-                    <a href="/" class="hover:text-sky-400 transition-colors">Torna all'App</a>
+                    <a href="/" class="hover:text-primary transition-colors">Torna all'App</a>
                 </div>
             </div>
         </div>
