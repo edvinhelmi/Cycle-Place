@@ -428,8 +428,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 clearGoogleErrors();
             }
             if (typeof renderGoogleButtons === 'function') {
-                setTimeout(renderGoogleButtons, 60);
-                setTimeout(renderGoogleButtons, 250);
+                setTimeout(() => renderGoogleButtons(), 50);
+            }
+            if (window.google?.accounts?.id && typeof google.accounts.id.prompt === 'function') {
+                try {
+                    google.accounts.id.prompt();
+                } catch (_) {}
             }
         }
     };
@@ -1097,10 +1101,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkResetPasswordFromUrl();
 
     // =========================================================
-    // GOOGLE IDENTITY SERVICES (GSI) SSO
+    // GOOGLE IDENTITY SERVICES (GSI) SSO & OAUTH2 FALLBACK
     // =========================================================
     let cachedGoogleClientId = null;
     let googleInitialized = false;
+    let tokenClient = null;
+    let lastRenderedTheme = null;
+    let lastRenderedLang = null;
 
     function showGoogleError(msg) {
         const errLogin = document.getElementById('google-error');
@@ -1153,8 +1160,90 @@ document.addEventListener('DOMContentLoaded', async () => {
             showGoogleError('❌ Errore Google SSO: ' + (err.message || 'Accesso non riuscito'));
         }
     }
+    window.handleGoogleCredential = handleGoogleCredential;
 
-    function renderGoogleButtons() {
+    async function handleGoogleAccessToken(accessToken) {
+        clearGoogleErrors();
+        console.log('[Google SSO OAuth2] Access token ricevuto, verifica con backend...');
+        try {
+            const res = await fetch('/api/v1/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accessToken })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Autenticazione con Google fallita');
+            }
+
+            console.log('[Google SSO OAuth2] Login completato per:', data.user?.email);
+            saveToken(data.accessToken || data.token, data.refreshToken);
+
+            closeModal(loginModal);
+            const regModal = document.getElementById('register-modal');
+            if (regModal) closeModal(regModal);
+
+            loginSuccess(data.user);
+            setTimeout(() => {
+                window.location.href = '/dashboard.html';
+            }, 700);
+        } catch (err) {
+            console.error('[Google SSO OAuth2] Errore autenticazione:', err);
+            showGoogleError('❌ Errore Google OAuth: ' + (err.message || 'Accesso non riuscito'));
+        }
+    }
+
+    function initTokenClient() {
+        if (!window.google?.accounts?.oauth2 || !cachedGoogleClientId) return;
+        try {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: cachedGoogleClientId,
+                scope: 'email profile openid',
+                callback: async (tokenResponse) => {
+                    if (tokenResponse.error) {
+                        console.error('[Google SSO OAuth2] Errore token:', tokenResponse);
+                        if (tokenResponse.error !== 'popup_closed_by_user') {
+                            showGoogleError('❌ Errore Google: ' + (tokenResponse.error_description || tokenResponse.error));
+                        }
+                        return;
+                    }
+                    await handleGoogleAccessToken(tokenResponse.access_token);
+                }
+            });
+            console.log('[Google SSO] TokenClient OAuth2 inizializzato con successo');
+        } catch (e) {
+            console.warn('[Google SSO] initTokenClient:', e);
+        }
+    }
+
+    function triggerGooglePopup() {
+        clearGoogleErrors();
+        if (tokenClient) {
+            try {
+                tokenClient.requestAccessToken({ prompt: 'select_account' });
+                return;
+            } catch (err) {
+                console.warn('[Google SSO] requestAccessToken:', err);
+            }
+        }
+        if (window.google?.accounts?.id) {
+            try {
+                google.accounts.id.prompt();
+            } catch (err) {
+                console.warn('[Google SSO] prompt:', err);
+            }
+        }
+    }
+
+    document.querySelectorAll('.btn-trigger-google-popup').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            triggerGooglePopup();
+        });
+    });
+
+    function renderGoogleButtons(force = false) {
         if (!cachedGoogleClientId || !window.google?.accounts?.id) {
             return;
         }
@@ -1166,41 +1255,48 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const loginContainer = document.getElementById('google-btn-container');
         if (loginContainer) {
-            loginContainer.innerHTML = '';
-            try {
-                google.accounts.id.renderButton(loginContainer, {
-                    type: 'standard',
-                    shape: 'rectangular',
-                    theme: isDark ? 'filled_black' : 'outline',
-                    text: 'signin_with',
-                    size: 'large',
-                    width: 280,
-                    logo_alignment: 'left',
-                    locale: lang
-                });
-            } catch (e) {
-                console.error('[Google SSO] renderButton login error:', e);
+            if (force || loginContainer.children.length === 0 || lastRenderedTheme !== isDark || lastRenderedLang !== lang) {
+                loginContainer.innerHTML = '';
+                try {
+                    google.accounts.id.renderButton(loginContainer, {
+                        type: 'standard',
+                        shape: 'rectangular',
+                        theme: isDark ? 'filled_black' : 'outline',
+                        text: 'signin_with',
+                        size: 'large',
+                        width: 280,
+                        logo_alignment: 'left',
+                        locale: lang
+                    });
+                } catch (e) {
+                    console.error('[Google SSO] renderButton login error:', e);
+                }
             }
         }
 
         const regContainer = document.getElementById('google-register-btn-container');
         if (regContainer) {
-            regContainer.innerHTML = '';
-            try {
-                google.accounts.id.renderButton(regContainer, {
-                    type: 'standard',
-                    shape: 'rectangular',
-                    theme: isDark ? 'filled_black' : 'outline',
-                    text: 'signup_with',
-                    size: 'large',
-                    width: 280,
-                    logo_alignment: 'left',
-                    locale: lang
-                });
-            } catch (e) {
-                console.error('[Google SSO] renderButton register error:', e);
+            if (force || regContainer.children.length === 0 || lastRenderedTheme !== isDark || lastRenderedLang !== lang) {
+                regContainer.innerHTML = '';
+                try {
+                    google.accounts.id.renderButton(regContainer, {
+                        type: 'standard',
+                        shape: 'rectangular',
+                        theme: isDark ? 'filled_black' : 'outline',
+                        text: 'signup_with',
+                        size: 'large',
+                        width: 280,
+                        logo_alignment: 'left',
+                        locale: lang
+                    });
+                } catch (e) {
+                    console.error('[Google SSO] renderButton register error:', e);
+                }
             }
         }
+
+        lastRenderedTheme = isDark;
+        lastRenderedLang = lang;
     }
 
     async function initGoogleSSO() {
@@ -1219,27 +1315,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Attende caricamento libreria accounts.google.com/gsi (fino a 6 secondi)
             let elapsed = 0;
-            while (!window.google?.accounts?.id && elapsed < 6000) {
+            while ((!window.google?.accounts?.id && !window.google?.accounts?.oauth2) && elapsed < 6000) {
                 await new Promise(resolve => setTimeout(resolve, 100));
                 elapsed += 100;
             }
 
-            if (!window.google?.accounts?.id) {
+            if (!window.google?.accounts?.id && !window.google?.accounts?.oauth2) {
                 console.warn('[Google SSO] Libreria accounts.google.com/gsi non disponibile');
                 return;
             }
 
-            google.accounts.id.initialize({
-                client_id: cachedGoogleClientId,
-                callback: handleGoogleCredential,
-                auto_select: false,
-                cancel_on_tap_outside: true,
-                itp_support: true
-            });
-            googleInitialized = true;
-            console.log('[Google SSO] Inizializzato con successo');
+            if (window.google?.accounts?.id) {
+                const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                google.accounts.id.initialize({
+                    client_id: cachedGoogleClientId,
+                    callback: handleGoogleCredential,
+                    auto_select: false,
+                    cancel_on_tap_outside: true,
+                    use_fedcm_for_prompt: true,
+                    ux_mode: 'popup',
+                    ...(isSafari ? { itp_support: true } : {})
+                });
+                googleInitialized = true;
+                console.log('[Google SSO] Inizializzato con successo');
+                renderGoogleButtons();
+            }
 
-            renderGoogleButtons();
+            if (window.google?.accounts?.oauth2) {
+                initTokenClient();
+            }
         } catch (err) {
             console.error('[Google SSO] Errore inizializzazione:', err);
         }
@@ -1991,17 +2095,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const onGeoError = (error) => {
-            // Se fallisce per timeout con alta precisione (comune su desktop/laptop senza GPS dedicato), ritenta a precisione standard
+            // Se fallisce per timeout con alta precisione (comune su mobile o desktop al chiuso), ritenta a precisione standard
             if (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE) {
                 navigator.geolocation.getCurrentPosition(
                     onGeoSuccess,
                     (err2) => {
                         restoreButton();
                         let errorMsg = tr('geo.errorUnavailable') || 'Posizione non disponibile';
-                        if (err2.code === err2.PERMISSION_DENIED) errorMsg = tr('geo.errorPermission') || 'Permesso di localizzazione negato';
+                        if (err2.code === err2.PERMISSION_DENIED) {
+                            errorMsg = tr('geo.errorPermission') || 'Permesso di localizzazione negato. Abilita la posizione nel browser o nelle impostazioni del telefono.';
+                        } else if (err2.code === err2.TIMEOUT) {
+                            errorMsg = 'Timeout rilevamento GPS. Riprova con una connessione stabile o all\'aperto.';
+                        }
                         showSearchFeedback(errorMsg, true);
                     },
-                    { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+                    { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 }
                 );
                 return;
             }
@@ -2009,7 +2117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             restoreButton();
             let errorMsg = tr('geo.errorUnavailable') || 'Posizione non disponibile';
             if (error.code === error.PERMISSION_DENIED) {
-                errorMsg = tr('geo.errorPermission') || 'Permesso di localizzazione negato';
+                errorMsg = tr('geo.errorPermission') || 'Permesso di localizzazione negato. Abilita la posizione nel browser o nelle impostazioni del telefono.';
             }
             showSearchFeedback(errorMsg, true);
         };
@@ -2017,12 +2125,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         navigator.geolocation.getCurrentPosition(
             onGeoSuccess,
             onGeoError,
-            { enableHighAccuracy: true, timeout: 6000, maximumAge: 30000 }
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
         );
     }
 
     const btnGeo = document.getElementById('btn-geolocation');
-    if (btnGeo) btnGeo.addEventListener('click', handleGeolocation);
+    if (btnGeo) {
+        btnGeo.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleGeolocation();
+        });
+    }
 
     // =========================================================
     // 5. FETCH DATI DAL BACKEND (Salvataggio nel Model)

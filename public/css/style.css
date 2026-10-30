@@ -631,7 +631,9 @@ body {
         padding: 0;
         border-radius: 50%;
         justify-content: center;
-        z-index: 600;
+        z-index: 1000;
+        pointer-events: auto !important;
+        touch-action: manipulation;
     }
 
     .btn-geo .geo-text {

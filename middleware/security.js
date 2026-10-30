@@ -17,8 +17,8 @@ function securityHeaders(req, res, next) {
     // Limita l'esposizione dei referrer
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-    // Disabilita API hardware non necessarie, consente la geolocalizzazione per la mappa
-    res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=(), payment=(), usb=()');
+    // Disabilita API hardware non necessarie, consente la geolocalizzazione e il recupero credenziali Google FedCM
+    res.setHeader('Permissions-Policy', 'geolocation=(self), identity-credentials-get=(self "https://accounts.google.com"), camera=(), microphone=(), payment=(), usb=()');
 
     // Necessario per consentire il corretto funzionamento del popup di Google SSO (OAuth)
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
