@@ -2102,12 +2102,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     (err2) => {
                         restoreButton();
                         let errorMsg = tr('geo.errorUnavailable') || 'Posizione non disponibile';
+                        let isPerm = false;
                         if (err2.code === err2.PERMISSION_DENIED) {
-                            errorMsg = tr('geo.errorPermission') || 'Permesso di localizzazione negato. Abilita la posizione nel browser o nelle impostazioni del telefono.';
+                            errorMsg = tr('geo.errorPermission') || 'Accesso posizione negato: tocca l\'icona delle impostazioni nella barra dell\'URL per abilitarla.';
+                            isPerm = true;
                         } else if (err2.code === err2.TIMEOUT) {
                             errorMsg = 'Timeout rilevamento GPS. Riprova con una connessione stabile o all\'aperto.';
                         }
-                        showSearchFeedback(errorMsg, true);
+                        showSearchFeedback(errorMsg, true, isPerm ? 8000 : 4000);
                     },
                     { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 }
                 );
@@ -2116,10 +2118,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             restoreButton();
             let errorMsg = tr('geo.errorUnavailable') || 'Posizione non disponibile';
+            let isPerm = false;
             if (error.code === error.PERMISSION_DENIED) {
-                errorMsg = tr('geo.errorPermission') || 'Permesso di localizzazione negato. Abilita la posizione nel browser o nelle impostazioni del telefono.';
+                errorMsg = tr('geo.errorPermission') || 'Accesso posizione negato: tocca l\'icona delle impostazioni nella barra dell\'URL per abilitarla.';
+                isPerm = true;
             }
-            showSearchFeedback(errorMsg, true);
+            showSearchFeedback(errorMsg, true, isPerm ? 8000 : 4000);
         };
 
         navigator.geolocation.getCurrentPosition(

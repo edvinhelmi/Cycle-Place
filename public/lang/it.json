@@ -39,7 +39,7 @@
   "geo.locating": "Rilevamento in corso...",
   "geo.youAreHere": "Ti trovi qui",
   "geo.accuracy": "Precisione segnale",
-  "geo.errorPermission": "Impossibile rilevare la posizione: autorizzazione negata nel browser.",
+  "geo.errorPermission": "Accesso posizione negato: tocca l'icona delle impostazioni nella barra dell'URL per abilitarla.",
   "geo.errorUnavailable": "Segnale GPS non disponibile al momento.",
   "geo.errorTimeout": "Tempo scaduto per il rilevamento della posizione.",
   "geo.notSupported": "La geolocalizzazione non è supportata dal tuo browser.",
