@@ -430,11 +430,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof renderGoogleButtons === 'function') {
                 setTimeout(() => renderGoogleButtons(), 50);
             }
-            if (window.google?.accounts?.id && typeof google.accounts.id.prompt === 'function') {
-                try {
-                    google.accounts.id.prompt();
-                } catch (_) {}
-            }
         }
     };
     const closeModal = m => {
@@ -1217,14 +1212,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function ensureTokenClient() {
+        if (tokenClient) return tokenClient;
+        if (window.google?.accounts?.oauth2 && cachedGoogleClientId) {
+            initTokenClient();
+        }
+        return tokenClient;
+    }
+
     function triggerGooglePopup() {
         clearGoogleErrors();
-        if (tokenClient) {
+        const client = ensureTokenClient();
+        if (client) {
             try {
-                tokenClient.requestAccessToken({ prompt: 'select_account' });
+                client.requestAccessToken({ prompt: 'select_account' });
                 return;
             } catch (err) {
                 console.warn('[Google SSO] requestAccessToken:', err);
+                showGoogleError('❌ Impossibile avviare popup Google: ' + (err.message || 'Errore'));
+                return;
             }
         }
         if (window.google?.accounts?.id) {
@@ -1233,14 +1239,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) {
                 console.warn('[Google SSO] prompt:', err);
             }
+        } else {
+            showGoogleError('❌ Servizio Google non pronto. Ricarica la pagina.');
         }
     }
 
-    document.querySelectorAll('.btn-trigger-google-popup').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+    // Event delegation globale per intercettare qualsiasi click sui pulsanti popup Google
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-trigger-google-popup');
+        if (btn) {
             e.preventDefault();
             triggerGooglePopup();
-        });
+        }
     });
 
     function renderGoogleButtons(force = false) {
@@ -1332,7 +1342,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     callback: handleGoogleCredential,
                     auto_select: false,
                     cancel_on_tap_outside: true,
-                    use_fedcm_for_prompt: true,
                     ux_mode: 'popup',
                     ...(isSafari ? { itp_support: true } : {})
                 });
