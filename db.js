@@ -10,7 +10,20 @@ const fs   = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
 
-const staticDataPath  = path.join(__dirname, 'data');
+function resolveStaticDataPath() {
+    const candidates = [
+        path.join(__dirname, 'data'),
+        path.join(process.cwd(), 'data'),
+        path.join(__dirname, '..', 'data')
+    ];
+    for (const c of candidates) {
+        if (fs.existsSync(c)) {
+            return c;
+        }
+    }
+    return candidates[0];
+}
+const staticDataPath  = resolveStaticDataPath();
 const isServerless    = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 const dynamicDataPath = isServerless ? path.join('/tmp', 'cycle-place-data') : staticDataPath;
 

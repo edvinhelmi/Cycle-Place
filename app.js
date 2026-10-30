@@ -51,6 +51,19 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Normalizzazione URL per compatibilità sia serverless Vercel che standalone locale
+app.use((req, res, next) => {
+    const original = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'];
+    if (original && original.startsWith('/api/')) {
+        const queryIndex = (req.url || '').indexOf('?');
+        const queryString = queryIndex !== -1 ? req.url.slice(queryIndex) : '';
+        req.url = original.includes('?') ? original : (original + queryString);
+    } else if (req.url && req.url.startsWith('/v1/')) {
+        req.url = '/api' + req.url;
+    }
+    next();
+});
+
 // =======================================================
 // RATE LIMITERS (RNF 2.5 & Protezione DDoS / Brute-force)
 // =======================================================
@@ -145,7 +158,20 @@ function transformToWGS84(geojson, addComputedFields) {
 }
 
 // --- Path dati ---
-const staticDataPath  = path.join(__dirname, 'data');
+function resolveStaticDataPath() {
+    const candidates = [
+        path.join(__dirname, 'data'),
+        path.join(process.cwd(), 'data'),
+        path.join(__dirname, '..', 'data')
+    ];
+    for (const c of candidates) {
+        if (fs.existsSync(path.join(c, 'rastrelliere.geojson'))) {
+            return c;
+        }
+    }
+    return candidates[0];
+}
+const staticDataPath  = resolveStaticDataPath();
 const isServerless    = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 // Su Vercel (serverless) il filesystem del bundle è in sola lettura: usiamo /tmp per le modifiche
 const dynamicDataPath = isServerless ? path.join('/tmp', 'cycle-place-data') : staticDataPath;

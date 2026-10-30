@@ -1109,6 +1109,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function initGoogleSSO() {
         try {
             const res = await fetch('/api/v1/config');
+            if (!res.ok) {
+                console.warn('[Google SSO] Config API non disponibile:', res.status);
+                return;
+            }
             const { googleClientId } = await res.json();
             const container = document.getElementById('google-btn-container');
             if (!container) return;
